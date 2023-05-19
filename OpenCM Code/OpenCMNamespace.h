@@ -4,10 +4,10 @@
    by Erick Nunez
 */
 
-#ifndef ARM_SUPPORT_NS_H
-#define ARM_SUPPORT_NS_H
+#ifndef OPEN_CM_NS_H
+#define OPEN_CM_NS_H
 
-namespace ASR
+namespace OCM
 {
 /* ---------------------------------------------------------------------------------------/
 / Constants ------------------------------------------------------------------------------/
@@ -55,16 +55,6 @@ extern const uint16_t      LEN_PRESENT_VELOCITY;
 extern const int           VEL_BASED_PROFILE;
 extern const unsigned char ESC_ASCII_VALUE;
 
-// Force Sensor Constants
-extern const float xyzSens[3];
-extern const float SENSOR_FILTER_WEIGHT;
-extern const float posX_SM[3];
-extern const float posY_SM[3];
-extern const float posZ_SM[3];
-extern const float negX_SM[3];
-extern const float negY_SM[3];
-extern const float negZ_SM[3];
-
 // Dynamixel Parameters for calculations
 extern const float DEGREES_PER_COUNT;
 extern const float RPM_PER_COUNT;
@@ -80,31 +70,8 @@ extern const int ELEVATION_CENTER;
 extern const float ELEVATION_RATIO;
 extern const int VEL_MAX_LIMIT;
 
-// Admitance Control Constants and initial Values
-extern const float LOOP_DT;  // Milliseconds
-extern const float MODEL_DT; // Secs
-extern const float GRAVITY;  // m/sec^2
-extern float initMassXY;     // kg
-extern float initDampingXY;  // N*(sec/m)
-extern float initMassZ;      // kg
-extern float initDampingZ;   // N*(sec/m)
-
-// Kinematic Constants
-extern const float A1_LINK;      // Shoulder to 4bar linkage
-extern const float L1_LINK;      // length of 4bar linkage
-extern const float A2_LINK;      // 4bar linkage to elbow
-extern const float L2_LINK;      // elbow to sensor
-extern const float LINK_OFFSET;  // elbow to sensor offset
-
-// Spring Dynamics
-extern const int    SPRING_KS; // N/m
-extern const float  SPRING_X0; // unstretched spring length in m = 5"
-extern const float  SPRING_XI; // initial stretch lenght in m = 6.3"
-extern const float  SPRING_SIDE_A; // in m
-extern const float  SPRING_SIDE_B; // in m
-extern const float  COS_SIN_45; // Cos Sin of 45 degrees
-extern const float  DEG_TO_RAD_45; // 45 Degrees to Radians
-extern float SPRING_FORCE_SCALING_FACTOR;
+// Loop Parameters
+extern const float LOOP_DT; // Milliseconds
 }
 
-#endif // ARM_SUPPORT_NS_H
+#endif // OPEN_CM_NS_H

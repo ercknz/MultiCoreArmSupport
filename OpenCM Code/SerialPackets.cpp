@@ -5,10 +5,8 @@
 */
 
 #include <Arduino.h>
-#include "ForceSensor.h"
-#include "AdmittanceModel.h"
 #include "RobotControl.h"
-#include "SerialCommPackets.h"
+#include "SerialPackets.h"
 #include "UtilityFunctions.h"
 
 /* ---------------------------------------------------------------------------------------/
@@ -24,50 +22,6 @@ SerialPackets::SerialPackets(USBSerial *ptrSer, const int baudrate)
 /* ---------------------------------------------------------------------------------------/
 / Serial Data Getters --------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-bool SerialPackets::DataAvailable() {
-  return SerialPort_M->available();
-}
-bool SerialPackets::ModifyMassXY() {
-  return _NEW_MASS_XY;
-}
-bool SerialPackets::ModifyMassZ() {
-  return _NEW_MASS_Z;
-}
-bool SerialPackets::ModifyDampingXY() {
-  return _NEW_DAMPING_XY;
-}
-bool SerialPackets::ModifyDampingZ() {
-  return _NEW_DAMPING_Z;
-}
-bool SerialPackets::ModifyScalingFactor() {
-  return _NEW_SCALING_FACTOR;
-}
-bool SerialPackets::ModifyMode(){
-  return _NEW_MODE;
-}
-bool SerialPackets::ModifyFilter() {
-  return _NEW_FILTER;
-}
-float SerialPackets::GetNewMassXY() {
-  _NEW_MASS_XY = false;
-  return newMassXY_M;
-}
-float SerialPackets::GetNewMassZ() {
-  _NEW_MASS_Z = false;
-  return newMassZ_M;
-}
-float SerialPackets::GetNewDampingXY() {
-  _NEW_DAMPING_XY = false;
-  return newDampingXY_M;
-}
-float SerialPackets::GetNewDampingZ() {
-  _NEW_DAMPING_Z = false;
-  return newDampingZ_M;
-}
-float SerialPackets::GetNewScalingFactor() {
-  _NEW_SCALING_FACTOR = false;
-  return newScalingFactor_M;
-}
 uint8_t SerialPackets::GetNewMode(){
   _NEW_MODE = false;
   return newMode_M;
@@ -87,15 +41,11 @@ float * SerialPackets::GetExternalForces(){
   _NEW_EXT_FORCE_Z = false;
   return ExtForces_M;
 }
-float SerialPackets::GetNewFilter() {
-  _NEW_FILTER = false;
-  return newFilter_M;
-}
 
 /* ---------------------------------------------------------------------------------------/
 / Serial Packet Writer -------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void SerialPackets::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, AdmittanceModel &Model, RobotControl &Robot, unsigned long &loopTime) {
+void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime) {
   byte dataPacket[_TX_PKT_LEN] = {0};
   int16_t slotsFilled   = 0;
   int16_t dataPosition  = 44;
@@ -311,17 +261,8 @@ void SerialPackets::ReadPackets() {
     tempHeader[i] = RXPacket[i];
   }
   if (SumCheck == CHECKSUM) {
-    if (memcmp(_CONFIGHEADER, tempHeader, sizeof(_CONFIGHEADER)) == 0) {
-      if (RXPacket[4] > 1){
-        _NEW_MODE = true;
-        newMode_M = RXPacket[4];
-      } else {
-        SendFlagResets();
-        ConfigPacketRX(RXPacket);
-      }
-    }
     if (memcmp(_MODHEADER, tempHeader, sizeof(_MODHEADER)) == 0) {
-      ModifierPacketRX(RXPacket);
+      ProcessRXData(RXPacket);
     }
   } else {
     while (SerialPort_M->available()) {
@@ -331,55 +272,10 @@ void SerialPackets::ReadPackets() {
 }
 
 /* ---------------------------------------------------------------------------------------/
-/ Configuration RX Packet ----------------------------------------------------------------/
-/----------------------------------------------------------------------------------------*/
-void SerialPackets::ConfigPacketRX(byte * RxPacket) {
-  if (RxPacket[5])  _SEND_RAWF          = true;
-  if (RxPacket[6])  _SEND_XYZGOAL       = true;
-  if (RxPacket[7])  _SEND_XYZDOTGOAL    = true;
-  if (RxPacket[8])  _SEND_XYZBOTGOAL    = true;
-  if (RxPacket[9])  _SEND_XYZDOTBOTGOAL = true;
-  if (RxPacket[10]) _SEND_PRESQCTS      = true;
-  if (RxPacket[11]) _SEND_PRESQDOTCTS   = true;
-  if (RxPacket[12]) _SEND_PRESQ         = true;
-  if (RxPacket[13]) _SEND_PRESQDOT      = true;
-  if (RxPacket[14]) _SEND_GOALQCTS      = true;
-  if (RxPacket[15]) _SEND_GOALQDOTCTS   = true;
-  if (RxPacket[16]) _SEND_GOALQ         = true;
-  if (RxPacket[17]) _SEND_GOALQDOT      = true;
-  if (RxPacket[18]) _SEND_MASS          = true;
-  if (RxPacket[19]) _SEND_DAMPING       = true;
-  if (RxPacket[20]) _SEND_SPRING_F      = true;
-  if (RxPacket[21]) _SEND_TOTAL_FORCES  = true;
-  if (RxPacket[22]) _SEND_FORCE_FILTER  = true;
-}
-
-void SerialPackets::SendFlagResets() {
-  _SEND_RAWF          = false;
-  _SEND_XYZGOAL       = false;
-  _SEND_XYZDOTGOAL    = false;
-  _SEND_XYZBOTGOAL    = false;
-  _SEND_XYZDOTBOTGOAL = false;
-  _SEND_PRESQCTS      = false;
-  _SEND_PRESQDOTCTS   = false;
-  _SEND_PRESQ         = false;
-  _SEND_PRESQDOT      = false;
-  _SEND_GOALQCTS      = false;
-  _SEND_GOALQDOTCTS   = false;
-  _SEND_GOALQ         = false;
-  _SEND_GOALQDOT      = false;
-  _SEND_MASS          = false;
-  _SEND_DAMPING       = false;
-  _SEND_SPRING_F      = false;
-  _SEND_TOTAL_FORCES  = false;
-  _SEND_FORCE_FILTER  = false;
-}
-
-/* ---------------------------------------------------------------------------------------/
 / Modifier RX Packet ---------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void SerialPackets::ModifierPacketRX(byte * RxPacket) {
-  // [0]:MassXY [1]:MassZ [2]:DampingXY [3]:DampingZ [4]:ScalingFactor [5]:eFx [6]:eFy [7]:eFz
+void SerialPackets::ProcessRXData(byte * RxPacket) {
+  // [0]:MassXY 
   byte mask = 1;
   byte bitArrayLarge[7];
   byte bitArraySmall[2];
