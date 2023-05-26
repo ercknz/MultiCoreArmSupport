@@ -15,19 +15,15 @@ class RobotControl {
     void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
-    int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+    int   WriteToMotors(float *goalQ, float *goalQdot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
     int32_t * GetPresQDotCts();
-    float *   GetPresPos();
-    float *   GetPresVel();
     int32_t * GetGoalQCts();
     int32_t * GetGoalQDotCts();
     float *   GetGoalQ();
     float *   GetGoalQDot();
-    float *   GetGoalPos();
-    float *   GetGoalVel();
     
   protected:
     int32_t qPresCts_M[3],  qDotPresCts_M[3];

@@ -28,7 +28,7 @@ dynamixel::PacketHandler *packetHandler;
 /* ---------------------------------------------------------------------------------------/
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl    ArmRobot = RobotControl(OCM::A1_LINK, OCM::L1_LINK, OCM::A2_LINK, OCM::L2_LINK, OCM::LINK_OFFSET);
+RobotControl    ArmRobot = RobotControl();
 SerialPackets   c2cComm  = SerialPackets(&Serial, OCM::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
@@ -53,9 +53,7 @@ void setup() {
 / Main loop function ---------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void loop() {
-  /* Calibrate Force Sensor */
-  delay(100);
-  OptoForceSensor.SensorConfig();
+  /* Motor Packet Configuration */
   ArmRobot.MotorConfig(portHandler, packetHandler);
   delay(100);
 
@@ -82,29 +80,35 @@ void loop() {
   }
   delay(100);
 
-  /* Initialize Robot and Model */
+  /* Initialize Robot*/
   previousTime = millis();
-  ArmRobot.ReadRobot(syncReadPacket);
-  pcComm.WritePackets(totalTime, ArmRobot, loopTime);
+  ArmRobot.ReadMotors(syncReadPacket);
+  c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
   /* Main Loop */
   while (Serial) {
     currentTime = millis();
 
-    /* Admittance Loop */
+    /* Motor Write/Read Loop */
     if (currentTime - previousTime >= OCM::LOOP_DT) {
       /* Loop Timing */
       startLoop = millis();
       totalTime += (currentTime - previousTime);
       previousTime = currentTime;
 
-      /* Control */
-      ArmRobot.ReadRobot(syncReadPacket);
-      ArmRobot.WriteToRobot(AdmitModel.GetGoalPos(), AdmitModel.GetGoalVel(), addParamResult, syncWritePacket);
+      /* Read Incoming Instructions*/
+      c2cComm.ReadPackets();
+
+      /* Motor Control */
+      if (c2cComm.NewGoalAvailable()){
+        ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);
+        c2cComm.NewGoalsPulled();
+      } 
+      ArmRobot.ReadMotors(syncReadPacket);
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-      pcComm.WritePackets(totalTime, ArmRobot, loopTime);
+      c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
     }
   }
   if (!Serial) {
