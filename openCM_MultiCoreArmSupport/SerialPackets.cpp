@@ -12,18 +12,18 @@
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Contructor  -----------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
-SerialPackets::SerialPackets(USBSerial *ptrSer, const int baudrate)
+SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
-  SerialPort_M = ptrSer;
-  SerialPort_M->begin(_BAUDRATE);
+  c2cPort_M = ptrSer;
+  c2cPort_M->begin(_BAUDRATE);
 }
 
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packets Setters and  Getters -------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 bool SerialPackets::DataAvailable() {
-  return SerialPort_M->available();
+  return c2cPort_M->available();
 }
 
 bool SerialPackets::NewGoalAvailable(){
@@ -102,7 +102,7 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   if (Serial){
     Serial.write(dataPacket,_TX_PKT_LEN);
   } else {
-    SerialPort_M->write(dataPacket,_TX_PKT_LEN);
+    c2cPort_M->write(dataPacket,_TX_PKT_LEN);
   }
   
 }
@@ -118,14 +118,14 @@ void SerialPackets::ReadPackets() {
   int16_t CHECKSUM;
   
   unsigned long timeOUtTime = millis();
-  while (SerialPort_M->available() < _RX_PKT_LEN) {
+  while (c2cPort_M->available() < _RX_PKT_LEN) {
     if (millis() - timeOUtTime > 10){
       return;
     }
   }
   
   for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
-    dataPacket[i] = SerialPort_M->read();
+    dataPacket[i] = c2cPort_M->read();
   }
   
   CHECKSUM = bytesToCounts(dataPacket[_RX_PKT_LEN - 2], dataPacket[_RX_PKT_LEN - 1]);

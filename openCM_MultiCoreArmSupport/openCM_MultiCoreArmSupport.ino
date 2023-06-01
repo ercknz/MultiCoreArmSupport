@@ -29,7 +29,7 @@ dynamixel::PacketHandler *packetHandler;
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 RobotControl    ArmRobot = RobotControl();
-SerialPackets   c2cComm  = SerialPackets(&Serial, OCM::SERIAL_BAUDRATE);
+SerialPackets   c2cComm  = SerialPackets(&Serial1, OCM::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
 / Setup function -------------------------------------------------------------------------/

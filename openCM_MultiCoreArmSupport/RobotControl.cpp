@@ -141,17 +141,25 @@ int  RobotControl::WriteToMotors(float *goalQ, float *goalQdot, bool &addParamRe
   uint8_t elbowParam[4], shoulderParam[4], elevateParam[4];
 
   for (int i=0; i<3; i++){
-    xyz_M[i]    = xyzPres_M[i] + modelXYZ[i];
-    xyzDot_M[i] = modelXYZDot[i];
+    q_M[i] = goalQ[i];
+    qDot_M[i] = goalQdot[i];
   }
 
   /* Convert to Motor Counts */
-  qCts_M[0]    = q_M[0] * (180.0 / PI) / ASR::DEGREES_PER_COUNT;
-  qCts_M[1]    = ASR::ELEVATION_CENTER - (q_M[1] * ASR::ELEVATION_RATIO * (180.0 / PI) / ASR::DEGREES_PER_COUNT);
-  qCts_M[2]    = ASR::ELBOW_MIN_POS + q_M[2] * (180.0 / PI) / ASR::DEGREES_PER_COUNT;
-  qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * PI)) / ASR::RPM_PER_COUNT);
-  qDotCts_M[1] = abs(qDot_M[1] * (60.0 / (2.0 * PI)) / ASR::RPM_PER_COUNT) * ASR::ELEVATION_RATIO;
-  qDotCts_M[2] = abs(qDot_M[2] * (60.0 / (2.0 * PI)) / ASR::RPM_PER_COUNT);
+  qCts_M[0]    = goalQ[0] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qCts_M[1]    = OCM::ELEVATION_CENTER - (goalQ[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
+  qCts_M[2]    = OCM::ELBOW_MIN_POS + goalQ[2] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qDotCts_M[0] = abs(goalQdot[0] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
+  qDotCts_M[1] = abs(goalQdot[1] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
+  qDotCts_M[2] = abs(goalQdot[2] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
+
+  /* Check versus hard limits */
+  if (qCts_M[0] < OCM::SHOULDER_MIN_POS) qCts_M[0] = OCM::SHOULDER_MIN_POS;
+  if (qCts_M[0] > OCM::SHOULDER_MAX_POS) qCts_M[0] = OCM::SHOULDER_MAX_POS;
+  if (qCts_M[1] < OCM::ELEVATION_MIN_POS) qCts_M[1] = OCM::ELEVATION_MIN_POS;
+  if (qCts_M[1] > OCM::ELEVATION_MAX_POS) qCts_M[1] = OCM::ELEVATION_MAX_POS;
+  if (qCts_M[2] < OCM::ELBOW_MIN_POS) qCts_M[2] = OCM::ELBOW_MIN_POS;
+  if (qCts_M[2] > OCM::ELBOW_MAX_POS) qCts_M[2] = OCM::ELBOW_MAX_POS;
 
   /* Shoulder Goal Position Packet */
   shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[0]));

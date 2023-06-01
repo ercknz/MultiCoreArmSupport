@@ -20,10 +20,10 @@ class RobotControl {
     float *   GetPresQDot();
     int32_t * GetPresQCts();
     int32_t * GetPresQDotCts();
-    int32_t * GetGoalQCts();
-    int32_t * GetGoalQDotCts();
     float *   GetGoalQ();
     float *   GetGoalQDot();
+    int32_t * GetGoalQCts();
+    int32_t * GetGoalQDotCts();
     
   protected:
     int32_t qPresCts_M[3],  qDotPresCts_M[3];
