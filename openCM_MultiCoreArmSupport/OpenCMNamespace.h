@@ -41,6 +41,7 @@ extern const uint16_t ADDRESS_GOAL_VELOCITY;
 extern const uint16_t ADDRESS_PROFILE_VELOCITY;
 extern const uint16_t ADDRESS_GOAL_POSITION;
 extern const uint16_t ADDRESS_MOVING;
+extern const uint16_t ADDRESS_PRESENT_CURRENT;
 extern const uint16_t ADDRESS_PRESENT_VELOCITY;
 extern const uint16_t ADDRESS_PRESENT_POSITION;
 
@@ -52,12 +53,14 @@ extern const uint16_t      LEN_GOAL_POSITION;
 extern const uint16_t      LEN_PROFILE_VELOCITY;
 extern const uint16_t      LEN_PRESENT_POSITION;
 extern const uint16_t      LEN_PRESENT_VELOCITY;
+extern const uint16_t      LEN_PRESENT_CURRENT;
 extern const int           VEL_BASED_PROFILE;
 extern const unsigned char ESC_ASCII_VALUE;
 
 // Dynamixel Parameters for calculations
 extern const float DEGREES_PER_COUNT;
 extern const float RPM_PER_COUNT;
+extern const float CURRENT_PER_COUNT;
 
 // Dynamixel Motor Limits
 extern const int ELBOW_MIN_POS;

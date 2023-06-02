@@ -97,7 +97,7 @@ void loop() {
       previousTime = currentTime;
 
       /* Read Incoming Instructions*/
-      c2cComm.ReadPackets();
+      if (c2cComm.DataAvailable()) c2cComm.ReadPackets();
 
       /* Motor Control */
       if (c2cComm.NewGoalAvailable()){

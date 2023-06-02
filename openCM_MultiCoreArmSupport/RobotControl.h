@@ -24,12 +24,16 @@ class RobotControl {
     float *   GetGoalQDot();
     int32_t * GetGoalQCts();
     int32_t * GetGoalQDotCts();
+    float *   GetPresCurrent();
+    int16_t * GetPresCurrentCts();
     
   protected:
     int32_t qPresCts_M[3],  qDotPresCts_M[3];
     float   qPres_M[3],     qDotPres_M[3];
     int32_t qCts_M[3],      qDotCts_M[3];
     float   q_M[3],         qDot_M[3];
+    float   iPres_M[3];
+    int16_t iPresCts_M[3];
     uint8_t dxl_error = 0;
 };
 

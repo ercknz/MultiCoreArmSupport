@@ -19,7 +19,7 @@ class SerialPackets {
     uint8_t GetNewMode();
     float * GetNewGoalQ();
     float * GetNewGoalQdot();
-    float * GetNewGoalTorque();
+    float * GetNewGoalCurrent();
     void NewGoalsPulled();
     
     void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
@@ -34,7 +34,7 @@ class SerialPackets {
     const byte  _TXHEADER[4]  = {170, 6, 9, 69};
     const int16_t _Q_SLOT = 8;
     const int16_t _QDOT_SLOT = 20;
-    const int16_t _TORQUE_SLOT = 32;
+    const int16_t _CURRENT_SLOT = 32;
     const int16_t _NEW_SLOT1 = 44;
 
     bool newGoal_M  = false;
@@ -42,7 +42,7 @@ class SerialPackets {
     uint8_t mode_M;
     float goalQ_M[3] = {0.0f};
     float goalQdot_M[3] = {0.0f};
-    float goalTorque_M[3] = {0.0f};
+    float goalCurrent_M[3] = {0.0f};
 };
 
 #endif // SERIAL_PACKETS_H

@@ -60,6 +60,14 @@ float* RobotControl::GetGoalQDot(){
   return qDot_M;
 }
 
+int16_t* RobotControl::GetPresCurrentCts(){ 
+  return iPresCts_M;
+} 
+
+float* RobotControl::GetPresCurrent(){
+  return iPres_M;
+}
+
 /* ---------------------------------------------------------------------------------------/
 / Arm Support DXL Torque Enabling Member Function ----------------------------------------/
 /----------------------------------------------------------------------------------------*/
@@ -123,7 +131,7 @@ void  RobotControl::MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::
 / Arm Support DXL Read Member Function ---------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
-  /* Read Position and Velocity */
+  /* Read Position, Velocity,  */
   int dxlCommResult = syncReadPacket.txRxPacket();
   qPresCts_M[0]    = syncReadPacket.getData(OCM::ID_SHOULDER,  OCM::ADDRESS_PRESENT_POSITION, OCM::LEN_PRESENT_POSITION);
   qPresCts_M[1]    = syncReadPacket.getData(OCM::ID_ELEVATION, OCM::ADDRESS_PRESENT_POSITION, OCM::LEN_PRESENT_POSITION);
@@ -131,6 +139,20 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
   qDotPresCts_M[0] = syncReadPacket.getData(OCM::ID_SHOULDER,  OCM::ADDRESS_PRESENT_VELOCITY, OCM::LEN_PRESENT_VELOCITY);
   qDotPresCts_M[1] = syncReadPacket.getData(OCM::ID_ELEVATION, OCM::ADDRESS_PRESENT_VELOCITY, OCM::LEN_PRESENT_VELOCITY);
   qDotPresCts_M[2] = syncReadPacket.getData(OCM::ID_ELBOW,     OCM::ADDRESS_PRESENT_VELOCITY, OCM::LEN_PRESENT_VELOCITY);
+  iPresCts_M[0]    = syncReadPacket.getData(OCM::ID_SHOULDER,  OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
+  iPresCts_M[1]    = syncReadPacket.getData(OCM::ID_ELEVATION, OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
+  iPresCts_M[2]    = syncReadPacket.getData(OCM::ID_ELBOW,     OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
+
+  /* Convert from Motor Counts */
+  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (PI / 180.0);
+  qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO);
+  qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0);
+  qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0);
+  qDotPres_M[1]   = qDotPresCts_M[1] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0) * (1/OCM::ELEVATION_RATIO);
+  qDotPres_M[2]   = qDotPresCts_M[2] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0);
+  iPres_M[0]      = iPresCts_M[0] * OCM::CURRENT_PER_COUNT; 
+  iPres_M[1]      = iPresCts_M[1] * OCM::CURRENT_PER_COUNT;
+  iPres_M[2]      = iPresCts_M[2] * OCM::CURRENT_PER_COUNT;
 }
 
 /* ---------------------------------------------------------------------------------------/

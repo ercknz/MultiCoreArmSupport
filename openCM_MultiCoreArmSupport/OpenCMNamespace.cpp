@@ -41,6 +41,7 @@ const uint16_t ADDRESS_GOAL_VELOCITY    = 104;
 const uint16_t ADDRESS_PROFILE_VELOCITY = 112;
 const uint16_t ADDRESS_GOAL_POSITION    = 116;
 const uint16_t ADDRESS_MOVING           = 122;
+const uint16_t ADDRESS_PRESENT_CURRENT  = 126;
 const uint16_t ADDRESS_PRESENT_VELOCITY = 128;
 const uint16_t ADDRESS_PRESENT_POSITION = 132;
 
@@ -52,12 +53,14 @@ const uint16_t      LEN_GOAL_POSITION     = 4;
 const uint16_t      LEN_PROFILE_VELOCITY  = 4;
 const uint16_t      LEN_PRESENT_POSITION  = 4;
 const uint16_t      LEN_PRESENT_VELOCITY  = 4; 
+const uint16_t      LEN_PRESENT_CURRENT   = 2;
 const int           VEL_BASED_PROFILE     = 0;
 const unsigned char ESC_ASCII_VALUE       = 0x1b;
 
 // Dynamixel Parameters for calculations
-const float DEGREES_PER_COUNT = 0.088;
-const float RPM_PER_COUNT     = 0.229;
+const float DEGREES_PER_COUNT = 0.088;    // degrees
+const float RPM_PER_COUNT     = 0.229;    // Rev/min
+const float CURRENT_PER_COUNT = 2.69;     // mA
 
 // Dynamixel Motor Limits
 const int ELBOW_MIN_POS     = 1200;
