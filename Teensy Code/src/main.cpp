@@ -53,10 +53,6 @@ void loop() {
       Serial.print(-(FyMax/inputBitRange)*((double)sensorValues[1] - inputBitZero));  Serial.print("\t");
       Serial.print(-(FzMax/inputBitRange)*((double)sensorValues[2] - inputBitZero));  Serial.print("\t\t");
 
-      // Serial.print(-(TxyzMax/inputBitRange)*((double)sensorValues[3] - inputBitZero));  Serial.print("\t");
-      // Serial.print(-(TxyzMax/inputBitRange)*((double)sensorValues[4] - inputBitZero));  Serial.print("\t");
-      // Serial.print(-(TxyzMax/inputBitRange)*((double)sensorValues[5] - inputBitZero));  Serial.print("\t");
-
       Serial.println(loopTime);
 
     }
