@@ -75,6 +75,23 @@ extern const int VEL_MAX_LIMIT;
 
 // Loop Parameters
 extern const float LOOP_DT; // Milliseconds
+
+// Kinematic Constants
+extern const float A1_LINK;      // Shoulder to 4bar linkage
+extern const float L1_LINK;      // length of 4bar linkage
+extern const float A2_LINK;      // 4bar linkage to elbow
+extern const float L2_LINK;      // elbow to sensor
+extern const float LINK_OFFSET;      // elbow to sensor offset
+
+// Spring Dynamics
+extern const int    SPRING_KS;     // N/m
+extern const float  SPRING_X0;    // unstretched spring length in m (5")
+extern const float  SPRING_XI;  // initial stretch lenght in m (6.3")
+extern const float  SPRING_SIDE_A;    // in m
+extern const float  SPRING_SIDE_B;   // in m
+extern const float  COS_SIN_45;   // Cos Sin of 45 degrees
+extern const float  DEG_TO_RAD_45;   // 45 Degrees to radians
+extern float SPRING_FORCE_SCALING_FACTOR;
 }
 
 #endif // OPEN_CM_NS_H

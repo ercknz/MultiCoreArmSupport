@@ -28,7 +28,7 @@ dynamixel::PacketHandler *packetHandler;
 /* ---------------------------------------------------------------------------------------/
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl    ArmRobot = RobotControl();
+RobotControl    ArmRobot = RobotControl(OCM::A1_LINK, OCM::L1_LINK, OCM::A2_LINK, OCM::L2_LINK, OCM::LINK_OFFSET);
 SerialPackets   c2cComm  = SerialPackets(&Serial1, OCM::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
@@ -82,7 +82,7 @@ void loop() {
 
   /* Initialize Robot*/
   previousTime = millis();
-  ArmRobot.ReadMotors(syncReadPacket);
+  ArmRobot.ReadRobot(syncReadPacket);
   c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
   /* Main Loop */
@@ -99,7 +99,7 @@ void loop() {
       /* Read Incoming Instructions*/
       if (c2cComm.DataAvailable()) c2cComm.ReadPackets();
 
-      /* Motor Control */
+      /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
         ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);
         c2cComm.NewGoalsPulled();
