@@ -99,6 +99,9 @@ void loop() {
       /* Read Incoming Instructions*/
       if (c2cComm.DataAvailable()) c2cComm.ReadPackets();
 
+      /* Torque Change */
+      if(c2cComm.TorqueChange()) ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
+
       /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
         ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);

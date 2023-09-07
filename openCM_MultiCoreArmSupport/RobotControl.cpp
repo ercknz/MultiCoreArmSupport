@@ -257,10 +257,10 @@ void RobotControl::SetScalingFactor(float newScalingFactor){
 /------------------------------------------------------------------------------*/
 void  RobotControl::EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state) {
   /* Modes to Select from:
-   *  [5]:  Full Admittance Control (Shoulder, Elbow, and Elevation ENABLED)
-   *  [10]: Planar Admittance Control ONLY (Shoulder and  Elbow ENABLED, Elevation DISABLED)
-   *  [15]: Vertical Admittance Control ONLY (Elevation ENABLED, Shoulder and Elbow DISABLED)
-   *  [20]: Fully Passive (Shoulder, Elbow, and Elevation DISABLED)
+   *  [5]:  Full Admittance Control (Shoulder, Elbow, and Elevation TORQUE ENABLED)
+   *  [10]: Planar Admittance Control ONLY (Shoulder and  Elbow TORQUE ENABLED, Elevation TORQUE DISABLED)
+   *  [15]: Vertical Admittance Control ONLY (Elevation TORQUE ENABLED, Shoulder and Elbow TORQUE DISABLED)
+   *  [20]: Fully Passive (Shoulder, Elbow, and Elevation TORQUE DISABLED)
    */
   using namespace OCM;
   int dxlCommResult;
