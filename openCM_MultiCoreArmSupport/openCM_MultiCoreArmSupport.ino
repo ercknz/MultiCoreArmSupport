@@ -100,18 +100,21 @@ void loop() {
       if (c2cComm.DataAvailable()) c2cComm.ReadPackets();
 
       /* Torque Change */
-      if(c2cComm.TorqueChange()) ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
+      if(c2cComm.TorqueChange()) {
+        ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
+        c2cComm.TorqueChangeApplied();
+      }
 
       /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
         ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);
-        c2cComm.NewGoalsPulled();
+        c2cComm.NewGoalApplied();
       } 
       ArmRobot.ReadMotors(syncReadPacket);
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-      c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
+      if (c2cComm.DataRequested()) c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
     }
   }
   if (!Serial) {

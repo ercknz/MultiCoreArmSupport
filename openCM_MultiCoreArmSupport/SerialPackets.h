@@ -20,7 +20,8 @@ class SerialPackets {
     float * GetNewGoalQ();
     float * GetNewGoalQdot();
     float * GetNewGoalCurrent();
-    void NewGoalsPulled();
+    void NewGoalApplied();
+    void TorqueChangeApplied();
     
     void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
     void ReadPackets();
