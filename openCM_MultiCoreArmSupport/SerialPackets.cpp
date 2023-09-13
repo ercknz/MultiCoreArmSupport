@@ -34,15 +34,15 @@ bool SerialPackets::NewGoalAvailable(){
 }
 
 uint8_t SerialPackets::GetNewMode(){
-  return mode_M;
+  return torqueMode_M;
 }
 
 float * SerialPackets::GetNewGoalQ(){
-  return goalQ_M;
+  return goalXYZ_M;
 }
 
 float * SerialPackets::GetNewGoalQdot(){
-  return goalQdot_M;
+  return goalXYZdot_M;
 }
 
 float * SerialPackets::GetNewGoalCurrent(){
@@ -58,7 +58,27 @@ void SerialPackets::NewGoalsPulled(){
 / Serial Packet Writer ----------------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime) {
-  // TX = [Header, ElapsedTime, Q1, Q2, Q4, Qdot1, Qdot2, Qdot4, T1, T2, T4, _, LoopTime, CheckSum]
+  /* TXpacket = Header: [ 0, 1, 2, 3,...
+           elapsedTime:   4, 5, 6, 7,...
+                presQ1:   8, 9,10,11,...
+                presQ2:  12,13,14,15,...
+                presQ4:  16,17,18,19,...
+             presQ1dot:  20,21,22,23,...
+             presQ2dot:  24,25,26,27,...
+             presQ3dot:  28,29,30,31,...
+          presCurrent1:  32,33,34,35,...
+          presCurrent2:  36,37,38,39,...
+          presCurrent3:  40,41,42,43,...
+                 presX:  44,45,46,47,...
+                 presY:  48,49,50,51,...
+                 presZ:  52,53,54,55,...
+              presXdot:  56,57,58,59,...
+              presYdot:  60,61,62,63,...
+              presZdot:  64,65,66,67,...
+                     _:  68,69,70,71,72,73,...
+              loopTime:  74,75,76,77,...
+              CheckSum:  78,79]
+  */ 
   byte dataPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
   int16_t byteLen       = 4;
@@ -76,16 +96,24 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
 
   // Motor's PresQ, PresQdot, and Torques
   byte *PresQ_bytes = floatArrayToBytes(Robot.GetPresQ());
-  for (int16_t i = _Q_SLOT; i < _QDOT_SLOT; i++){
-    dataPacket[i] = PresQ_bytes[i - _Q_SLOT];
+  for (int16_t i = _presQ_SLOT; i < _presQDOT_SLOT; i++){
+    dataPacket[i] = PresQ_bytes[i - _presQ_SLOT];
   }
   byte *PresQDot_bytes = floatArrayToBytes(Robot.GetPresQDot());
-  for (int16_t i = _QDOT_SLOT; i < _CURRENT_SLOT; i++){
-    dataPacket[i] = PresQDot_bytes[i - _QDOT_SLOT];
+  for (int16_t i = _presQDOT_SLOT; i < _presCURRENT_SLOT; i++){
+    dataPacket[i] = PresQDot_bytes[i - _presQDOT_SLOT];
   }
   byte *PresI_bytes = floatArrayToBytes(Robot.GetPresCurrent());
-  for (int16_t i = _CURRENT_SLOT; i < _NEW_SLOT1; i++){
-    dataPacket[i] = PresI_bytes[i - _CURRENT_SLOT];
+  for (int16_t i = _presCURRENT_SLOT; i < _presXYZ_SLOT; i++){
+    dataPacket[i] = PresI_bytes[i - _presCURRENT_SLOT];
+  }
+  byte *PresXYZ_bytes = floatArrayToBytes();
+  for (int16_t i = _presXYZ_SLOT; i < _presXYZdot_SLOT; i++){
+    dataPacket[i] = PresXYZ_bytes[i - _presXYZ_SLOT];
+  }
+  byte *PresXYZdot_bytes = floatArrayToBytes();
+  for (int16_t i = _presXYZdot_SLOT; i < _BLANK_SLOT; i++){
+    dataPacket[i] = PresXYZdot_bytes[i - _presXYZdot_SLOT];
   }
 
   // looptime
@@ -113,12 +141,28 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
 / Serial Packet Reader ----------------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void SerialPackets::ReadPackets() {
-  // RX = [Header, Mode, Q1, Q2, Q4, Qdot1, Qdot2, Qdot4, T1, T2, T4, _, CheckSum]
+  /* RXpacket = Header: [ 0, 1, 2, 3,...
+                     _:   4,...
+                  Mode:   5,...
+                     _:   6, 7,...
+                 goalX:   8, 9,10,11,...
+                 goalY:  12,13,14,15,...
+                 goalZ:  16,17,18,19,...
+              goalXdot:  20,21,22,23,...
+              goalYdot:  24,25,26,27,...
+              goalZdot:  28,29,30,31,...
+          goalCurrent1:  32,33,34,35,...
+          goalCurrent2:  36,37,38,39,...
+          goalCurrent3:  40,41,42,43,...
+                     _:  44,45,46,47,48,49,50,51,52,53,54,55,56,57,...
+              CheckSum:  58,59]
+  */ 
   byte dataPacket[_RX_PKT_LEN];
   byte tempHeader[4];
-  int16_t SumCheck;
+  int16_t sumCheck;
   int16_t CHECKSUM;
   
+  /* Check for instructions */
   unsigned long timeOUtTime = millis();
   while (c2cPort_M->available() < _RX_PKT_LEN) {
     if (millis() - timeOUtTime > 10){
@@ -126,38 +170,39 @@ void SerialPackets::ReadPackets() {
     }
   }
   
+  /* Read Instructions */
   for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
     dataPacket[i] = c2cPort_M->read();
   }
-  
+
+  /* verify packet */
   CHECKSUM = bytesToCounts(dataPacket[_RX_PKT_LEN - 2], dataPacket[_RX_PKT_LEN - 1]);
-  SumCheck = 0;
+  sumCheck = 0;
   for (int16_t i = 0; i < _RX_PKT_LEN - 2; i++) {
-    SumCheck += dataPacket[i];
+    sumCheck += dataPacket[i];
   }
-  
   for (int16_t i = 0; i < 4; i++) {
     tempHeader[i] = dataPacket[i];
   }
 
-  if (SumCheck != CHECKSUM) return;
-
+  /* Escapes */
+  if (sumCheck != CHECKSUM) return;
   if (memcmp(_RXHEADER, tempHeader, sizeof(_RXHEADER)) != 0) return;
   
   newGoal_M = true;
 
   /* Drive Mode */
-  mode_M = dataPacket[5];
+  torqueMode_M = dataPacket[5];
 
   /* GoalQ slot = 8 */
-  goalQ_M[0] = bytesToFloat(dataPacket[8], dataPacket[9], dataPacket[10], dataPacket[11]);
-  goalQ_M[1] = bytesToFloat(dataPacket[12], dataPacket[13], dataPacket[14], dataPacket[15]);
-  goalQ_M[2] = bytesToFloat(dataPacket[16], dataPacket[17], dataPacket[18], dataPacket[19]);
+  goalXYZ_M[0] = bytesToFloat(dataPacket[8], dataPacket[9], dataPacket[10], dataPacket[11]);
+  goalXYZ_M[1] = bytesToFloat(dataPacket[12], dataPacket[13], dataPacket[14], dataPacket[15]);
+  goalXYZ_M[2] = bytesToFloat(dataPacket[16], dataPacket[17], dataPacket[18], dataPacket[19]);
 
   /* GoalQdot slot = 20 */
-  goalQdot_M[0] = bytesToFloat(dataPacket[20], dataPacket[21], dataPacket[22], dataPacket[23]);
-  goalQdot_M[1] = bytesToFloat(dataPacket[24], dataPacket[25], dataPacket[26], dataPacket[27]);
-  goalQdot_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
+  goalXYZdot_M[0] = bytesToFloat(dataPacket[20], dataPacket[21], dataPacket[22], dataPacket[23]);
+  goalXYZdot_M[1] = bytesToFloat(dataPacket[24], dataPacket[25], dataPacket[26], dataPacket[27]);
+  goalXYZdot_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
 
   /* GoalCurrent slot = 32 */
   goalCurrent_M[0] = bytesToFloat(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);

@@ -110,6 +110,8 @@ void loop() {
         ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);
         c2cComm.NewGoalApplied();
       } 
+
+      /* Read Robot */
       ArmRobot.ReadMotors(syncReadPacket);
 
       /* Outgoing Data */

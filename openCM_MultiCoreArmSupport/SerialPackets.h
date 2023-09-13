@@ -22,6 +22,8 @@ class SerialPackets {
     float * GetNewGoalCurrent();
     void NewGoalApplied();
     void TorqueChangeApplied();
+    bool DataRequested();
+    bool TorqueChanged();
     
     void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
     void ReadPackets();
@@ -29,20 +31,24 @@ class SerialPackets {
   protected:
     const int   _BAUDRATE;
     HardwareSerial *c2cPort_M;
-    const int16_t _TX_PKT_LEN = 60;
+    const int16_t _TX_PKT_LEN = 80;
     const int16_t _RX_PKT_LEN = 60;
     const byte  _RXHEADER[4]  = {150, 10, 1, 101};
     const byte  _TXHEADER[4]  = {170, 6, 9, 69};
-    const int16_t _Q_SLOT = 8;
-    const int16_t _QDOT_SLOT = 20;
-    const int16_t _CURRENT_SLOT = 32;
-    const int16_t _NEW_SLOT1 = 44;
+    const int16_t _presQ_SLOT = 8;
+    const int16_t _presQDOT_SLOT = 20;
+    const int16_t _presCURRENT_SLOT = 32;
+    const int16_t _presXYZ_SLOT = 44;
+    const int16_t _presXYZdot_SLOT = 56;
+    const int16_t _BLANK_SLOT = 68;
 
-    bool newGoal_M  = false;
+    bool newGoal_M        = false;
+    bool torqueChange_M   = false;
+    bool dataRequested_M  = false;
+    uint8_t torqueMode_M;
 
-    uint8_t mode_M;
-    float goalQ_M[3] = {0.0f};
-    float goalQdot_M[3] = {0.0f};
+    float goalXYZ_M[3] = {0.0f};
+    float goalXYZdot_M[3] = {0.0f};
     float goalCurrent_M[3] = {0.0f};
 };
 
