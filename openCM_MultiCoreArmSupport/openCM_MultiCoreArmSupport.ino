@@ -107,7 +107,7 @@ void loop() {
 
       /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
-        ArmRobot.WriteToMotors(c2cComm.GetNewGoalQ(), c2cComm.GetNewGoalQdot(), addParamResult, syncWritePacket);
+        ArmRobot.WriteToMotors(c2cComm.GetNewXYZGoal(), c2cComm.GetNewXYZdotGoal(), addParamResult, syncWritePacket);
         c2cComm.NewGoalApplied();
       } 
 

@@ -33,25 +33,38 @@ bool SerialPackets::NewGoalAvailable(){
   return newGoal_M;
 }
 
-uint8_t SerialPackets::GetNewMode(){
-  return torqueMode_M;
-}
-
-float * SerialPackets::GetNewGoalQ(){
+float * SerialPackets::GetNewXYZGoal(){
   return goalXYZ_M;
 }
 
-float * SerialPackets::GetNewGoalQdot(){
+float * SerialPackets::GetNewXYZdotGoal(){
   return goalXYZdot_M;
 }
 
-float * SerialPackets::GetNewGoalCurrent(){
+float * SerialPackets::GetNewCurrentGoal(){
   return goalCurrent_M;
 }
 
-void SerialPackets::NewGoalsPulled(){
+void SerialPackets::NewGoalApplied(){
   newGoal_M = false;
   return;
+}
+
+bool SerialPackets::TorqueChanged(){
+  return torqueChange_M;
+}
+
+uint8_t SerialPackets::ChangeModeTo(){
+  return torqueMode_M;
+}
+
+void SerialPackets::TorqueChangeApplied(){
+  torqueChange_M = false;
+  return;
+}
+
+bool SerialPackets::DataRequested(){
+  return dataRequested_M;
 }
 
 /* ------------------------------------------------------------------------------------------------------/
@@ -143,8 +156,9 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
 void SerialPackets::ReadPackets() {
   /* RXpacket = Header: [ 0, 1, 2, 3,...
                      _:   4,...
-                  Mode:   5,...
-                     _:   6, 7,...
+           Packet Type:   5,...
+                     _:   6,...
+                  Mode:   7,...
                  goalX:   8, 9,10,11,...
                  goalY:  12,13,14,15,...
                  goalZ:  16,17,18,19,...
@@ -185,6 +199,9 @@ void SerialPackets::ReadPackets() {
     tempHeader[i] = dataPacket[i];
   }
 
+  /* Packet Type */
+  uint8_t packetType = dataPacket[5];
+
   /* Escapes */
   if (sumCheck != CHECKSUM) return;
   if (memcmp(_RXHEADER, tempHeader, sizeof(_RXHEADER)) != 0) return;
@@ -192,19 +209,19 @@ void SerialPackets::ReadPackets() {
   newGoal_M = true;
 
   /* Drive Mode */
-  torqueMode_M = dataPacket[5];
+  torqueMode_M = dataPacket[7];
 
-  /* GoalQ slot = 8 */
+  /* XYZ Goal slot = 8 */
   goalXYZ_M[0] = bytesToFloat(dataPacket[8], dataPacket[9], dataPacket[10], dataPacket[11]);
   goalXYZ_M[1] = bytesToFloat(dataPacket[12], dataPacket[13], dataPacket[14], dataPacket[15]);
   goalXYZ_M[2] = bytesToFloat(dataPacket[16], dataPacket[17], dataPacket[18], dataPacket[19]);
 
-  /* GoalQdot slot = 20 */
+  /* XYZdot Goal slot = 20 */
   goalXYZdot_M[0] = bytesToFloat(dataPacket[20], dataPacket[21], dataPacket[22], dataPacket[23]);
   goalXYZdot_M[1] = bytesToFloat(dataPacket[24], dataPacket[25], dataPacket[26], dataPacket[27]);
   goalXYZdot_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
 
-  /* GoalCurrent slot = 32 */
+  /* Current Goal slot = 32 */
   goalCurrent_M[0] = bytesToFloat(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
   goalCurrent_M[1] = bytesToFloat(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
   goalCurrent_M[2] = bytesToFloat(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);

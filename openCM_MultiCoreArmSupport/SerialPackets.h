@@ -16,14 +16,14 @@ class SerialPackets {
 
     bool DataAvailable();
     bool NewGoalAvailable();
-    uint8_t GetNewMode();
-    float * GetNewGoalQ();
-    float * GetNewGoalQdot();
-    float * GetNewGoalCurrent();
+    float * GetNewXYZGoal();
+    float * GetNewXYZdotGoal();
+    float * GetNewCurrentGoal();
     void NewGoalApplied();
+    bool TorqueChanged();
+    uint8_t ChangeModeTo();
     void TorqueChangeApplied();
     bool DataRequested();
-    bool TorqueChanged();
     
     void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
     void ReadPackets();
