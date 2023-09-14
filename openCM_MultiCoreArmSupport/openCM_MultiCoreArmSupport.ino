@@ -100,19 +100,19 @@ void loop() {
       if (c2cComm.DataAvailable()) c2cComm.ReadPackets();
 
       /* Torque Change */
-      if(c2cComm.TorqueChange()) {
+      if(c2cComm.TorqueChanged()) {
         ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
         c2cComm.TorqueChangeApplied();
       }
 
       /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
-        ArmRobot.WriteToMotors(c2cComm.GetNewXYZGoal(), c2cComm.GetNewXYZdotGoal(), addParamResult, syncWritePacket);
+        ArmRobot.WriteToRobot(c2cComm.GetNewXYZGoal(), c2cComm.GetNewXYZdotGoal(), addParamResult, syncWritePacket);
         c2cComm.NewGoalApplied();
       } 
 
       /* Read Robot */
-      ArmRobot.ReadMotors(syncReadPacket);
+      ArmRobot.ReadRobot(syncReadPacket);
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;

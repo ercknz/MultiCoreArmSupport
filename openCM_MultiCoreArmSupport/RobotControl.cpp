@@ -46,20 +46,20 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Get Member functions -------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-int32_t* RobotControl::GetPresQCts(){ 
-  return qPresCts_M;
-} 
-
-int32_t* RobotControl::GetPresQDotCts(){
-  return qDotPresCts_M;
-}
-
 float* RobotControl::GetPresQ(){
   return qPres_M;
 }
 
 float* RobotControl::GetPresQDot(){
   return qDotPres_M;
+}
+
+int32_t* RobotControl::GetPresQCts(){ 
+  return qPresCts_M;
+} 
+
+int32_t* RobotControl::GetPresQDotCts(){
+  return qDotPresCts_M;
 }
 
 float* RobotControl::GetPresXYZ(){ 
@@ -70,20 +70,20 @@ float* RobotControl::GetPresXYZdot(){
   return xyzDotPres_M;
 }
 
-int32_t* RobotControl::GetGoalQCts(){ 
-  return qCts_M;
-}
-
-int32_t* RobotControl::GetGoalQDotCts(){
-  return qDotCts_M;
-}
-
 float* RobotControl::GetGoalQ(){
   return q_M;
 }
 
 float* RobotControl::GetGoalQDot(){
   return qDot_M;
+}
+
+int32_t* RobotControl::GetGoalQCts(){ 
+  return qCts_M;
+}
+
+int32_t* RobotControl::GetGoalQDotCts(){
+  return qDotCts_M;
 }
 
 float* RobotControl::GetGoalXYZ(){ 
@@ -94,17 +94,17 @@ float* RobotControl::GetGoalXYZdot(){
   return xyzDot_M;
 }
 
-float RobotControl::GetSpringForce(){
-  return springF_M;
+float* RobotControl::GetPresCurrent(){
+  return iPres_M;
 }
 
 int16_t* RobotControl::GetPresCurrentCts(){ 
   return iPresCts_M;
-} 
-
-float* RobotControl::GetPresCurrent(){
-  return iPres_M;
 }
+
+float RobotControl::GetSpringForce(){
+  return springF_M;
+} 
 
 /* ---------------------------------------------------------------------------------------/
 / ROBOT LEVEL FUNCTIONS ------------------------------------------------------------------/
@@ -342,22 +342,17 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
 /* -----------------------------------------------------------------------------/
 / Arm Support DXL Write Member Function ----------------------------------------/
 /------------------------------------------------------------------------------*/
-int  RobotControl::WriteToMotors(float *goalQ, float *goalQdot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket) {
+int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket) {
   int dxlCommResult;
   uint8_t elbowParam[4], shoulderParam[4], elevateParam[4];
 
-  for (int i=0; i<3; i++){
-    q_M[i] = goalQ[i];
-    qDot_M[i] = goalQdot[i];
-  }
-
   /* Convert to Motor Counts */
-  qCts_M[0]    = goalQ[0] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
-  qCts_M[1]    = OCM::ELEVATION_CENTER - (goalQ[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
-  qCts_M[2]    = OCM::ELBOW_MIN_POS + goalQ[2] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
-  qDotCts_M[0] = abs(goalQdot[0] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
-  qDotCts_M[1] = abs(goalQdot[1] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
-  qDotCts_M[2] = abs(goalQdot[2] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
+  qCts_M[0]    = q_M[0] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qCts_M[1]    = OCM::ELEVATION_CENTER - (q_M[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
+  qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
+  qDotCts_M[1] = abs(qDot_M[1] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
+  qDotCts_M[2] = abs(qDot_M[2] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
 
   /* Check versus hard limits */
   if (qCts_M[0] < OCM::SHOULDER_MIN_POS) qCts_M[0] = OCM::SHOULDER_MIN_POS;
