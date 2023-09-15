@@ -15,7 +15,9 @@ class ForceSensor {
                       const float filterWeight);
     void  CalibrateSensor();
     void  CalculateGlobalForces(float *q);
-    int* GetRawFT();
+    int* GetRawCtsFT();
+    float* GetRawFT();
+    float* GetFilteredFT();
     float* GetGlobalFT();
     float  GetFilterWeight();
     void   SetFilterWeight(float newFilterValue);
@@ -25,24 +27,30 @@ class ForceSensor {
    
     void  FilterFT();
 
-    const float _READ_DT = 1;  // milliseconds
     float       _xyzCALIBRATION[6] = {0.0f}; // [fx, fy, fz, tx, ty, tz]
     int16_t     _SAMPLECOUNTER;
     int16_t     _SENSORSTATUS;
-    //const float _xyzSENSITIVITY[3]; 
     const uint8_t _Fx_PIN;
     const uint8_t _Fy_PIN;
     const uint8_t _Fz_PIN;
     const uint8_t _Tx_PIN;
     const uint8_t _Ty_PIN;
     const uint8_t _Tz_PIN;
+
+    float AFxy_M, BFxy_M; //const
+    float AFz_M, BFz_M; // const
+    float ATxyz_M, BTxyz_M; //const 
+
     float FilterWeight_M;
-    int ftxyzRaw_M[6]     = {0}; // [fx, fy, fz, tx, ty, tz]
-    int ftxyzLastRaw_M[6] = {0}; // [fx, fy, fz, tx, ty, tz]
+
+    int ftxyzRawCts_M[6]     = {0}; // [fxcts, fycts, fzcts, txcts, tycts, tzcts]
+    int ftxyzLastRawCts_M[6] = {0}; // [fxcts, fycts, fzcts, txcts, tycts, tzcts]
+    float ftxyzRaw_M[6]     = {0}; // [fx, fy, fz, tx, ty, tz]
+    float ftxyzLastRaw_M[6] = {0}; // [fx, fy, fz, tx, ty, tz]
     float ftxyzFilt_M[6]    = {0.0f}; // [fx, fy, fz, tx, ty, tz]
     float ftxyzLastFilt_M[6]= {0.0f}; // [fx, fy, fz, tx, ty, tz]
     float ftxyzGlobal_M[6]  = {0.0f}; // [fx, fy, fz, tx, ty, tz]
-    bool calibratingFlag_M = false;
+
 };
 
 #endif // FORCE_SENSOR_H
