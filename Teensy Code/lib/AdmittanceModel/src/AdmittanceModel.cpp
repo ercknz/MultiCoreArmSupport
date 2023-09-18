@@ -36,20 +36,15 @@
 
 #include <Arduino.h>
 #include "AdmittanceModel.h"
-#include "armSupportNamespace.h"
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Constructor -----------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz, const float G, const float T)
-  : mass_M{Mxy, Mz},
-    damping_M{Bxy, Bz},
+  : mass_M{Mxy, Mxy, Mz},
+    damping_M{Bxy, Bxy, Bz},
     _GRAVITY{G},
-    _DELTAT{T},
-    _INNER_R_LIMIT{ASR::A1_LINK + ASR::L1_LINK + ASR::A2_LINK - ASR::L2_LINK},
-    _Z_LIMIT{abs(ASR::L1_LINK * sin((ASR::ELEVATION_MAX_POS - ASR::ELEVATION_CENTER) * ASR::DEGREES_PER_COUNT * (PI / 180.0) * (1/ASR::ELEVATION_RATIO)))},
-    _A1A2{ASR::A1_LINK + ASR::A2_LINK},
-    _H_OF_L2{sqrt(pow(ASR::LINK_OFFSET, 2) + pow(ASR::L2_LINK, 2))}
+    _DELTA_T{T}
 {
 }
 
@@ -76,22 +71,22 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float springFz, float *extern
   totalForces_M[0] = forceXYZ[0] + externalFxyz[0];
   float Cx1 = ((totalForces_M[0] / damping_M[0]) - xyzDotInit_M[0]) * (mass_M[0] / damping_M[0]);
   float Cx2 = xyzInit_M[0] - Cx1;
-  xyzGoal_M[0]    = Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTAT) + (totalForces_M[0] / damping_M[0]) * _DELTAT + Cx2;
-  xyzDotGoal_M[0] = (totalForces_M[0] / damping_M[0]) - (damping_M[0] / mass_M[0]) * Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTAT);
+  xyzGoal_M[0]    = Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTA_T) + (totalForces_M[0] / damping_M[0]) * _DELTA_T + Cx2;
+  xyzDotGoal_M[0] = (totalForces_M[0] / damping_M[0]) - (damping_M[0] / mass_M[0]) * Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTA_T);
 
   /* Coefficents and Solution for Y-Direction */
   totalForces_M[1] = forceXYZ[1] + externalFxyz[1];
-  float Cy1 = ((totalForces_M[1] / damping_M[0]) - xyzDotInit_M[1]) * (mass_M[0] / damping_M[0]);
+  float Cy1 = ((totalForces_M[1] / damping_M[1]) - xyzDotInit_M[1]) * (mass_M[1] / damping_M[1]);
   float Cy2 = xyzInit_M[1] - Cy1;
-  xyzGoal_M[1]    = Cy1 * exp(-(damping_M[0] / mass_M[0]) * _DELTAT) + (totalForces_M[1] / damping_M[0]) * _DELTAT + Cy2;
-  xyzDotGoal_M[1] = (totalForces_M[1] / damping_M[0]) - (damping_M[0] / mass_M[0]) * Cy1 * exp(-(damping_M[0] / mass_M[0]) * _DELTAT);
+  xyzGoal_M[1]    = Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T) + (totalForces_M[1] / damping_M[1]) * _DELTA_T + Cy2;
+  xyzDotGoal_M[1] = (totalForces_M[1] / damping_M[1]) - (damping_M[1] / mass_M[1]) * Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T);
 
   /* Coefficents and Solution for Z-Direction */
   totalForces_M[2] = forceXYZ[2] + springFz + externalFxyz[2];
-  float Cz1 = ((totalForces_M[2]  / damping_M[1]) - xyzDotInit_M[2]) * (mass_M[1] / damping_M[1]);
+  float Cz1 = ((totalForces_M[2]  / damping_M[2]) - xyzDotInit_M[2]) * (mass_M[2] / damping_M[2]);
   float Cz2 = xyzInit_M[2] - Cz1;
-  xyzGoal_M[2]    = Cz1 * exp(-(damping_M[1] / mass_M[1]) * _DELTAT) + (totalForces_M[2] / damping_M[1]) * _DELTAT + Cz2;
-  xyzDotGoal_M[2] = (totalForces_M[2] / damping_M[1]) - (damping_M[1] / mass_M[1]) * Cz1 * exp(-(damping_M[1] / mass_M[1]) * _DELTAT);
+  xyzGoal_M[2]    = Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T) + (totalForces_M[2] / damping_M[2]) * _DELTA_T + Cz2;
+  xyzDotGoal_M[2] = (totalForces_M[2] / damping_M[2]) - (damping_M[2] / mass_M[2]) * Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T);
 
   /* Check TaskSpace Limits */
 //  if (xyzGoal_M[2] >  _Z_LIMIT) xyzGoal_M[2] =  _Z_LIMIT;

@@ -24,36 +24,16 @@
 /* ---------------------------------------------------------------------------------------/
 / Force Sensor Constructor ---------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-ForceSensor::ForceSensor(const uint8_t fxPin, const uint8_t fyPin, const uint8_t fzPin,
-                         const uint8_t txPin, const uint8_t tyPin, const uint8_t tzPin,
-                         const float filterWeight)
-    : _Fx_PIN{fxPin},
-      _Fy_PIN{fyPin},
-      _Fz_PIN{fzPin},
-      _Tx_PIN{txPin},
-      _Ty_PIN{tyPin},
-      _Tz_PIN{tzPin}
+ForceSensor::ForceSensor(const float filterWeight)
+    : _AFXY_M{(_V2 * _FXY_MAX)/ _VF_MAX},
+      _BFXY_M{(_AIN_TOL * _R1 * _FXY_MAX) / (_AIN_RES * _R3 * _VF_MAX)},
+      _AFZ_M{(_V2 * _FZ_MAX) / _VF_MAX},
+      _BFZ_M{(_AIN_TOL * _R1 * _FZ_MAX) / (_AIN_RES * _R3 * _VF_MAX)},
+      _ATXYZ_M{(_V2 * _TXYZ_MAX) / _VF_MAX},
+      _BTXYZ_M{(_AIN_TOL * _R1 * _TXYZ_MAX) / (_AIN_RES * _R3 * _VF_MAX)}
 {
-  FilterWeight_M = filterWeight;
+  SetFilterWeight(filterWeight);
   analogReference(EXTERNAL);
-  float FxyMax = 290;
-  float FzMax = 580;
-  float TxyzMax = 10;
-  float VfMax = 10;
-  float AinTol = 3.3;
-  float R1 = 2200;
-  float R3 = 330;
-  float AinRes = pow(2, 13);
-  float V2 = 11.66;
-
-  AFxy_M = (V2 * FxyMax) / VfMax;
-  BFxy_M = (AinTol * R1 * FxyMax) / (AinRes * R3 * VfMax);
-
-  AFz_M = (V2 * FzMax) / VfMax;
-  BFz_M = (AinTol * R1 * FzMax) / (AinRes * R3 * VfMax);
-
-  ATxyz_M = (V2 * TxyzMax) / VfMax;
-  BTxyz_M = (AinTol * R1 * TxyzMax) / (AinRes * R3 * VfMax);
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -69,10 +49,6 @@ float *ForceSensor::GetRawFT(){
 
 float *ForceSensor::GetFilteredFT(){
   return ftxyzFilt_M;
-}
-
-float *ForceSensor::GetGlobalFT(){
-  return ftxyzGlobal_M;
 }
 
 float ForceSensor::GetFilterWeight(){
@@ -133,20 +109,20 @@ void ForceSensor::CalibrateSensor(){
     }
 
     // Reads Analog Signals
-    ftxyzRawCts_M[0] = analogRead(_Fx_PIN);
-    ftxyzRawCts_M[1] = analogRead(_Fy_PIN);
-    ftxyzRawCts_M[2] = analogRead(_Fz_PIN);
-    ftxyzRawCts_M[3] = analogRead(_Tx_PIN);
-    ftxyzRawCts_M[4] = analogRead(_Ty_PIN);
-    ftxyzRawCts_M[5] = analogRead(_Tz_PIN);
+    ftxyzRawCts_M[0] = analogRead(_FX_PIN);
+    ftxyzRawCts_M[1] = analogRead(_FY_PIN);
+    ftxyzRawCts_M[2] = analogRead(_FZ_PIN);
+    ftxyzRawCts_M[3] = analogRead(_TX_PIN);
+    ftxyzRawCts_M[4] = analogRead(_TY_PIN);
+    ftxyzRawCts_M[5] = analogRead(_TZ_PIN);
 
     // Convert to Force/Torque Values
-    ftxyzRaw_M[0] = AFxy_M - BFxy_M * ftxyzRawCts_M[0];
-    ftxyzRaw_M[1] = AFxy_M - BFxy_M * ftxyzRawCts_M[1];
-    ftxyzRaw_M[2] = AFz_M  - BFz_M  * ftxyzRawCts_M[2];
-    ftxyzRaw_M[3] = ATxyz_M - BTxyz_M * ftxyzRawCts_M[3];
-    ftxyzRaw_M[4] = ATxyz_M - BTxyz_M * ftxyzRawCts_M[4];
-    ftxyzRaw_M[5] = ATxyz_M - BTxyz_M * ftxyzRawCts_M[5];
+    ftxyzRaw_M[0] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[0];
+    ftxyzRaw_M[1] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[1];
+    ftxyzRaw_M[2] = _AFZ_M  - _BFZ_M  * ftxyzRawCts_M[2];
+    ftxyzRaw_M[3] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[3];
+    ftxyzRaw_M[4] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[4];
+    ftxyzRaw_M[5] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
     // Filter Values
     FilterFT();
@@ -161,15 +137,4 @@ void ForceSensor::CalibrateSensor(){
       ftxyzLastFilt_M[i] = ftxyzFilt_M[i];
       ftxyzFilt_M[i] = FilterWeight_M * (ftxyzRaw_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * ftxyzLastFilt_M[i];
     }
-  }
-
-  /* ---------------------------------------------------------------------------------------/
-  / Force Sensor Global Forces -------------------------------------------------------------/
-  /----------------------------------------------------------------------------------------*/
-  void ForceSensor::CalculateGlobalForces(float *q){
-    // q[] = [q1, q2, q4]
-    ReadForceSensor();
-    ftxyzGlobal_M[0] = ftxyzFilt_M[0] * (sin(q[0] + q[2])) + ftxyzFilt_M[1] * (-cos(q[0] + q[2]));
-    ftxyzGlobal_M[1] = ftxyzFilt_M[0] * (-cos(q[0] + q[2])) + ftxyzFilt_M[1] * (-sin(q[0] + q[2]));
-    ftxyzGlobal_M[2] = -ftxyzFilt_M[2];
   }
