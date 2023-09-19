@@ -1,21 +1,20 @@
-/* Class controls the arm support robot
+/* Class controls the robot communication
 
-   Created 10/28/2020
+   Created 10/28/2023
    Script by Erick Nunez
 */
 
-#ifndef ROBOT_CONTROL_H
-#define ROBOT_CONTROL_H
+#include <Arduino.h>
 
-#include <DynamixelSDK.h>
+#ifndef ROBOT_COMM_H
+#define ROBOT_COMM_H
 
-class RobotControl {
+class RobotComm {
   public:
-          RobotControl(const float A1, const float L1, const float A2, const float L2, const float Offset);
-    void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
-    void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
-    void  ReadRobot(dynamixel::GroupSyncRead &syncReadPacket);
-    void  WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+          RobotComm();
+    void  EnableTorque();
+    void  ReadRobot();
+    void  WriteToRobot();
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
@@ -28,15 +27,15 @@ class RobotControl {
     float *   GetGoalQDot();
     float *   GetGoalPos();
     float *   GetGoalVel();
-    void      CalculateSpringForce(float *forces); 
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
     
   protected:
-    void  fKine();
-    void  iKine(float *modelXYZ, float *modelXYZDot);
-    void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
-    int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+
+    const int _BAUDRATE;
+    const byte _READ_HEADER[4] = {170, 6, 9, 69};
+    const byte _WRITE_HEADER[4] = {};
+
 
     const float  _A1A2,      _L1,        _L2;
     const double _OFFSET,    _PHI,       _H_OF_L2;
@@ -45,7 +44,6 @@ class RobotControl {
     const double _Q4_MIN,    _Q4_MAX;
     const double _INNER_R,   _Z_LIMIT;
     const double _SPRING_Li, _BETAi, _SPRING_Fi;
-    float J_M[3][3] = {{0.0f}};
     int32_t qPresCts_M[3],  qDotPresCts_M[3];
     float   qPres_M[3],     qDotPres_M[3];
     float   xyzPres_M[3],   xyzDotPres_M[3];
@@ -54,7 +52,6 @@ class RobotControl {
     float   xyz_M[3],       xyzDot_M[3];
     float   springF_M;
     float   scalingFactor_M;
-    uint8_t dxl_error = 0;
 };
 
-#endif // ROBOT_CONTROL_H
+#endif // ROBOT_COMM_H
