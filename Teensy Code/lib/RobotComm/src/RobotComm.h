@@ -6,6 +6,12 @@
 
 #include <Arduino.h>
 
+/* Macro Control Table Values from DynamixelSDK/packet_handler.h */
+#define DXL_LOWORD(l)       ((uint16_t)(((uint64_t)(l)) & 0xffff))
+#define DXL_HIWORD(l)       ((uint16_t)((((uint64_t)(l)) >> 16) & 0xffff))
+#define DXL_LOBYTE(w)       ((uint8_t)(((uint64_t)(w)) & 0xff))
+#define DXL_HIBYTE(w)       ((uint8_t)((((uint64_t)(w)) >> 8) & 0xff))
+
 #ifndef ROBOT_COMM_H
 #define ROBOT_COMM_H
 
@@ -14,7 +20,7 @@ class RobotComm {
           RobotComm();
     void  EnableTorque();
     void  ReadRobot();
-    void  WriteToRobot();
+    void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
@@ -32,24 +38,35 @@ class RobotComm {
     
   protected:
 
+    HardwareSerial *robotPort_M;
     const int _BAUDRATE;
+
     const byte _READ_HEADER[4]  = {170,  6, 9,  69};
+    const int16_t _RX_PKT_LEN = 80;
+    const int16_t _RX_presQ_SLOT = 8;
+    const int16_t _RX_presQDOT_SLOT = 20;
+    const int16_t _RX_presCURRENT_SLOT = 32;
+    const int16_t _RX_presXYZ_SLOT = 44;
+    const int16_t _RX_presXYZdot_SLOT = 56;
+    const int16_t _RX_BLANK_SLOT = 68;
+
     const byte _WRITE_HEADER[4] = {150, 10, 1, 101};
-    const int16_t _presQ_SLOT = 8;
-    const int16_t _presQDOT_SLOT = 20;
-    const int16_t _presCURRENT_SLOT = 32;
-    const int16_t _presXYZ_SLOT = 44;
-    const int16_t _presXYZdot_SLOT = 56;
-    const int16_t _BLANK_SLOT = 68;
+    const int16_t _TX_PKT_LEN = 60;
+    const int16_t _TX_PKT_TYPE_SLOT = 5;
+    const int16_t _TX_TORQUE_CHANGE_SLOT = 7;
+    const int16_t _TX_GOAL_XYZ_SLOT = 8;
+    const int16_t _TX_GOAL_XYZDOT_SLOT = 20;
+    const int16_t _TX_GOAL_CURRENT_SLOT = 32;
+    const int16_t _TX_BLANK_SLOT = 44;    
 
     float qPres_M[3], qDotPres_M[3];
     float xyzPres_M[3], xyzDotPres_M[3];
     float xyzGoal_M[3], xyzDotGoal_M[3];
     float presCurrent_M[3];
-    float   springF_M;
-    float   scalingFactor_M;
+    float springF_M;
+    float scalingFactor_M;
 
-    int16_t torqueMode;
+    int16_t torqueState_M;
 
     const float  _A1A2,      _L1,        _L2;
     const double _OFFSET,    _PHI,       _H_OF_L2;
