@@ -6,12 +6,6 @@
 
 #include <Arduino.h>
 
-/* Macro Control Table Values from DynamixelSDK/packet_handler.h */
-#define DXL_LOWORD(l)       ((uint16_t)(((uint64_t)(l)) & 0xffff))
-#define DXL_HIWORD(l)       ((uint16_t)((((uint64_t)(l)) >> 16) & 0xffff))
-#define DXL_LOBYTE(w)       ((uint8_t)(((uint64_t)(w)) & 0xff))
-#define DXL_HIBYTE(w)       ((uint8_t)((((uint64_t)(w)) >> 8) & 0xff))
-
 #ifndef ROBOT_COMM_H
 #define ROBOT_COMM_H
 
