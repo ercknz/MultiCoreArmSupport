@@ -35,8 +35,10 @@ SerialPackets   c2cComm  = SerialPackets(&Serial1, OCM::SERIAL_BAUDRATE);
 / Setup function -------------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void setup() {
-  /* Wait for Serial Comm */
-  while (!Serial);
+  /* Attempt to establish connection */
+  c2cComm.InitalizingComm();
+  /* Wait for communication */
+  while (!Serial || c2cComm.InTestingMode());
   /* Set pin modes */
   pinMode(OCM::TORQUE_SWITCH_PIN, INPUT_PULLUP);
   /* Setup port and packet handlers */
@@ -86,7 +88,7 @@ void loop() {
   c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
   /* Main Loop */
-  while (Serial) {
+  while (Serial || !c2cComm.InTestingMode()) {
     currentTime = millis();
 
     /* Motor Write/Read Loop */
@@ -119,8 +121,8 @@ void loop() {
       if (c2cComm.DataRequested()) c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
     }
   }
-  if (!Serial) {
+  if (!Serial || c2cComm.InTestingMode()) {
     ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
-    while (!Serial);
+    while (1);
   }
 }

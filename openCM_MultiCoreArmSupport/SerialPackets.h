@@ -24,6 +24,8 @@ class SerialPackets {
     uint8_t ChangeModeTo();
     void TorqueChangeApplied();
     bool DataRequested();
+    void InitalizingComm();
+    bool InTestingMode();
     
     void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
     void ReadPackets();
@@ -42,6 +44,8 @@ class SerialPackets {
     const int16_t _presXYZdot_SLOT = 56;
     const int16_t _BLANK_SLOT = 68;
 
+    bool testingMode_M = true;
+
     bool newGoal_M        = false;
     bool torqueChange_M   = false;
     bool dataRequested_M  = false;
@@ -50,6 +54,8 @@ class SerialPackets {
     float goalXYZ_M[3] = {0.0f};
     float goalXYZdot_M[3] = {0.0f};
     float goalCurrent_M[3] = {0.0f};
+
+    int LED_PIN = 14;
 };
 
 #endif // SERIAL_PACKETS_H

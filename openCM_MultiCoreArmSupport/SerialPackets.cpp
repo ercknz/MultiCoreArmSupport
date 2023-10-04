@@ -17,6 +17,24 @@ SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
 {
   c2cPort_M = ptrSer;
   c2cPort_M->begin(_BAUDRATE);
+  pinMode(LED_PIN, OUTPUT);
+}
+
+/* ------------------------------------------------------------------------------------------------------/
+/ Serial Packets Setters and  Getters -------------------------------------------------------------------/
+/-------------------------------------------------------------------------------------------------------*/
+void SerialPackets::InitalizingComm(){
+  for (int i = 0; i < 30; i++){
+    if (c2cPort_M->available() > 0){
+      if (c2cPort_M->read() == 0x01){
+        c2cPort_M->write();
+        digitWrite(LED_PIN, HIGH);
+        testingMode_M = false;
+        break;
+      }
+    }
+    delay(1000);
+  }
 }
 
 /* ------------------------------------------------------------------------------------------------------/
@@ -65,6 +83,10 @@ void SerialPackets::TorqueChangeApplied(){
 
 bool SerialPackets::DataRequested(){
   return dataRequested_M;
+}
+
+bool SerialPackets::InTestingMode(){
+  return testingMode_M;
 }
 
 /* ------------------------------------------------------------------------------------------------------/
@@ -178,16 +200,32 @@ void SerialPackets::ReadPackets() {
   
   /* Check for instructions */
   unsigned long timeOUtTime = millis();
-  while (c2cPort_M->available() < _RX_PKT_LEN) {
-    if (millis() - timeOUtTime > 10){
-      return;
+  if (Serial){
+    while (Serial->available() < _RX_PKT_LEN) {
+      if (millis() - timeOUtTime > 10){
+        return;
+      }
+    }
+  } else {
+    while (c2cPort_M->available() < _RX_PKT_LEN) {
+      if (millis() - timeOUtTime > 10){
+        return;
+      }
     }
   }
   
+  
   /* Read Instructions */
-  for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
-    dataPacket[i] = c2cPort_M->read();
+  if (Serial){
+    for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
+      dataPacket[i] = Serial.read();
+    }
+  } else {
+    for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
+      dataPacket[i] = c2cPort_M->read();
+    }
   }
+  
 
   /* Verify Packet */
   CHECKSUM = bytesToCounts(dataPacket[_RX_PKT_LEN - 2], dataPacket[_RX_PKT_LEN - 1]);
