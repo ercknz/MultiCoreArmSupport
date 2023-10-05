@@ -35,12 +35,14 @@ SerialPackets   c2cComm  = SerialPackets(&Serial1, OCM::SERIAL_BAUDRATE);
 / Setup function -------------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void setup() {
+  /* Set up pins */
+  pinMode(OCM::COMM_LED_PIN, OUTPUT);
+  pinMode(OCM::TORQUE_SWITCH_PIN, INPUT_PULLUP);
+  pinMode(OCM::C2C_PIN, INPUT);
   /* Attempt to establish connection */
   c2cComm.InitalizingComm();
   /* Wait for communication */
   while (!Serial || c2cComm.InTestingMode());
-  /* Set pin modes */
-  pinMode(OCM::TORQUE_SWITCH_PIN, INPUT_PULLUP);
   /* Setup port and packet handlers */
   portHandler   = dynamixel::PortHandler::getPortHandler(OCM::DEVICEPORT);
   packetHandler = dynamixel::PacketHandler::getPacketHandler(OCM::PROTOCOL_VERSION);

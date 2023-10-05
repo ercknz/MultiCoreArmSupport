@@ -8,6 +8,7 @@
 #include "RobotControl.h"
 #include "SerialPackets.h"
 #include "UtilityFunctions.h"
+#include "OpenCMNamespace.h"
 
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Contructor  -----------------------------------------------------------------------------/
@@ -17,7 +18,6 @@ SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
 {
   c2cPort_M = ptrSer;
   c2cPort_M->begin(_BAUDRATE);
-  pinMode(LED_PIN, OUTPUT);
 }
 
 /* ------------------------------------------------------------------------------------------------------/
@@ -28,7 +28,7 @@ void SerialPackets::InitalizingComm(){
     if (c2cPort_M->available() > 0){
       if (c2cPort_M->read() == 0x01){
         c2cPort_M->write();
-        digitWrite(LED_PIN, HIGH);
+        digitWrite(OCM::COMM_LED_PIN, HIGH);
         testingMode_M = false;
         break;
       }

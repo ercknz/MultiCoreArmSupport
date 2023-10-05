@@ -20,6 +20,7 @@ extern const int     MOTOR_BAUDRATE;
 extern const char   *DEVICEPORT;
 extern const uint8_t CAL_BUTTON_PIN;
 extern const uint8_t TORQUE_SWITCH_PIN;
+extern const uint8_t COMM_LED_PIN;
 
 // Dynamixel Motor Parameters
 extern const uint8_t ID_SHOULDER;

@@ -20,6 +20,7 @@ const int     MOTOR_BAUDRATE    = 1000000;
 const char   *DEVICEPORT        = "3";
 const uint8_t CAL_BUTTON_PIN    = 23;
 const uint8_t TORQUE_SWITCH_PIN = 1;
+const uint8_t COMM_LED_PIN      = 14;
 
 // Dynamixel Motor Parameters
 const uint8_t ID_SHOULDER       = 3;
