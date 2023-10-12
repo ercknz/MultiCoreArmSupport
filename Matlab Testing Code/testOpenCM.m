@@ -3,6 +3,7 @@
 
 %% Clean workspace
 delete(instrfindall);
+clear; clc; close all;
 
 %% Ports
 robotSerialPort = 'COM5';
