@@ -27,8 +27,8 @@ void SerialPackets::InitalizingComm(){
   for (int i = 0; i < 30; i++){
     if (c2cPort_M->available() > 0){
       if (c2cPort_M->read() == 0x01){
-        c2cPort_M->write();
-        digitWrite(OCM::COMM_LED_PIN, HIGH);
+        c2cPort_M->write(0x02);
+        digitalWrite(OCM::COMM_LED_PIN, HIGH);
         testingMode_M = false;
         break;
       }
@@ -203,7 +203,7 @@ void SerialPackets::ReadPackets() {
   /* Check for instructions */
   unsigned long timeOUtTime = millis();
   if (Serial){
-    while (Serial->available() < _RX_PKT_LEN) {
+    while (Serial.available() < _RX_PKT_LEN) {
       if (millis() - timeOUtTime > 10){
         return;
       }

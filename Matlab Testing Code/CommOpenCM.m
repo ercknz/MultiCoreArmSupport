@@ -19,7 +19,7 @@ classdef CommOpenCM < handle
         txHeader = uint8([150, 10, 1, 101])
         txPacketLen = 60
         
-        rxHeader = unit([170, 6, 9, 69])
+        rxHeader = uint8([170, 6, 9, 69])
         rxPacketLen = 80
     end
     
@@ -31,14 +31,14 @@ classdef CommOpenCM < handle
     % Methods
     %--------------------------------------------------------------------------
     methods
-        function obj = armSupportRobot(port, baud)
+        function obj = CommOpenCM(port, baud)
             obj.rawBytes = nan(1,obj.rxPacketLen);
             obj.port = port;
             obj.baud = baud;
         end
         
         function Start(obj)
-            obj.serialObj = serialPort(obj.port, obj.baud);
+            obj.serialObj = serialport(obj.port, obj.baud);
             obj.CommOpen = true;
         end
         

@@ -12,7 +12,7 @@
 
 class SerialPackets {
   public:
-         SerialPackets(HardwareSerial  *ptrSer, const int baudrate);
+         SerialPackets(HardwareSerial *ptrSer, const int baudrate);
 
     bool DataAvailable();
     bool NewGoalAvailable();
