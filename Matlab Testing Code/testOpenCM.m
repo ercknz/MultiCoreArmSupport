@@ -6,18 +6,18 @@ delete(instrfindall);
 clear; clc; close all;
 
 %% Ports
-robotSerialPort = 'COM4';
+robotSerialPort = 'COM7';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
 packetLen = 80;
 
 %% Log CSV file
-logFileID = '_OpenCMframe_';
-fileTime = datestr(now,'mmddyyHHMM');
-csvFile = ['./Logs/Log',logFileID,fileTime,'.csv'];
-csvFileHeader = {'mTime','rTime','Q1','Q2','Q4','dQ1','dQ2','dQ4','I1','I2','I4',...
-                'X','Y','Z','dX','dY','dZ','lTime'};
-writecell(csvFileHeader,csvFile);
+% logFileID = '_OpenCMframe_';
+% fileTime = datestr(now,'mmddyyHHMM');
+% csvFile = ['./Logs/Log',logFileID,fileTime,'.csv'];
+% csvFileHeader = {'mTime','rTime','Q1','Q2','Q4','dQ1','dQ2','dQ4','I1','I2','I4',...
+%                 'X','Y','Z','dX','dY','dZ','lTime'};
+% writecell(csvFileHeader,csvFile);
 
 %% start main collection loop
 botSerial.Start();
@@ -40,7 +40,7 @@ while testRunning
     if frames > 30
         testRunning = false;
     end
-    writematrix([mTime,botSerial.frameData],csvFile,'WriteMode','append');
+    %writematrix([mTime,botSerial.frameData],csvFile,'WriteMode','append');
     pause(1)
 end
 

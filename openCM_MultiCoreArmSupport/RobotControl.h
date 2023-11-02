@@ -12,6 +12,7 @@
 class RobotControl {
   public:
           RobotControl(const float A1, const float L1, const float A2, const float L2, const float Offset);
+          
     void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
     void  ReadRobot(dynamixel::GroupSyncRead &syncReadPacket);

@@ -41,6 +41,7 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
 {
   // Initalize RobotControl Class
   scalingFactor_M = OCM::SPRING_FORCE_SCALING_FACTOR;
+  //Serial.println("0.1");
 }
 
 /* ---------------------------------------------------------------------------------------/

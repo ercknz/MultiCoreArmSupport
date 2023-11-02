@@ -5,7 +5,7 @@
 */
 
 #include <Arduino.h>
-#include "openCMNamespace.h"
+#include "OpenCMNamespace.h"
 
 namespace OCM
 {

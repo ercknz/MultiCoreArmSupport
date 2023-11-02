@@ -16,15 +16,16 @@
 SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
+  //Serial.println("0.2");
   c2cPort_M = ptrSer;
-  c2cPort_M->begin(_BAUDRATE);
 }
 
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packets Setters and  Getters -------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void SerialPackets::InitalizingComm(){
-  for (int i = 0; i < 30; i++){
+  c2cPort_M->begin(_BAUDRATE);
+  for (int i = 0; i < 10; i++){
     if (c2cPort_M->available() > 0){
       if (c2cPort_M->read() == 0x01){
         c2cPort_M->write(0x02);
@@ -168,6 +169,10 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   dataRequested_M = false;
   // write data packet
   if (Serial){
+//    for (int i = 0; i < _TX_PKT_LEN; i++){
+//      Serial.print(dataPacket[i]);Serial.print(" ");
+//    }
+//    Serial.println();
     Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }
