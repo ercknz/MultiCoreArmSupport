@@ -54,8 +54,6 @@ class SerialPackets {
     float goalXYZ_M[3] = {0.0f};
     float goalXYZdot_M[3] = {0.0f};
     float goalCurrent_M[3] = {0.0f};
-
-    int LED_PIN = 14;
 };
 
 #endif // SERIAL_PACKETS_H
