@@ -68,6 +68,12 @@ Q1 = @(alpha,beta) alpha - beta;
 
 Q = [0,0,0];
 
+%% Serial Comm
+robotSerialPort = 'COM7';
+robotBaud = 115200;
+botSerial = CommOpenCM(robotSerialPort, robotBaud);
+packetLen = 80;
+
 %% GUI
 % Initial Values for lines
 t0 = [0,0,0];
@@ -135,36 +141,92 @@ axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
 iKine(t7(1,4),t7(2,4),t7(3,4));
 
-% UI Controls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Halpha = uicontrol('Style','text');
-set(Halpha,'Units','normalized','Position',[0.8 0.85 0.1 0.05],...
-    'String','0','Fontsize',20)
-Hbeta = uicontrol('Style','text');
-set(Hbeta,'Units','normalized','Position',[0.8 0.65 0.1 0.05],...
-    'String','0','Fontsize',20)
-Htheta = uicontrol('Style','text');
-set(Htheta,'Units','normalized','Position',[0.8 0.45 0.1 0.05],...
-    'String','0','Fontsize',20)
+% UI Controls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% buttons -----------------------------------------------------------------
+HbttnSerialStart = uicontrol('Style','pushbutton');
+set(HbttnSerialStart,'Units','normalized','Position',[0.75 0.85 0.1 0.05],...
+    'String','Start','Callback',@startSerial);
+HbttnSerialStop = uicontrol('Style','pushbutton');
+set(HbttnSerialStop,'Units','normalized','Position',[0.85 0.85 0.1 0.05],...
+    'String','Stop','Callback',@stopSerial);
+
+% time --------------------------------------------------------------------
+HtimeLabel = uicontrol('Style','text');
+set(HtimeLabel,'Units','normalized','Position',[0.75 0.95 0.1 0.05],...
+    'String','elapsedT:','Fontsize',20);
+HloopLabel = uicontrol('Style','text');
+set(HloopLabel,'Units','normalized','Position',[0.75 0.9 0.1 0.05],...
+    'String','loopT:','Fontsize',20);
+
+HtimeValue = uicontrol('Style','text');
+set(HtimeValue,'Units','normalized','Position',[0.85 0.95 0.1 0.05],...
+    'String','0','Fontsize',20);
+HloopValue = uicontrol('Style','text');
+set(HloopValue,'Units','normalized','Position',[0.85 0.9 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+% Q1, Q2, Q4 --------------------------------------------------------------
+HalphaLabel = uicontrol('Style','text');
+set(HalphaLabel,'Units','normalized','Position',[0.75 0.8 0.1 0.05],...
+    'String','rQ1:','Fontsize',20);
+HbetaLabel = uicontrol('Style','text');
+set(HbetaLabel,'Units','normalized','Position',[0.75 0.75 0.1 0.05],...
+    'String','rQ2:','Fontsize',20);
+HthetaLabel = uicontrol('Style','text');
+set(HthetaLabel,'Units','normalized','Position',[0.75 0.7 0.1 0.05],...
+    'String','rQ4:','Fontsize',20);
+
+HalphaValue = uicontrol('Style','text');
+set(HalphaValue,'Units','normalized','Position',[0.85 0.8 0.1 0.05],...
+    'String','0','Fontsize',20);
+HbetaValue = uicontrol('Style','text');
+set(HbetaValue,'Units','normalized','Position',[0.85 0.75 0.1 0.05],...
+    'String','0','Fontsize',20);
+HthetaValue = uicontrol('Style','text');
+set(HthetaValue,'Units','normalized','Position',[0.85 0.7 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+% X, Y, Z -----------------------------------------------------------------
+HxLabel = uicontrol('Style','text');
+set(HxLabel,'Units','normalized','Position',[0.75 0.65 0.1 0.05],...
+    'String','rX:','Fontsize',20);
+HyLabel = uicontrol('Style','text');
+set(HyLabel,'Units','normalized','Position',[0.75 0.6 0.1 0.05],...
+    'String','rY:','Fontsize',20);
+HzLabel = uicontrol('Style','text');
+set(HzLabel,'Units','normalized','Position',[0.75 0.55 0.1 0.05],...
+    'String','rZ:','Fontsize',20);
+
+HxValue = uicontrol('Style','text');
+set(HxValue,'Units','normalized','Position',[0.85 0.65 0.1 0.05],...
+    'String','0','Fontsize',20);
+HyValue = uicontrol('Style','text');
+set(HyValue,'Units','normalized','Position',[0.85 0.6 0.1 0.05],...
+    'String','0','Fontsize',20);
+HzValue = uicontrol('Style','text');
+set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
+    'String','0','Fontsize',20);
+
 
 HXYZ = uicontrol('Style','text');
 set(HXYZ,'Units','normalized','Position',[0.75 0.25 0.2 0.05],...
-    'String',['fKine = X: ',num2str(t7(1,4)),' Y: ',num2str(t7(2,4)),' Z: ',num2str(t7(3,4))],'Fontsize',15)
+    'String',['fKine = X: ',num2str(t7(1,4)),' Y: ',num2str(t7(2,4)),' Z: ',num2str(t7(3,4))],'Fontsize',15);
 HQ124 = uicontrol('Style','text');
 set(HQ124,'Units','normalized','Position',[0.75 0.15 0.2 0.05],...
-    'String',['iKine = Q1: ',num2str(0),' Q2: ',num2str(0),' Q4: ',num2str(0)],'Fontsize',15)
+    'String',['iKine = Q1: ',num2str(0),' Q2: ',num2str(0),' Q4: ',num2str(0)],'Fontsize',15);
 
-HsldAlpha = uicontrol('Style','slider');
-set(HsldAlpha,'Units','normalized','Position',[0.75 0.75 0.2 0.05],...
-    'Callback',@slide,'Max',SHDR_LIMIT(2),'Min',SHDR_LIMIT(1),...
-    'Value',SHDR_LIMIT(1),'SliderStep',[0.01 0.1])
-HsldBeta = uicontrol('Style','slider');
-set(HsldBeta,'Units','normalized','Position',[0.75 0.55 0.2 0.05],...
-    'Callback',@slide,'Max',ELVN_LIMIT(2),'Min',ELVN_LIMIT(1),...
-    'Value',0,'SliderStep',[0.01 0.1])
-HsldTheta = uicontrol('Style','slider');
-set(HsldTheta,'Units','normalized','Position',[0.75 0.35 0.2 0.05],...
-    'Callback',@slide,'Max',ELBW_LIMIT(2),'Min',ELBW_LIMIT(1),...
-    'Value',ELBW_LIMIT(1),'SliderStep',[0.01 0.1])
+% HsldAlpha = uicontrol('Style','slider');
+% set(HsldAlpha,'Units','normalized','Position',[0.75 0.75 0.2 0.05],...
+%     'Callback',@slide,'Max',SHDR_LIMIT(2),'Min',SHDR_LIMIT(1),...
+%     'Value',SHDR_LIMIT(1),'SliderStep',[0.01 0.1])
+% HsldBeta = uicontrol('Style','slider');
+% set(HsldBeta,'Units','normalized','Position',[0.75 0.55 0.2 0.05],...
+%     'Callback',@slide,'Max',ELVN_LIMIT(2),'Min',ELVN_LIMIT(1),...
+%     'Value',0,'SliderStep',[0.01 0.1])
+% HsldTheta = uicontrol('Style','slider');
+% set(HsldTheta,'Units','normalized','Position',[0.75 0.35 0.2 0.05],...
+%     'Callback',@slide,'Max',ELBW_LIMIT(2),'Min',ELBW_LIMIT(1),...
+%     'Value',ELBW_LIMIT(1),'SliderStep',[0.01 0.1])
 
     function slide(source,eventdata)
         % Callback function for slider
@@ -172,11 +234,21 @@ set(HsldTheta,'Units','normalized','Position',[0.75 0.35 0.2 0.05],...
         beta=round(get(HsldBeta,'Value'));
         theta=round(get(HsldTheta,'Value'));
         animatedata(deg2rad(alpha),deg2rad(beta),deg2rad(theta))
-        set(Halpha,'String',[num2str(alpha),'(',num2str(alpha*pi/180),')'])
-        set(Hbeta,'String',[num2str(beta),'(',num2str(beta*pi/180),')'])
-        set(Htheta,'String',[num2str(theta),'(',num2str(theta*pi/180),')'])
+        set(HalphaValue,'String',[num2str(alpha),'(',num2str(alpha*pi/180),')'])
+        set(HbetaValue,'String',[num2str(beta),'(',num2str(beta*pi/180),')'])
+        set(HthetaValue,'String',[num2str(theta),'(',num2str(theta*pi/180),')'])
         set(HXYZ,'String',['fKine = X: ',num2str(t7(1,4)),' Y: ',num2str(t7(2,4)),' Z: ',num2str(t7(3,4))])
         set(HQ124,'String',['iKine = Q1: ',num2str(Q(1)),' Q2: ',num2str(Q(2)),' Q4: ',num2str(Q(3))])
+    end
+
+    function startSerial(source,eventdata)
+        botSerial.Start();
+        testRunning = true;
+    end
+
+    function stopSerial(source,eventdata)
+        testRunning = false;
+        botSerial.Stop();
     end
 
 %% Animation of data

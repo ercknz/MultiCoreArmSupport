@@ -116,15 +116,15 @@ void loop() {
       /* Read Incoming Instructions*/
       if (c2cComm.DataAvailable()) {
         c2cComm.ReadPackets();
-//        Serial.println("9.1");
+//        Serial.println(Serial.available());
       }
-//
-//      /* Torque Change */
-//      if(c2cComm.TorqueChanged()) {
-//        ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
-//        c2cComm.TorqueChangeApplied();
-//        //Serial.println("9.2");
-//      }
+
+      /* Torque Change */
+      if(c2cComm.TorqueChanged()) {
+        ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
+        c2cComm.TorqueChangeApplied();
+//        Serial.println("9.2");
+      }
 
       /* Robot Control */
       if (c2cComm.NewGoalAvailable()){
@@ -138,10 +138,10 @@ void loop() {
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-//      if (c2cComm.DataRequested()) {
+      if (c2cComm.DataRequested()) {
         c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 //        Serial.println("9.4");
-//      }
+      }
     }
   }
   if (!Serial){//|| c2cComm.InTestingMode()) {

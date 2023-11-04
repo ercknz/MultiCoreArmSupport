@@ -169,11 +169,11 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   dataRequested_M = false;
   // write data packet
   if (Serial){
-    for (int i = 0; i < _TX_PKT_LEN; i++){
-      Serial.print(dataPacket[i]);Serial.print(" ");
-    }
-    Serial.println();
-//    Serial.write(dataPacket,_TX_PKT_LEN);
+//    for (int i = 0; i < _TX_PKT_LEN; i++){
+//      Serial.print(dataPacket[i]);Serial.print(" ");
+//    }
+//    Serial.println();
+    Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }
   c2cPort_M->write(dataPacket,_TX_PKT_LEN); 
@@ -210,12 +210,14 @@ void SerialPackets::ReadPackets() {
   if (Serial){
     while (Serial.available() < _RX_PKT_LEN) {
       if (millis() - timeOUtTime > 10){
+        while(Serial.available()) Serial.read();
         return;
       }
     }
   } else {
     while (c2cPort_M->available() < _RX_PKT_LEN) {
       if (millis() - timeOUtTime > 10){
+        while(c2cPort_M->available()) c2cPort_M->read();
         return;
       }
     }

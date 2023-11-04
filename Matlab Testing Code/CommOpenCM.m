@@ -66,7 +66,7 @@ classdef CommOpenCM < handle
                 obj.rawBytes = read(obj.serialObj,obj.rxPacketLen,'uint8');
             end
             tempHeader = obj.rawBytes(1:4);
-            inCS = typecast(uint8(obj.rawBytes(end-1:end)),'uint16');
+            inCS = swapbytes(typecast(uint8(obj.rawBytes(end-1:end)),'uint16'));
             cCS = sum(obj.rawBytes(1:end-2));
             if (sum(tempHeader == obj.rxHeader)==4) && (inCS == cCS)
                 % Total Time

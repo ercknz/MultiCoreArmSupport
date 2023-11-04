@@ -33,15 +33,14 @@ while testRunning
     end
     if botSerial.BytesAvailable >= packetLen
         ReadFrame(botSerial);
-        fprintf('q1=%f\tq2=%f\tq4=%f\n',botSerial.frameData(11),botSerial.frameData(12),botSerial.frameData(13));
     end
     mTime = mTime + toc(loopTime);
     loopTime = tic;
-    if frames > 30
+    fprintf('frame%f,q1=%f\tq2=%f\tq4=%f\ttime:%f\t%f\n',frames,botSerial.frameData(11),botSerial.frameData(12),botSerial.frameData(13),botSerial.frameData(1),botSerial.frameData(17));
+    if frames > 10
         testRunning = false;
     end
     %writematrix([mTime,botSerial.frameData],csvFile,'WriteMode','append');
-    pause(1)
 end
 
 %% post cleanup
@@ -49,7 +48,7 @@ instrreset;
 botSerial.Stop();
 disp('.........Closing Port to Robot...............')
 
-test = readmatrix(csvFile);
-subplot(3,1,1)
-plot(test(:,1));
-grid on; title('Robot Read Times Per Loop');
+% test = readmatrix(csvFile);
+% subplot(3,1,1)
+% plot(test(:,1));
+% grid on; title('Robot Read Times Per Loop');
