@@ -76,7 +76,7 @@ const float ELEVATION_RATIO = 2.2978;
 const int VEL_MAX_LIMIT     = 100;
 
 // Loop Parameters
-const float LOOP_DT     = 2000; // Milliseconds
+const float LOOP_DT     = 8; // Milliseconds
 
 // Kinematic Constants
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage

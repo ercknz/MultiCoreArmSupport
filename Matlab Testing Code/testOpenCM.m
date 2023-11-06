@@ -36,7 +36,7 @@ while testRunning
     end
     mTime = mTime + toc(loopTime);
     loopTime = tic;
-    fprintf('frame%f,q1=%f\tq2=%f\tq4=%f\ttime:%f\t%f\n',frames,botSerial.frameData(11),botSerial.frameData(12),botSerial.frameData(13),botSerial.frameData(1),botSerial.frameData(17));
+    fprintf('frame%f,q1=%f\tq2=%f\tq4=%f\ttime:%f\t%f\n',frames,botSerial.frameData(2),botSerial.frameData(3),botSerial.frameData(4),botSerial.frameData(1),botSerial.frameData(17));
     if frames > 10
         testRunning = false;
     end

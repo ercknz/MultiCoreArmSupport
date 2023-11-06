@@ -84,8 +84,8 @@ t4 = T04(0,0,deg2rad(ELBW_LIMIT(1)));
 t5 = T05(0,0,deg2rad(ELBW_LIMIT(1)));
 t6 = T06(0,0,deg2rad(ELBW_LIMIT(1)));
 t7 = T07(0,0,deg2rad(ELBW_LIMIT(1)));
-H = figure(100);
-set(H,'Units','normalized','Position',[0 0 1 1])
+Hfigure = figure(100);
+set(Hfigure,'Units','normalized','Position',[0 0 1 1])
 % Top(XY) plot creation (top right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXYHandle = subplot(2,2,1);
 grid on; hold on;
@@ -176,14 +176,14 @@ HthetaLabel = uicontrol('Style','text');
 set(HthetaLabel,'Units','normalized','Position',[0.75 0.7 0.1 0.05],...
     'String','rQ4:','Fontsize',20);
 
-HalphaValue = uicontrol('Style','text');
-set(HalphaValue,'Units','normalized','Position',[0.85 0.8 0.1 0.05],...
+Hq1Value = uicontrol('Style','text');
+set(Hq1Value,'Units','normalized','Position',[0.85 0.8 0.1 0.05],...
     'String','0','Fontsize',20);
-HbetaValue = uicontrol('Style','text');
-set(HbetaValue,'Units','normalized','Position',[0.85 0.75 0.1 0.05],...
+Hq2Value = uicontrol('Style','text');
+set(Hq2Value,'Units','normalized','Position',[0.85 0.75 0.1 0.05],...
     'String','0','Fontsize',20);
-HthetaValue = uicontrol('Style','text');
-set(HthetaValue,'Units','normalized','Position',[0.85 0.7 0.1 0.05],...
+Hq4Value = uicontrol('Style','text');
+set(Hq4Value,'Units','normalized','Position',[0.85 0.7 0.1 0.05],...
     'String','0','Fontsize',20);
 
 % X, Y, Z -----------------------------------------------------------------
@@ -207,94 +207,89 @@ HzValue = uicontrol('Style','text');
 set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
     'String','0','Fontsize',20);
 
-
-HXYZ = uicontrol('Style','text');
-set(HXYZ,'Units','normalized','Position',[0.75 0.25 0.2 0.05],...
-    'String',['fKine = X: ',num2str(t7(1,4)),' Y: ',num2str(t7(2,4)),' Z: ',num2str(t7(3,4))],'Fontsize',15);
-HQ124 = uicontrol('Style','text');
-set(HQ124,'Units','normalized','Position',[0.75 0.15 0.2 0.05],...
-    'String',['iKine = Q1: ',num2str(0),' Q2: ',num2str(0),' Q4: ',num2str(0)],'Fontsize',15);
-
-% HsldAlpha = uicontrol('Style','slider');
-% set(HsldAlpha,'Units','normalized','Position',[0.75 0.75 0.2 0.05],...
-%     'Callback',@slide,'Max',SHDR_LIMIT(2),'Min',SHDR_LIMIT(1),...
-%     'Value',SHDR_LIMIT(1),'SliderStep',[0.01 0.1])
-% HsldBeta = uicontrol('Style','slider');
-% set(HsldBeta,'Units','normalized','Position',[0.75 0.55 0.2 0.05],...
-%     'Callback',@slide,'Max',ELVN_LIMIT(2),'Min',ELVN_LIMIT(1),...
-%     'Value',0,'SliderStep',[0.01 0.1])
-% HsldTheta = uicontrol('Style','slider');
-% set(HsldTheta,'Units','normalized','Position',[0.75 0.35 0.2 0.05],...
-%     'Callback',@slide,'Max',ELBW_LIMIT(2),'Min',ELBW_LIMIT(1),...
-%     'Value',ELBW_LIMIT(1),'SliderStep',[0.01 0.1])
-
-    function slide(source,eventdata)
-        % Callback function for slider
-        alpha=round(get(HsldAlpha,'Value'));
-        beta=round(get(HsldBeta,'Value'));
-        theta=round(get(HsldTheta,'Value'));
-        animatedata(deg2rad(alpha),deg2rad(beta),deg2rad(theta))
-        set(HalphaValue,'String',[num2str(alpha),'(',num2str(alpha*pi/180),')'])
-        set(HbetaValue,'String',[num2str(beta),'(',num2str(beta*pi/180),')'])
-        set(HthetaValue,'String',[num2str(theta),'(',num2str(theta*pi/180),')'])
-        set(HXYZ,'String',['fKine = X: ',num2str(t7(1,4)),' Y: ',num2str(t7(2,4)),' Z: ',num2str(t7(3,4))])
-        set(HQ124,'String',['iKine = Q1: ',num2str(Q(1)),' Q2: ',num2str(Q(2)),' Q4: ',num2str(Q(3))])
-    end
-
     function startSerial(source,eventdata)
         botSerial.Start();
-        testRunning = true;
+        set(Hfigure,'UserData',true);
+        animatedata();
     end
 
     function stopSerial(source,eventdata)
-        testRunning = false;
+        set(Hfigure,'UserData',false);
         botSerial.Stop();
     end
 
 %% Animation of data
-    function animatedata(q1,q2,q4)
-        t0 = [0,0,0];
-        t1 = T01(q1);
-        t2 = T02(q1,q2);
-        t3 = T03(q1,q2);
-        t4 = T04(q1,q2,q4);
-        t5 = T05(q1,q2,q4);
-        t6 = T06(q1,q2,q4);
-        t7 = T07(q1,q2,q4);
-        % XY Plot
-        set(baseLink_XY,'XData',[t0(1) t1(1,4)],'YData',[t0(2) t1(2,4)])
-        set(link1_XY,'XData',[t1(1,4) t2(1,4)],'YData',[t1(2,4) t2(2,4)])
-        set(link2_XY,'XData',[t2(1,4) t3(1,4)],'YData',[t2(2,4) t3(2,4)])
-        set(link3_XY,'XData',[t3(1,4) t4(1,4)],'YData',[t3(2,4) t4(2,4)])
-        set(link4_XY,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)])
-        set(link5_XY,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)])
-        set(link6_XY,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)])
-        % 3D Plot
-        set(baseLink_3d,'XData',[t0(1) t1(1,4)],'YData',[t0(2) t1(2,4)],'ZData',[t0(3) t1(3,4)])
-        set(link1_3d,'XData',[t1(1,4) t2(1,4)],'YData',[t1(2,4) t2(2,4)],'ZData',[t1(3,4) t2(3,4)])
-        set(link2_3d,'XData',[t2(1,4) t3(1,4)],'YData',[t2(2,4) t3(2,4)],'ZData',[t2(3,4) t3(3,4)])
-        set(link3_3d,'XData',[t3(1,4) t4(1,4)],'YData',[t3(2,4) t4(2,4)],'ZData',[t3(3,4) t4(3,4)])
-        set(link4_3d,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)],'ZData',[t4(3,4) t5(3,4)])
-        set(link5_3d,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)],'ZData',[t5(3,4) t6(3,4)])
-        set(link6_3d,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)],'ZData',[t6(3,4) t7(3,4)])
-        % XZ Plot
-        set(baseLink_XZ,'XData',[t0(1) t1(1,4)],'YData',[t0(3) t1(3,4)])
-        set(link1_XZ,'XData',[t1(1,4) t2(1,4)],'YData',[t1(3,4) t2(3,4)])
-        set(link2_XZ,'XData',[t2(1,4) t3(1,4)],'YData',[t2(3,4) t3(3,4)])
-        set(link3_XZ,'XData',[t3(1,4) t4(1,4)],'YData',[t3(3,4) t4(3,4)])
-        set(link4_XZ,'XData',[t4(1,4) t5(1,4)],'YData',[t4(3,4) t5(3,4)])
-        set(link5_XZ,'XData',[t5(1,4) t6(1,4)],'YData',[t5(3,4) t6(3,4)])
-        set(link6_XZ,'XData',[t6(1,4) t7(1,4)],'YData',[t6(3,4) t7(3,4)])
-        % YZ Plot
-        set(baseLink_YZ,'XData',[t0(2) t1(2,4)],'YData',[t0(3) t1(3,4)])
-        set(link1_YZ,'XData',[t1(2,4) t2(2,4)],'YData',[t1(3,4) t2(3,4)])
-        set(link2_YZ,'XData',[t2(2,4) t3(2,4)],'YData',[t2(3,4) t3(3,4)])
-        set(link3_YZ,'XData',[t3(2,4) t4(2,4)],'YData',[t3(3,4) t4(3,4)])
-        set(link4_YZ,'XData',[t4(2,4) t5(2,4)],'YData',[t4(3,4) t5(3,4)])
-        set(link5_YZ,'XData',[t5(2,4) t6(2,4)],'YData',[t5(3,4) t6(3,4)])
-        set(link6_YZ,'XData',[t6(2,4) t7(2,4)],'YData',[t6(3,4) t7(3,4)])
-        
-        iKine(t7(1,4),t7(2,4),t7(3,4))
+    function animatedata()
+        while true
+            drawnow();
+            testRunning = get(Hfigure,'UserData');
+            if ~isempty(testRunning) && ~testRunning
+                break;
+            end
+            % Data Request
+            botSerial.SendRequest();
+            while botSerial.BytesAvailable < packetLen
+            end
+            if botSerial.BytesAvailable >= packetLen
+                ReadFrame(botSerial);
+            end
+            q1 = botSerial.frameData(2);
+            q2 = botSerial.frameData(3);
+            q4 = botSerial.frameData(4);
+            x = botSerial.frameData(11);
+            y = botSerial.frameData(12);
+            z = botSerial.frameData(13);
+            % Kinematics Calculations
+            t0 = [0,0,0];
+            t1 = T01(q1);
+            t2 = T02(q1,q2);
+            t3 = T03(q1,q2);
+            t4 = T04(q1,q2,q4);
+            t5 = T05(q1,q2,q4);
+            t6 = T06(q1,q2,q4);
+            t7 = T07(q1,q2,q4);
+            % XY Plot update
+            set(baseLink_XY,'XData',[t0(1) t1(1,4)],'YData',[t0(2) t1(2,4)])
+            set(link1_XY,'XData',[t1(1,4) t2(1,4)],'YData',[t1(2,4) t2(2,4)])
+            set(link2_XY,'XData',[t2(1,4) t3(1,4)],'YData',[t2(2,4) t3(2,4)])
+            set(link3_XY,'XData',[t3(1,4) t4(1,4)],'YData',[t3(2,4) t4(2,4)])
+            set(link4_XY,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)])
+            set(link5_XY,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)])
+            set(link6_XY,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)])
+            % 3D Plot update
+            set(baseLink_3d,'XData',[t0(1) t1(1,4)],'YData',[t0(2) t1(2,4)],'ZData',[t0(3) t1(3,4)])
+            set(link1_3d,'XData',[t1(1,4) t2(1,4)],'YData',[t1(2,4) t2(2,4)],'ZData',[t1(3,4) t2(3,4)])
+            set(link2_3d,'XData',[t2(1,4) t3(1,4)],'YData',[t2(2,4) t3(2,4)],'ZData',[t2(3,4) t3(3,4)])
+            set(link3_3d,'XData',[t3(1,4) t4(1,4)],'YData',[t3(2,4) t4(2,4)],'ZData',[t3(3,4) t4(3,4)])
+            set(link4_3d,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)],'ZData',[t4(3,4) t5(3,4)])
+            set(link5_3d,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)],'ZData',[t5(3,4) t6(3,4)])
+            set(link6_3d,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)],'ZData',[t6(3,4) t7(3,4)])
+            % XZ Plot Update
+            set(baseLink_XZ,'XData',[t0(1) t1(1,4)],'YData',[t0(3) t1(3,4)])
+            set(link1_XZ,'XData',[t1(1,4) t2(1,4)],'YData',[t1(3,4) t2(3,4)])
+            set(link2_XZ,'XData',[t2(1,4) t3(1,4)],'YData',[t2(3,4) t3(3,4)])
+            set(link3_XZ,'XData',[t3(1,4) t4(1,4)],'YData',[t3(3,4) t4(3,4)])
+            set(link4_XZ,'XData',[t4(1,4) t5(1,4)],'YData',[t4(3,4) t5(3,4)])
+            set(link5_XZ,'XData',[t5(1,4) t6(1,4)],'YData',[t5(3,4) t6(3,4)])
+            set(link6_XZ,'XData',[t6(1,4) t7(1,4)],'YData',[t6(3,4) t7(3,4)])
+            % YZ Plot Update
+            set(baseLink_YZ,'XData',[t0(2) t1(2,4)],'YData',[t0(3) t1(3,4)])
+            set(link1_YZ,'XData',[t1(2,4) t2(2,4)],'YData',[t1(3,4) t2(3,4)])
+            set(link2_YZ,'XData',[t2(2,4) t3(2,4)],'YData',[t2(3,4) t3(3,4)])
+            set(link3_YZ,'XData',[t3(2,4) t4(2,4)],'YData',[t3(3,4) t4(3,4)])
+            set(link4_YZ,'XData',[t4(2,4) t5(2,4)],'YData',[t4(3,4) t5(3,4)])
+            set(link5_YZ,'XData',[t5(2,4) t6(2,4)],'YData',[t5(3,4) t6(3,4)])
+            set(link6_YZ,'XData',[t6(2,4) t7(2,4)],'YData',[t6(3,4) t7(3,4)])
+            % Values update
+            set(Hq1Value,'String',num2str(q1));
+            set(Hq2Value,'String',num2str(q2));
+            set(Hq4Value,'String',num2str(q4));
+            set(HxValue,'String',num2str(x));
+            set(HyValue,'String',num2str(y));
+            set(HzValue,'String',num2str(z));
+            set(HtimeValue,'String',num2str(botSerial.frameData(1)));
+            set(HloopValue,'String',num2str(botSerial.frameData(17)));
+        end
     end
 
     function iKine(x,y,z)

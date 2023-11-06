@@ -209,14 +209,14 @@ void SerialPackets::ReadPackets() {
   unsigned long timeOUtTime = millis();
   if (Serial){
     while (Serial.available() < _RX_PKT_LEN) {
-      if (millis() - timeOUtTime > 10){
+      if (millis() - timeOUtTime > 5){
         while(Serial.available()) Serial.read();
         return;
       }
     }
   } else {
     while (c2cPort_M->available() < _RX_PKT_LEN) {
-      if (millis() - timeOUtTime > 10){
+      if (millis() - timeOUtTime > 5){
         while(c2cPort_M->available()) c2cPort_M->read();
         return;
       }
