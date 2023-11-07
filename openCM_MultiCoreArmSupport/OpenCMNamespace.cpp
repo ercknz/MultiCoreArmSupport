@@ -69,11 +69,12 @@ const int ELBOW_MIN_POS     = 1200;
 const int ELBOW_MAX_POS     = 3130;
 const int SHOULDER_MIN_POS  = 776;
 const int SHOULDER_MAX_POS  = 3677;
-const int ELEVATION_MIN_POS = 1137;
-const int ELEVATION_MAX_POS = 3487;
+const int ELEVATION_MIN_POS = 720;
+const int ELEVATION_MAX_POS = 3040;
 const int ELEVATION_CENTER  = (ELEVATION_MAX_POS + ELEVATION_MIN_POS) / 2;
 const float ELEVATION_RATIO = 2.2978;
 const int VEL_MAX_LIMIT     = 100;
+const float SHOULDER_OFFSET = 0.6219;
 
 // Loop Parameters
 const float LOOP_DT     = 8; // Milliseconds

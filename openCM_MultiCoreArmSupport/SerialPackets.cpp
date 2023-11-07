@@ -16,7 +16,6 @@
 SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
-  //Serial.println("0.2");
   c2cPort_M = ptrSer;
 }
 
@@ -93,7 +92,7 @@ bool SerialPackets::InTestingMode(){
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Writer ----------------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
-void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime) {
+void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &lTime) {
   /* TX Packet Structure: Header: [ 0, 1, 2, 3,...
                      elapsedTime:   4, 5, 6, 7,...
                           presQ1:   8, 9,10,11,...
@@ -111,9 +110,12 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
                         presXdot:  56,57,58,59,...
                         presYdot:  60,61,62,63,...
                         presZdot:  64,65,66,67,...
-                               _:  68,69,70,71,72,73,...
-                        loopTime:  74,75,76,77,...
-                        CheckSum:  78,79]
+                               _:  68,69,70,71,,...
+                               _:  72,73,74,75,...
+                               _:  76,77,78,79,...
+                               _:  80,81,82,83,...
+                        loopTime:  84,85,86,87,...
+                        CheckSum:  88,89]
   */ 
   byte dataPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
@@ -152,11 +154,11 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
     dataPacket[i] = PresXYZdot_bytes[i - _presXYZdot_SLOT];
   }
 
-  // looptime
-  dataPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 5] = DXL_HIBYTE(DXL_LOWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 4] = DXL_LOBYTE(DXL_HIWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 3] = DXL_HIBYTE(DXL_HIWORD(loopTime));
+  // looptime  
+  dataPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(lTime));
+  dataPacket[_TX_PKT_LEN - 5] = DXL_HIBYTE(DXL_LOWORD(lTime));
+  dataPacket[_TX_PKT_LEN - 4] = DXL_LOBYTE(DXL_HIWORD(lTime));
+  dataPacket[_TX_PKT_LEN - 3] = DXL_HIBYTE(DXL_HIWORD(lTime));
 
   // check Sum
   for (int16_t i = 0; i < _TX_PKT_LEN - 2; i++) {
@@ -169,10 +171,6 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   dataRequested_M = false;
   // write data packet
   if (Serial){
-//    for (int i = 0; i < _TX_PKT_LEN; i++){
-//      Serial.print(dataPacket[i]);Serial.print(" ");
-//    }
-//    Serial.println();
     Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }

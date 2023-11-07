@@ -74,6 +74,7 @@ extern const int ELEVATION_MAX_POS;
 extern const int ELEVATION_CENTER;
 extern const float ELEVATION_RATIO;
 extern const int VEL_MAX_LIMIT;
+extern const float SHOULDER_OFFSET;
 
 // Loop Parameters
 extern const float LOOP_DT; // Milliseconds

@@ -31,8 +31,8 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
   _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
   _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
   _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO))},
-  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
-  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
+  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET},
+  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET},
   _INNER_R{A1 + L1 + A2 - L2},
   _Z_LIMIT{abs(L1 * sin((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO)))},
   _SPRING_Li{sqrt(pow(OCM::SPRING_SIDE_A,2) + pow(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
@@ -41,7 +41,6 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
 {
   // Initalize RobotControl Class
   scalingFactor_M = OCM::SPRING_FORCE_SCALING_FACTOR;
-  //Serial.println("0.1");
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -185,7 +184,7 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
 
   /* Finds and checks shoulder angle */
   beta = asin((_H_OF_L2 * sin(gamma)) / R);
-  q_M[0] = alpha - beta;
+  q_M[0] = alpha - beta + OCM::SHOULDER_OFFSET;
 
   /* Check for nans */
   if (q_M[0] != q_M[0]) q_M[0] = qPres_M[0];
@@ -329,7 +328,7 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
   iPresCts_M[2]    = syncReadPacket.getData(OCM::ID_ELBOW,     OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
 
   /* Convert from Motor Counts */
-  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (PI / 180.0);
+  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET;
   qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO);
   qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0);
   qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0);
@@ -348,7 +347,7 @@ int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite
   uint8_t elbowParam[4], shoulderParam[4], elevateParam[4];
 
   /* Convert to Motor Counts */
-  qCts_M[0]    = q_M[0] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
   qCts_M[1]    = OCM::ELEVATION_CENTER - (q_M[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
   qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
   qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);

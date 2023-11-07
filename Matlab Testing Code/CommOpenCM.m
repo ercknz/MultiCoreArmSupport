@@ -14,13 +14,13 @@ classdef CommOpenCM < handle
         dt = 0.008
         port
         rawBytes
-        frameData = nan(1,17)
+        frameData = nan(1,21)
         
         txHeader = uint8([150, 10, 1, 101])
         txPacketLen = 60
         
         rxHeader = uint8([170, 6, 9, 69])
-        rxPacketLen = 80
+        rxPacketLen = 90
     end
     
     properties (Access = private)
@@ -92,9 +92,12 @@ classdef CommOpenCM < handle
                 obj.frameData(15) = double(typecast(uint8(obj.rawBytes(61:64)),'int32'));
                 obj.frameData(16) = double(typecast(uint8(obj.rawBytes(65:68)),'int32'));
                 % Loop Time
-                obj.frameData(17) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                obj.frameData(18) = typecast(uint8(obj.rawBytes(end-17:end-14)),'uint32');
+                obj.frameData(19) = typecast(uint8(obj.rawBytes(end-13:end-10)),'uint32');
+                obj.frameData(20) = typecast(uint8(obj.rawBytes(end-9:end-6)),'uint32');
+                obj.frameData(21) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(17) = obj.frameData(17)*0.001;
+                obj.frameData(18:21) = obj.frameData(18:21)*0.001;
                 obj.frameData(2:16) = obj.frameData(2:16)./10000;
             end
         end

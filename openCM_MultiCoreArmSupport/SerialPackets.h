@@ -27,13 +27,13 @@ class SerialPackets {
     void InitalizingComm();
     bool InTestingMode();
     
-    void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &loopTime);
+    void WritePackets(unsigned long &totalTime, RobotControl &Robot, unsigned long &lTime);
     void ReadPackets();
 
   protected:
     const int   _BAUDRATE;
     HardwareSerial *c2cPort_M;
-    const int16_t _TX_PKT_LEN = 80;
+    const int16_t _TX_PKT_LEN = 90;
     const int16_t _RX_PKT_LEN = 60;
     const byte  _RXHEADER[4]  = {150, 10, 1, 101};
     const byte  _TXHEADER[4]  = {170, 6, 9, 69};

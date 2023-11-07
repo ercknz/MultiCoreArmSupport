@@ -67,7 +67,8 @@ void loop() {
   /* Other Variables needed */
   unsigned long previousTime, currentTime;
   unsigned long totalTime = 0;
-  unsigned long loopTime, startLoop;
+  unsigned long startLoop;
+  unsigned long loopTime = 0;
   
   /* Sets up dynamixel read/write packet parameters */
   int  goalReturn;
@@ -119,7 +120,7 @@ void loop() {
       if (c2cComm.NewGoalAvailable()){
         ArmRobot.WriteToRobot(c2cComm.GetNewXYZGoal(), c2cComm.GetNewXYZdotGoal(), addParamResult, syncWritePacket);
         c2cComm.NewGoalApplied();
-      } 
+      }
 
       /* Read Robot */
       ArmRobot.ReadRobot(syncReadPacket);

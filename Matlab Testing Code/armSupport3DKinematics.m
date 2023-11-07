@@ -72,7 +72,7 @@ Q = [0,0,0];
 robotSerialPort = 'COM7';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
-packetLen = 80;
+packetLen = 90;
 
 %% GUI
 % Initial Values for lines
@@ -86,6 +86,8 @@ t6 = T06(0,0,deg2rad(ELBW_LIMIT(1)));
 t7 = T07(0,0,deg2rad(ELBW_LIMIT(1)));
 Hfigure = figure(100);
 set(Hfigure,'Units','normalized','Position',[0 0 1 1])
+set(Hfigure,'UserData',false);
+% set(Hfigure,'CloseRequestFcn',@closereq);
 % Top(XY) plot creation (top right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXYHandle = subplot(2,2,1);
 grid on; hold on;
@@ -96,6 +98,7 @@ link3_XY = plot([t3(1,4) t4(1,4)], [t3(2,4) t4(2,4)],'LineWidth',2,'Color','#007
 link4_XY = plot([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)],'LineWidth',2,'Color','#0072BD');
 link5_XY = plot([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)],'LineWidth',2,'Color','#0072BD');
 link6_XY = plot([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)],'LineWidth',2,'Color','#D95319');
+end_XY = plot(t7(1,4),t7(2,4),'g*','MarkerSize',12);
 set(plotXYHandle,'Position',[0.05 0.575 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Y');
@@ -109,6 +112,7 @@ link3_3d = plot3([t3(1,4) t4(1,4)], [t3(2,4) t4(2,4)], [t3(3,4) t4(3,4)],'LineWi
 link4_3d = plot3([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color','#0072BD');
 link5_3d = plot3([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_3d = plot3([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
+end_3d = plot3(t7(1,4),t7(2,4),t7(3,4),'g*','MarkerSize',12);
 set(plot3DHandle,'Position',[0.4 0.575 0.3 0.4])
 set(plot3DHandle,'View',[45,45])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
@@ -123,6 +127,7 @@ link3_XZ = plot([t3(1,4) t4(1,4)], [t3(3,4) t4(3,4)],'LineWidth',2,'Color','#007
 link4_XZ = plot([t4(1,4) t5(1,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color','#0072BD');
 link5_XZ = plot([t5(1,4) t6(1,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_XZ = plot([t6(1,4) t7(1,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
+end_XZ = plot(t7(1,4),t7(3,4),'g*','MarkerSize',12);
 set(plotXZHandle,'Position',[0.05 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Z');
@@ -136,6 +141,7 @@ link3_YZ = plot([t3(2,4) t4(2,4)], [t3(3,4) t4(3,4)],'LineWidth',2,'Color','#007
 link4_YZ = plot([t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color','#0072BD');
 link5_YZ = plot([t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_YZ = plot([t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
+end_YZ = plot(t7(2,4),t7(3,4),'g*','MarkerSize',12);
 set(plotYZHandle,'Position',[0.4 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
@@ -143,82 +149,140 @@ iKine(t7(1,4),t7(2,4),t7(3,4));
 
 % UI Controls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % buttons -----------------------------------------------------------------
-HbttnSerialStart = uicontrol('Style','pushbutton');
-set(HbttnSerialStart,'Units','normalized','Position',[0.75 0.85 0.1 0.05],...
-    'String','Start','Callback',@startSerial);
-HbttnSerialStop = uicontrol('Style','pushbutton');
-set(HbttnSerialStop,'Units','normalized','Position',[0.85 0.85 0.1 0.05],...
-    'String','Stop','Callback',@stopSerial);
+HbttnOpenCMStart = uicontrol('Style','pushbutton');
+set(HbttnOpenCMStart,'Units','normalized','Position',[0.75 0.95 0.1 0.05],...
+    'String','Start OpenCM','Callback',@startOpenCM);
+HbttnOpenCMStop = uicontrol('Style','pushbutton');
+set(HbttnOpenCMStop,'Units','normalized','Position',[0.85 0.95 0.1 0.05],...
+    'String','Stop OpenCM','Callback',@stopOpenCM);
+HbttnTeensyStart = uicontrol('Style','pushbutton');
+set(HbttnTeensyStart,'Units','normalized','Position',[0.75 0.9 0.1 0.05],...
+    'String','Start Teensy','Callback',@startTeensy);
+HbttnTeensyStop = uicontrol('Style','pushbutton');
+set(HbttnTeensyStop,'Units','normalized','Position',[0.85 0.9 0.1 0.05],...
+    'String','Stop Teensy','Callback',@stopTeensy);
 
 % time --------------------------------------------------------------------
 HtimeLabel = uicontrol('Style','text');
-set(HtimeLabel,'Units','normalized','Position',[0.75 0.95 0.1 0.05],...
+set(HtimeLabel,'Units','normalized','Position',[0.75 0.85 0.1 0.05],...
     'String','elapsedT:','Fontsize',20);
-HloopLabel = uicontrol('Style','text');
-set(HloopLabel,'Units','normalized','Position',[0.75 0.9 0.1 0.05],...
-    'String','loopT:','Fontsize',20);
-
 HtimeValue = uicontrol('Style','text');
-set(HtimeValue,'Units','normalized','Position',[0.85 0.95 0.1 0.05],...
+set(HtimeValue,'Units','normalized','Position',[0.85 0.85 0.1 0.05],...
     'String','0','Fontsize',20);
+
+HloopLabel = uicontrol('Style','text');
+set(HloopLabel,'Units','normalized','Position',[0.75 0.8 0.1 0.05],...
+    'String','loopT:','Fontsize',20);
 HloopValue = uicontrol('Style','text');
-set(HloopValue,'Units','normalized','Position',[0.85 0.9 0.1 0.05],...
+set(HloopValue,'Units','normalized','Position',[0.85 0.8 0.1 0.05],...
     'String','0','Fontsize',20);
 
-% Q1, Q2, Q4 --------------------------------------------------------------
+% Present Q1, Q2, Q4 ------------------------------------------------------
 HalphaLabel = uicontrol('Style','text');
-set(HalphaLabel,'Units','normalized','Position',[0.75 0.8 0.1 0.05],...
+set(HalphaLabel,'Units','normalized','Position',[0.75 0.75 0.1 0.05],...
     'String','rQ1:','Fontsize',20);
-HbetaLabel = uicontrol('Style','text');
-set(HbetaLabel,'Units','normalized','Position',[0.75 0.75 0.1 0.05],...
-    'String','rQ2:','Fontsize',20);
-HthetaLabel = uicontrol('Style','text');
-set(HthetaLabel,'Units','normalized','Position',[0.75 0.7 0.1 0.05],...
-    'String','rQ4:','Fontsize',20);
-
 Hq1Value = uicontrol('Style','text');
-set(Hq1Value,'Units','normalized','Position',[0.85 0.8 0.1 0.05],...
+set(Hq1Value,'Units','normalized','Position',[0.85 0.75 0.1 0.05],...
     'String','0','Fontsize',20);
+
+HbetaLabel = uicontrol('Style','text');
+set(HbetaLabel,'Units','normalized','Position',[0.75 0.7 0.1 0.05],...
+    'String','rQ2:','Fontsize',20);
 Hq2Value = uicontrol('Style','text');
-set(Hq2Value,'Units','normalized','Position',[0.85 0.75 0.1 0.05],...
+set(Hq2Value,'Units','normalized','Position',[0.85 0.7 0.1 0.05],...
     'String','0','Fontsize',20);
+
+HthetaLabel = uicontrol('Style','text');
+set(HthetaLabel,'Units','normalized','Position',[0.75 0.65 0.1 0.05],...
+    'String','rQ4:','Fontsize',20);
 Hq4Value = uicontrol('Style','text');
-set(Hq4Value,'Units','normalized','Position',[0.85 0.7 0.1 0.05],...
+set(Hq4Value,'Units','normalized','Position',[0.85 0.65 0.1 0.05],...
     'String','0','Fontsize',20);
 
-% X, Y, Z -----------------------------------------------------------------
-HxLabel = uicontrol('Style','text');
-set(HxLabel,'Units','normalized','Position',[0.75 0.65 0.1 0.05],...
+% Present X, Y, Z ---------------------------------------------------------
+HRxLabel = uicontrol('Style','text');
+set(HRxLabel,'Units','normalized','Position',[0.75 0.6 0.1 0.05],...
     'String','rX:','Fontsize',20);
-HyLabel = uicontrol('Style','text');
-set(HyLabel,'Units','normalized','Position',[0.75 0.6 0.1 0.05],...
+HRxValue = uicontrol('Style','text');
+set(HRxValue,'Units','normalized','Position',[0.85 0.6 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+HRyLabel = uicontrol('Style','text');
+set(HRyLabel,'Units','normalized','Position',[0.75 0.55 0.1 0.05],...
     'String','rY:','Fontsize',20);
-HzLabel = uicontrol('Style','text');
-set(HzLabel,'Units','normalized','Position',[0.75 0.55 0.1 0.05],...
+HRyValue = uicontrol('Style','text');
+set(HRyValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+HRzLabel = uicontrol('Style','text');
+set(HRzLabel,'Units','normalized','Position',[0.75 0.5 0.1 0.05],...
     'String','rZ:','Fontsize',20);
-
-HxValue = uicontrol('Style','text');
-set(HxValue,'Units','normalized','Position',[0.85 0.65 0.1 0.05],...
-    'String','0','Fontsize',20);
-HyValue = uicontrol('Style','text');
-set(HyValue,'Units','normalized','Position',[0.85 0.6 0.1 0.05],...
-    'String','0','Fontsize',20);
-HzValue = uicontrol('Style','text');
-set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
+HRzValue = uicontrol('Style','text');
+set(HRzValue,'Units','normalized','Position',[0.85 0.5 0.1 0.05],...
     'String','0','Fontsize',20);
 
-    function startSerial(source,eventdata)
-        botSerial.Start();
-        set(Hfigure,'UserData',true);
-        animatedata();
+% Calculated X, Y, Z ---------------------------------------------------------
+HCxLabel = uicontrol('Style','text');
+set(HCxLabel,'Units','normalized','Position',[0.75 0.45 0.1 0.05],...
+    'String','cX:','Fontsize',20);
+HCxValue = uicontrol('Style','text');
+set(HCxValue,'Units','normalized','Position',[0.85 0.45 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+HCyLabel = uicontrol('Style','text');
+set(HCyLabel,'Units','normalized','Position',[0.75 0.4 0.1 0.05],...
+    'String','cY:','Fontsize',20);
+HCyValue = uicontrol('Style','text');
+set(HCyValue,'Units','normalized','Position',[0.85 0.4 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+HCzLabel = uicontrol('Style','text');
+set(HCzLabel,'Units','normalized','Position',[0.75 0.35 0.1 0.05],...
+    'String','cZ:','Fontsize',20);
+HCzValue = uicontrol('Style','text');
+set(HCzValue,'Units','normalized','Position',[0.85 0.35 0.1 0.05],...
+    'String','0','Fontsize',20);
+
+%% Callback Functions
+%     function closereq(source,eventdata)
+%         testRunning = get(Hfigure,'UserData');
+%         if  testRunning
+%             botSerial.Stop();
+%         end
+%     end
+
+    function startOpenCM(source,eventdata)
+        testRunning = get(Hfigure,'UserData');
+        if  ~testRunning
+            botSerial.Start();
+            set(Hfigure,'UserData',true);
+            animatedata();
+        end
     end
 
-    function stopSerial(source,eventdata)
-        set(Hfigure,'UserData',false);
-        botSerial.Stop();
+    function stopOpenCM(source,eventdata)
+        testRunning = get(Hfigure,'UserData');
+        if  testRunning
+            set(Hfigure,'UserData',false);
+            botSerial.Stop();
+        end
     end
 
-%% Animation of data
+    function startTeensy(source,eventdata)
+        testRunning = get(Hfigure,'UserData');
+        if  ~testRunning
+            
+        end
+    end
+
+    function stopTeensy(source,eventdata)
+        testRunning = get(Hfigure,'UserData');
+        if  testRunning
+           
+        end
+    end
+
+%% Other Functions
     function animatedata()
         while true
             drawnow();
@@ -233,7 +297,7 @@ set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
             if botSerial.BytesAvailable >= packetLen
                 ReadFrame(botSerial);
             end
-            q1 = botSerial.frameData(2);
+            q1 = botSerial.frameData(2);% + 0.6219; % offset 35.63deg
             q2 = botSerial.frameData(3);
             q4 = botSerial.frameData(4);
             x = botSerial.frameData(11);
@@ -256,6 +320,7 @@ set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
             set(link4_XY,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)])
             set(link5_XY,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)])
             set(link6_XY,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)])
+            set(end_XY,'XData',x,'YData',y);
             % 3D Plot update
             set(baseLink_3d,'XData',[t0(1) t1(1,4)],'YData',[t0(2) t1(2,4)],'ZData',[t0(3) t1(3,4)])
             set(link1_3d,'XData',[t1(1,4) t2(1,4)],'YData',[t1(2,4) t2(2,4)],'ZData',[t1(3,4) t2(3,4)])
@@ -264,6 +329,7 @@ set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
             set(link4_3d,'XData',[t4(1,4) t5(1,4)],'YData',[t4(2,4) t5(2,4)],'ZData',[t4(3,4) t5(3,4)])
             set(link5_3d,'XData',[t5(1,4) t6(1,4)],'YData',[t5(2,4) t6(2,4)],'ZData',[t5(3,4) t6(3,4)])
             set(link6_3d,'XData',[t6(1,4) t7(1,4)],'YData',[t6(2,4) t7(2,4)],'ZData',[t6(3,4) t7(3,4)])
+            set(end_3d,'XData',x,'YData',y,'ZData',z);
             % XZ Plot Update
             set(baseLink_XZ,'XData',[t0(1) t1(1,4)],'YData',[t0(3) t1(3,4)])
             set(link1_XZ,'XData',[t1(1,4) t2(1,4)],'YData',[t1(3,4) t2(3,4)])
@@ -272,6 +338,7 @@ set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
             set(link4_XZ,'XData',[t4(1,4) t5(1,4)],'YData',[t4(3,4) t5(3,4)])
             set(link5_XZ,'XData',[t5(1,4) t6(1,4)],'YData',[t5(3,4) t6(3,4)])
             set(link6_XZ,'XData',[t6(1,4) t7(1,4)],'YData',[t6(3,4) t7(3,4)])
+            set(end_XZ,'XData',x,'YData',z);
             % YZ Plot Update
             set(baseLink_YZ,'XData',[t0(2) t1(2,4)],'YData',[t0(3) t1(3,4)])
             set(link1_YZ,'XData',[t1(2,4) t2(2,4)],'YData',[t1(3,4) t2(3,4)])
@@ -280,15 +347,16 @@ set(HzValue,'Units','normalized','Position',[0.85 0.55 0.1 0.05],...
             set(link4_YZ,'XData',[t4(2,4) t5(2,4)],'YData',[t4(3,4) t5(3,4)])
             set(link5_YZ,'XData',[t5(2,4) t6(2,4)],'YData',[t5(3,4) t6(3,4)])
             set(link6_YZ,'XData',[t6(2,4) t7(2,4)],'YData',[t6(3,4) t7(3,4)])
+            set(end_YZ,'XData',y,'YData',z);
             % Values update
             set(Hq1Value,'String',num2str(q1));
             set(Hq2Value,'String',num2str(q2));
             set(Hq4Value,'String',num2str(q4));
-            set(HxValue,'String',num2str(x));
-            set(HyValue,'String',num2str(y));
-            set(HzValue,'String',num2str(z));
+            set(HRxValue,'String',num2str(x));
+            set(HRyValue,'String',num2str(y));
+            set(HRzValue,'String',num2str(z));
             set(HtimeValue,'String',num2str(botSerial.frameData(1)));
-            set(HloopValue,'String',num2str(botSerial.frameData(17)));
+            set(HloopValue,'String',num2str(botSerial.frameData(21)));
         end
     end
 
