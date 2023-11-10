@@ -110,10 +110,11 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
                         presXdot:  56,57,58,59,...
                         presYdot:  60,61,62,63,...
                         presZdot:  64,65,66,67,...
-                               _:  68,69,70,71,,...
-                               _:  72,73,74,75,...
-                               _:  76,77,78,79,...
-                               _:  80,81,82,83,...
+                          goalQ1:  68,69,70,71,,...
+                          goalQ2:  72,73,74,75,...
+                          goalQ4:  76,77,78,79,...
+                                :  80,81,82,...
+                currentDriveMode:  83,...
                         loopTime:  84,85,86,87,...
                         CheckSum:  88,89]
   */ 
@@ -133,26 +134,35 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   dataPacket[7] = DXL_HIBYTE(DXL_HIWORD(totalTime));
 
   // Motor's PresQ, PresQdot, and Torques
-  byte *PresQ_bytes = floatArrayToBytes(Robot.GetPresQ());
+  byte *presQ_bytes = floatArrayToBytes(Robot.GetPresQ());
   for (int16_t i = _presQ_SLOT; i < _presQDOT_SLOT; i++){
-    dataPacket[i] = PresQ_bytes[i - _presQ_SLOT];
+    dataPacket[i] = presQ_bytes[i - _presQ_SLOT];
   }
-  byte *PresQDot_bytes = floatArrayToBytes(Robot.GetPresQDot());
+  byte *presQDot_bytes = floatArrayToBytes(Robot.GetPresQDot());
   for (int16_t i = _presQDOT_SLOT; i < _presCURRENT_SLOT; i++){
-    dataPacket[i] = PresQDot_bytes[i - _presQDOT_SLOT];
+    dataPacket[i] = presQDot_bytes[i - _presQDOT_SLOT];
   }
-  byte *PresI_bytes = floatArrayToBytes(Robot.GetPresCurrent());
+  byte *presI_bytes = floatArrayToBytes(Robot.GetPresCurrent());
   for (int16_t i = _presCURRENT_SLOT; i < _presXYZ_SLOT; i++){
-    dataPacket[i] = PresI_bytes[i - _presCURRENT_SLOT];
+    dataPacket[i] = presI_bytes[i - _presCURRENT_SLOT];
   }
-  byte *PresXYZ_bytes = floatArrayToBytes(Robot.GetPresXYZ());
+  byte *presXYZ_bytes = floatArrayToBytes(Robot.GetPresXYZ());
   for (int16_t i = _presXYZ_SLOT; i < _presXYZdot_SLOT; i++){
-    dataPacket[i] = PresXYZ_bytes[i - _presXYZ_SLOT];
+    dataPacket[i] = presXYZ_bytes[i - _presXYZ_SLOT];
   }
-  byte *PresXYZdot_bytes = floatArrayToBytes(Robot.GetPresXYZdot());
-  for (int16_t i = _presXYZdot_SLOT; i < _BLANK_SLOT; i++){
-    dataPacket[i] = PresXYZdot_bytes[i - _presXYZdot_SLOT];
+  byte *presXYZdot_bytes = floatArrayToBytes(Robot.GetPresXYZdot());
+  for (int16_t i = _presXYZdot_SLOT; i < _goalQ_SLOT; i++){
+    dataPacket[i] = presXYZdot_bytes[i - _presXYZdot_SLOT];
   }
+
+  // Motor GoalQ for troubleshooting
+  byte *goalQ_bytes = floatArrayToBytes(Robot.GetGoalQ());
+  for (int16_t i = _goalQ_SLOT; i < _BLANK_SLOT; i++){
+    dataPacket[i] = goalQ_bytes[i - _goalQ_SLOT];
+  }
+
+  // Robot Current Torque Mode
+  dataPacket[_TX_PKT_LEN - 7] = Robot.GetCurrentTorqueMode();
 
   // looptime  
   dataPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(lTime));

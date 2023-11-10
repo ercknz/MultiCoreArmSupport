@@ -91,6 +91,7 @@ void loop() {
   /* Initialize Robot*/
   previousTime = millis();
   ArmRobot.ReadRobot(syncReadPacket);
+  ArmRobot.InitializeGoals();
   c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
   /* Main Loop */

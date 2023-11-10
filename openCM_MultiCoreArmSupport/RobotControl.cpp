@@ -46,6 +46,10 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Get Member functions -------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
+uint8_t RobotControl::GetCurrentTorqueMode(){
+  return currentTorqueMode_M;
+}
+
 float* RobotControl::GetPresQ(){
   return qPres_M;
 }
@@ -105,6 +109,12 @@ int16_t* RobotControl::GetPresCurrentCts(){
 float RobotControl::GetSpringForce(){
   return springF_M;
 } 
+
+void RobotControl::InitializeGoals(){
+  for (int i = 0; i < 3; i++){
+    q_M[i] = qPres_M[i];
+  }
+}
 
 /* ---------------------------------------------------------------------------------------/
 / ROBOT LEVEL FUNCTIONS ------------------------------------------------------------------/
@@ -263,6 +273,7 @@ void  RobotControl::EnableTorque(dynamixel::PortHandler *portHandler, dynamixel:
    *  [20]: Fully Passive (Shoulder, Elbow, and Elevation TORQUE DISABLED)
    */
   using namespace OCM;
+  currentTorqueMode_M = state;
   int dxlCommResult;
 //  if ((state == 5)||(state == 10)){
 //    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_SHOULDER,     ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);

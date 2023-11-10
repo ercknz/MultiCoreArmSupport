@@ -17,6 +17,7 @@ class RobotControl {
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
     void  ReadRobot(dynamixel::GroupSyncRead &syncReadPacket);
     void   WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+    uint8_t   GetCurrentTorqueMode();
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
@@ -34,6 +35,7 @@ class RobotControl {
     void      CalculateSpringForce(float *forces); 
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
+    void      InitializeGoals();
     
   protected:
     void  fKine();
@@ -54,14 +56,15 @@ class RobotControl {
     int32_t qPresCts_M[3],  qDotPresCts_M[3];
     float   qPres_M[3],     qDotPres_M[3];
     float   xyzPres_M[3],   xyzDotPres_M[3];
-    int32_t qCts_M[3],      qDotCts_M[3];
-    float   q_M[3],         qDot_M[3];
-    float   xyz_M[3],       xyzDot_M[3];
+    int32_t qCts_M[3],      qDotCts_M[3];     // Goal Q and Qdot in counts
+    float   q_M[3],         qDot_M[3];        // Goal Q and Qdot in radians
+    float   xyz_M[3],       xyzDot_M[3];      // Goal XYZ coordinates in meters
     float   springF_M;
     float   scalingFactor_M;
     float   iPres_M[3];     // Present Current
     int16_t iPresCts_M[3];  // Present Current Counts
     uint8_t dxl_error = 0;
+    uint8_t currentTorqueMode_M;
 };
 
 #endif // ROBOT_CONTROL_H

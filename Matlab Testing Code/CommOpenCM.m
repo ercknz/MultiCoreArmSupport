@@ -91,14 +91,18 @@ classdef CommOpenCM < handle
                 obj.frameData(14) = double(typecast(uint8(obj.rawBytes(57:60)),'int32'));
                 obj.frameData(15) = double(typecast(uint8(obj.rawBytes(61:64)),'int32'));
                 obj.frameData(16) = double(typecast(uint8(obj.rawBytes(65:68)),'int32'));
+                % goalQ
+                obj.frameData(17) = double(typecast(uint8(obj.rawBytes(69:72)),'int32'));
+                obj.frameData(18) = double(typecast(uint8(obj.rawBytes(73:76)),'int32'));
+                obj.frameData(19) = double(typecast(uint8(obj.rawBytes(77:80)),'int32'));
+                % Torque Mode
+                obj.frameData(20) = double(obj.rawBytes(84));
                 % Loop Time
-                obj.frameData(18) = typecast(uint8(obj.rawBytes(end-17:end-14)),'uint32');
-                obj.frameData(19) = typecast(uint8(obj.rawBytes(end-13:end-10)),'uint32');
-                obj.frameData(20) = typecast(uint8(obj.rawBytes(end-9:end-6)),'uint32');
                 obj.frameData(21) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(18:21) = obj.frameData(18:21)*0.001;
-                obj.frameData(2:16) = obj.frameData(2:16)./10000;
+                obj.frameData(21) = obj.frameData(21)*0.001;
+                obj.frameData(2:19) = obj.frameData(2:19)./10000;
             end
         end
         

@@ -14,6 +14,13 @@ SHDR_LIMIT = [0,270];
 ELVN_LIMIT = [-45,45];
 ELBW_LIMIT = [atand(offset/L2),180];
 
+testGoals = [0.750,  0.300,  0.250;
+             0.750, -0.300,  0.250;
+             0.550,  0.000,  0.000;
+             0.650,  0.300, -0.200;
+             0.650, -0.300, -0.200];
+idx = 5;
+
 %% Calculate
 rotateX = @(a)  [1,0,0;
                  0,cos(a),-sin(a);
@@ -91,6 +98,7 @@ set(Hfigure,'UserData',false);
 % Top(XY) plot creation (top right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXYHandle = subplot(2,2,1);
 grid on; hold on;
+% Robot
 baseLink_XY = plot([t0(1) t1(1,4)], [t0(2) t1(2,4)],'LineWidth',2,'Color','#0072BD');
 link1_XY = plot([t1(1,4) t2(1,4)], [t1(2,4) t2(2,4)],'LineWidth',2,'Color','#0072BD');
 link2_XY = plot([t2(1,4) t3(1,4)], [t2(2,4) t3(2,4)],'LineWidth',2,'Color','#D95319');
@@ -99,12 +107,22 @@ link4_XY = plot([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)],'LineWidth',2,'Color','#007
 link5_XY = plot([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)],'LineWidth',2,'Color','#0072BD');
 link6_XY = plot([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)],'LineWidth',2,'Color','#D95319');
 end_XY = plot(t7(1,4),t7(2,4),'g*','MarkerSize',12);
+% Goal
+g_baseLink_XY = plot([t0(1) t1(1,4)], [t0(2) t1(2,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link1_XY = plot([t1(1,4) t2(1,4)], [t1(2,4) t2(2,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link2_XY = plot([t2(1,4) t3(1,4)], [t2(2,4) t3(2,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_link3_XY = plot([t3(1,4) t4(1,4)], [t3(2,4) t4(2,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link4_XY = plot([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link5_XY = plot([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link6_XY = plot([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_end_XY = plot(t7(1,4),t7(2,4),'*','MarkerSize',12,'Color',[0.6350 0.0780 0.1840 0.2]);
 set(plotXYHandle,'Position',[0.05 0.575 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Y');
 % 3D plot creation (top left) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plot3DHandle = subplot(2,2,2);
 grid on; hold on;
+% Robot
 baseLink_3d = plot3([t0(1) t1(1,4)], [t0(2) t1(2,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color','#0072BD');
 link1_3d = plot3([t1(1,4) t2(1,4)], [t1(2,4) t2(2,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color','#0072BD');
 link2_3d = plot3([t2(1,4) t3(1,4)], [t2(2,4) t3(2,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color','#D95319');
@@ -113,6 +131,15 @@ link4_3d = plot3([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWi
 link5_3d = plot3([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_3d = plot3([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
 end_3d = plot3(t7(1,4),t7(2,4),t7(3,4),'g*','MarkerSize',12);
+% Goal
+g_baseLink_3d = plot3([t0(1) t1(1,4)], [t0(2) t1(2,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link1_3d = plot3([t1(1,4) t2(1,4)], [t1(2,4) t2(2,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link2_3d = plot3([t2(1,4) t3(1,4)], [t2(2,4) t3(2,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_link3_3d = plot3([t3(1,4) t4(1,4)], [t3(2,4) t4(2,4)], [t3(3,4) t4(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link4_3d = plot3([t4(1,4) t5(1,4)], [t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link5_3d = plot3([t5(1,4) t6(1,4)], [t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link6_3d = plot3([t6(1,4) t7(1,4)], [t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_end_3d = plot3(t7(1,4),t7(2,4),t7(3,4),'*','MarkerSize',12,'Color',[0.6350 0.0780 0.1840 0.2]);
 set(plot3DHandle,'Position',[0.4 0.575 0.3 0.4])
 set(plot3DHandle,'View',[45,45])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
@@ -120,6 +147,7 @@ xlabel('X');ylabel('Y');zlabel('Z');
 % Front(XZ) plot creation (bottom left) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXZHandle = subplot(2,2,3);
 grid on; hold on;
+% Robot
 baseLink_XZ = plot([t0(1) t1(1,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color','#0072BD');
 link1_XZ = plot([t1(1,4) t2(1,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color','#0072BD');
 link2_XZ = plot([t2(1,4) t3(1,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color','#D95319');
@@ -128,12 +156,22 @@ link4_XZ = plot([t4(1,4) t5(1,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color','#007
 link5_XZ = plot([t5(1,4) t6(1,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_XZ = plot([t6(1,4) t7(1,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
 end_XZ = plot(t7(1,4),t7(3,4),'g*','MarkerSize',12);
+% Goal
+g_baseLink_XZ = plot([t0(1) t1(1,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link1_XZ = plot([t1(1,4) t2(1,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link2_XZ = plot([t2(1,4) t3(1,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_link3_XZ = plot([t3(1,4) t4(1,4)], [t3(3,4) t4(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link4_XZ = plot([t4(1,4) t5(1,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link5_XZ = plot([t5(1,4) t6(1,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link6_XZ = plot([t6(1,4) t7(1,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_end_XZ = plot(t7(1,4),t7(3,4),'*','MarkerSize',12,'Color',[0.6350 0.0780 0.1840 0.2]);
 set(plotXZHandle,'Position',[0.05 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Z');
 % Right(YZ) plot creation (bottom right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotYZHandle = subplot(2,2,4);
 grid on; hold on;
+% Robot
 baseLink_YZ = plot([t0(2) t1(2,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color','#0072BD');
 link1_YZ = plot([t1(2,4) t2(2,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color','#0072BD');
 link2_YZ = plot([t2(2,4) t3(2,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color','#D95319');
@@ -142,6 +180,15 @@ link4_YZ = plot([t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color','#007
 link5_YZ = plot([t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color','#0072BD');
 link6_YZ = plot([t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color','#D95319');
 end_YZ = plot(t7(2,4),t7(3,4),'g*','MarkerSize',12);
+% Goal
+g_baseLink_YZ = plot([t0(2) t1(2,4)], [t0(3) t1(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link1_YZ = plot([t1(2,4) t2(2,4)], [t1(3,4) t2(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link2_YZ = plot([t2(2,4) t3(2,4)], [t2(3,4) t3(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_link3_YZ = plot([t3(2,4) t4(2,4)], [t3(3,4) t4(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link4_YZ = plot([t4(2,4) t5(2,4)], [t4(3,4) t5(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link5_YZ = plot([t5(2,4) t6(2,4)], [t5(3,4) t6(3,4)],'LineWidth',2,'Color',[0 0 0 0.1]);
+g_link6_YZ = plot([t6(2,4) t7(2,4)], [t6(3,4) t7(3,4)],'LineWidth',2,'Color',[1 0 1 0.1]);
+g_end_YZ = plot(t7(2,4),t7(3,4),'*','MarkerSize',12,'Color',[0.6350 0.0780 0.1840 0.2]);
 set(plotYZHandle,'Position',[0.4 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
@@ -161,6 +208,9 @@ set(HbttnTeensyStart,'Units','normalized','Position',[0.75 0.9 0.1 0.05],...
 HbttnTeensyStop = uicontrol('Style','pushbutton');
 set(HbttnTeensyStop,'Units','normalized','Position',[0.85 0.9 0.1 0.05],...
     'String','Stop Teensy','Callback',@stopTeensy);
+HbttnTestGoal = uicontrol('Style','pushbutton');
+set(HbttnTestGoal,'Units','normalized','Position',[0.96 0.9 0.03, 0.1],...
+    'String','<html>Send<br />Goal</html>','Callback',@sendGoal);
 
 % time --------------------------------------------------------------------
 HtimeLabel = uicontrol('Style','text');
@@ -221,26 +271,58 @@ HRzValue = uicontrol('Style','text');
 set(HRzValue,'Units','normalized','Position',[0.85 0.5 0.1 0.05],...
     'String','0','Fontsize',20);
 
-% Calculated X, Y, Z ---------------------------------------------------------
-HCxLabel = uicontrol('Style','text');
-set(HCxLabel,'Units','normalized','Position',[0.75 0.45 0.1 0.05],...
-    'String','cX:','Fontsize',20);
-HCxValue = uicontrol('Style','text');
-set(HCxValue,'Units','normalized','Position',[0.85 0.45 0.1 0.05],...
+% Goal X, Y, Z ---------------------------------------------------------
+HGxLabel = uicontrol('Style','text');
+set(HGxLabel,'Units','normalized','Position',[0.75 0.45 0.066 0.05],...
+    'String','gX:','Fontsize',20);
+HGxValue = uicontrol('Style','text');
+set(HGxValue,'Units','normalized','Position',[0.816 0.45 0.066 0.05],...
+    'String','0','Fontsize',20);
+HSxValue = uicontrol('Style','text');
+set(HSxValue,'Units','normalized','Position',[0.882 0.45 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
+
+HGyLabel = uicontrol('Style','text');
+set(HGyLabel,'Units','normalized','Position',[0.75 0.4 0.066 0.05],...
+    'String','gY:','Fontsize',20);
+HGyValue = uicontrol('Style','text');
+set(HGyValue,'Units','normalized','Position',[0.816 0.4 0.066 0.05],...
+    'String','0','Fontsize',20);
+HSyValue = uicontrol('Style','text');
+set(HSyValue,'Units','normalized','Position',[0.882 0.4 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
+HGzLabel = uicontrol('Style','text');
+set(HGzLabel,'Units','normalized','Position',[0.75 0.35 0.066 0.05],...
+    'String','gZ:','Fontsize',20);
+HGzValue = uicontrol('Style','text');
+set(HGzValue,'Units','normalized','Position',[0.816 0.35 0.066 0.05],...
+    'String','0','Fontsize',20);
+HSzValue = uicontrol('Style','text');
+set(HSzValue,'Units','normalized','Position',[0.882 0.35 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
+% Goal Q1, Q2, Q4 ------------------------------------------------------
+HgoalQ1Label = uicontrol('Style','text');
+set(HgoalQ1Label,'Units','normalized','Position',[0.75 0.3 0.1 0.05],...
+    'String','gQ1:','Fontsize',20);
+HgoalQ1Value = uicontrol('Style','text');
+set(HgoalQ1Value,'Units','normalized','Position',[0.85 0.3 0.1 0.05],...
     'String','0','Fontsize',20);
 
-HCyLabel = uicontrol('Style','text');
-set(HCyLabel,'Units','normalized','Position',[0.75 0.4 0.1 0.05],...
-    'String','cY:','Fontsize',20);
-HCyValue = uicontrol('Style','text');
-set(HCyValue,'Units','normalized','Position',[0.85 0.4 0.1 0.05],...
+HgoalQ2Label = uicontrol('Style','text');
+set(HgoalQ2Label,'Units','normalized','Position',[0.75 0.25 0.1 0.05],...
+    'String','gQ2:','Fontsize',20);
+HgoalQ2Value = uicontrol('Style','text');
+set(HgoalQ2Value,'Units','normalized','Position',[0.85 0.25 0.1 0.05],...
     'String','0','Fontsize',20);
 
-HCzLabel = uicontrol('Style','text');
-set(HCzLabel,'Units','normalized','Position',[0.75 0.35 0.1 0.05],...
-    'String','cZ:','Fontsize',20);
-HCzValue = uicontrol('Style','text');
-set(HCzValue,'Units','normalized','Position',[0.85 0.35 0.1 0.05],...
+HgoalQ4Label = uicontrol('Style','text');
+set(HgoalQ4Label,'Units','normalized','Position',[0.75 0.2 0.1 0.05],...
+    'String','gQ4:','Fontsize',20);
+HgoalQ4Value = uicontrol('Style','text');
+set(HgoalQ4Value,'Units','normalized','Position',[0.85 0.2 0.1 0.05],...
     'String','0','Fontsize',20);
 
 %% Callback Functions
@@ -282,6 +364,22 @@ set(HCzValue,'Units','normalized','Position',[0.85 0.35 0.1 0.05],...
         end
     end
 
+    function sendGoal(source,eventdata)
+        if idx >= 5
+            idx = 1;
+        else
+            idx = idx + 1;
+        end
+        botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), 0, 0, 0);
+        set(HSxValue,'String',num2str(testGoals(idx,1)));
+        set(HSyValue,'String',num2str(testGoals(idx,2)));
+        set(HSzValue,'String',num2str(testGoals(idx,3)));
+        set(g_end_XY,'XData',testGoals(idx,1),'YData',testGoals(idx,2));
+        set(g_end_3d,'XData',testGoals(idx,1),'YData',testGoals(idx,2),'ZData',testGoals(idx,3));
+        set(g_end_XZ,'XData',testGoals(idx,1),'YData',testGoals(idx,3));
+        set(g_end_YZ,'XData',testGoals(idx,2),'YData',testGoals(idx,3));
+    end
+
 %% Other Functions
     function animatedata()
         while true
@@ -303,7 +401,10 @@ set(HCzValue,'Units','normalized','Position',[0.85 0.35 0.1 0.05],...
             x = botSerial.frameData(11);
             y = botSerial.frameData(12);
             z = botSerial.frameData(13);
-            % Kinematics Calculations
+            goalQ1 = botSerial.frameData(17);
+            goalQ2 = botSerial.frameData(18);
+            goalQ4 = botSerial.frameData(19);
+            % ROBOT Kinematics Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             t0 = [0,0,0];
             t1 = T01(q1);
             t2 = T02(q1,q2);
@@ -355,6 +456,55 @@ set(HCzValue,'Units','normalized','Position',[0.85 0.35 0.1 0.05],...
             set(HRxValue,'String',num2str(x));
             set(HRyValue,'String',num2str(y));
             set(HRzValue,'String',num2str(z));
+            % GOAL Kinematics Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            t0_g = [0,0,0];
+            t1_g = T01(goalQ1);
+            t2_g = T02(goalQ1, goalQ2);
+            t3_g = T03(goalQ1, goalQ2);
+            t4_g = T04(goalQ1, goalQ2, goalQ4);
+            t5_g = T05(goalQ1, goalQ2, goalQ4);
+            t6_g = T06(goalQ1, goalQ2, goalQ4);
+            t7_g = T07(goalQ1, goalQ2, goalQ4);
+            % XY Plot update
+            set(g_baseLink_XY,'XData',[t0_g(1) t1_g(1,4)],'YData',[t0_g(2) t1_g(2,4)])
+            set(g_link1_XY,'XData',[t1_g(1,4) t2_g(1,4)],'YData',[t1_g(2,4) t2_g(2,4)])
+            set(g_link2_XY,'XData',[t2_g(1,4) t3_g(1,4)],'YData',[t2_g(2,4) t3_g(2,4)])
+            set(g_link3_XY,'XData',[t3_g(1,4) t4_g(1,4)],'YData',[t3_g(2,4) t4_g(2,4)])
+            set(g_link4_XY,'XData',[t4_g(1,4) t5_g(1,4)],'YData',[t4_g(2,4) t5_g(2,4)])
+            set(g_link5_XY,'XData',[t5_g(1,4) t6_g(1,4)],'YData',[t5_g(2,4) t6_g(2,4)])
+            set(g_link6_XY,'XData',[t6_g(1,4) t7_g(1,4)],'YData',[t6_g(2,4) t7_g(2,4)])
+            % 3D Plot update
+            set(g_baseLink_3d,'XData',[t0_g(1) t1_g(1,4)],'YData',[t0_g(2) t1_g(2,4)],'ZData',[t0_g(3) t1_g(3,4)])
+            set(g_link1_3d,'XData',[t1_g(1,4) t2_g(1,4)],'YData',[t1_g(2,4) t2_g(2,4)],'ZData',[t1_g(3,4) t2_g(3,4)])
+            set(g_link2_3d,'XData',[t2_g(1,4) t3_g(1,4)],'YData',[t2_g(2,4) t3_g(2,4)],'ZData',[t2_g(3,4) t3_g(3,4)])
+            set(g_link3_3d,'XData',[t3_g(1,4) t4_g(1,4)],'YData',[t3_g(2,4) t4_g(2,4)],'ZData',[t3_g(3,4) t4_g(3,4)])
+            set(g_link4_3d,'XData',[t4_g(1,4) t5_g(1,4)],'YData',[t4_g(2,4) t5_g(2,4)],'ZData',[t4_g(3,4) t5_g(3,4)])
+            set(g_link5_3d,'XData',[t5_g(1,4) t6_g(1,4)],'YData',[t5_g(2,4) t6_g(2,4)],'ZData',[t5_g(3,4) t6_g(3,4)])
+            set(g_link6_3d,'XData',[t6_g(1,4) t7_g(1,4)],'YData',[t6_g(2,4) t7_g(2,4)],'ZData',[t6_g(3,4) t7_g(3,4)])
+            % XZ Plot Update
+            set(g_baseLink_XZ,'XData',[t0_g(1) t1_g(1,4)],'YData',[t0_g(3) t1_g(3,4)])
+            set(g_link1_XZ,'XData',[t1_g(1,4) t2_g(1,4)],'YData',[t1_g(3,4) t2_g(3,4)])
+            set(g_link2_XZ,'XData',[t2_g(1,4) t3_g(1,4)],'YData',[t2_g(3,4) t3_g(3,4)])
+            set(g_link3_XZ,'XData',[t3_g(1,4) t4_g(1,4)],'YData',[t3_g(3,4) t4_g(3,4)])
+            set(g_link4_XZ,'XData',[t4_g(1,4) t5_g(1,4)],'YData',[t4_g(3,4) t5_g(3,4)])
+            set(g_link5_XZ,'XData',[t5_g(1,4) t6_g(1,4)],'YData',[t5_g(3,4) t6_g(3,4)])
+            set(g_link6_XZ,'XData',[t6_g(1,4) t7_g(1,4)],'YData',[t6_g(3,4) t7_g(3,4)])
+            % YZ Plot Update
+            set(g_baseLink_YZ,'XData',[t0_g(2) t1_g(2,4)],'YData',[t0_g(3) t1_g(3,4)])
+            set(g_link1_YZ,'XData',[t1_g(2,4) t2_g(2,4)],'YData',[t1_g(3,4) t2_g(3,4)])
+            set(g_link2_YZ,'XData',[t2_g(2,4) t3_g(2,4)],'YData',[t2_g(3,4) t3_g(3,4)])
+            set(g_link3_YZ,'XData',[t3_g(2,4) t4_g(2,4)],'YData',[t3_g(3,4) t4_g(3,4)])
+            set(g_link4_YZ,'XData',[t4_g(2,4) t5_g(2,4)],'YData',[t4_g(3,4) t5_g(3,4)])
+            set(g_link5_YZ,'XData',[t5_g(2,4) t6_g(2,4)],'YData',[t5_g(3,4) t6_g(3,4)])
+            set(g_link6_YZ,'XData',[t6_g(2,4) t7_g(2,4)],'YData',[t6_g(3,4) t7_g(3,4)])
+            % Values update
+            set(HgoalQ1Value,'String',num2str(goalQ1));
+            set(HgoalQ2Value,'String',num2str(goalQ2));
+            set(HgoalQ4Value,'String',num2str(goalQ4));
+            set(HGxValue,'String',num2str(t7_g(1,4)));
+            set(HGyValue,'String',num2str(t7_g(2,4)));
+            set(HGzValue,'String',num2str(t7_g(3,4)));
+            % Time parameters
             set(HtimeValue,'String',num2str(botSerial.frameData(1)));
             set(HloopValue,'String',num2str(botSerial.frameData(21)));
         end
