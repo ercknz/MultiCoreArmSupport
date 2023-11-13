@@ -136,13 +136,13 @@ void RobotControl::WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult,
 / Arm Support Inverse Kinematics Member function -------------------------------/
 /------------------------------------------------------------------------------*/
 void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
-  /*  TAKE NOTE:
+  /*  NOTE:
               xyz_M[3] = {x, y, z}
               q_M[3] = {q1, q2, q4} = {shoulder, elevation, elbow} 
   */
   float L1_XY, OUTER_R, R, alpha, presR, presAlpha, beta, gamma, detJ;
   for (int i=0; i<3; i++){
-    xyz_M[i]    = xyzPres_M[i] + goalXYZ[i];
+    xyz_M[i]    = goalXYZ[i];
     xyzDot_M[i] = goalXYZDot[i];
   }
 
