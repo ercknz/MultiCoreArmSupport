@@ -19,6 +19,7 @@ const float A1_LINK = 0.073;	 // Shoulder to 4bar linkage
 const float L1_LINK = 0.419;	 // length of 4bar linkage
 const float A2_LINK = 0.082;	 // 4bar linkage to elbow
 const float L2_LINK = 0.520;	 // elbow to sensor
+const float A3_LINK = 0.072;	 // Vertical Offset
 const float LINK_OFFSET = 0.035; // elbow to sensor offset
 
 // Dynamixel Parameters for calculations
@@ -77,8 +78,8 @@ void iKine(float *xyz_M)
 		xyz_M[2] = -_Z_LIMIT;
 
 	/* Find variables based on Z */
-	q_M[1] = asin(xyz_M[2] / _L1);
-	L1_XY = sqrt(pow(_L1, 2) - pow(xyz_M[2], 2));
+	q_M[1] = asin((xyz_M[2]-A3_LINK) / _L1);
+	L1_XY = sqrt(pow(_L1, 2) - pow((xyz_M[2]-A3_LINK), 2));
 
 	/* Checks if X and Y are both 0 */
 	if ((abs(xyz_M[0]) < 0.001) && (abs(xyz_M[1]) < 0.001))
@@ -94,7 +95,8 @@ void iKine(float *xyz_M)
 	alpha = atan2(xyz_M[1], xyz_M[0]);
 	if (alpha < 1.0f)
 		alpha += 2 * PI;
-	presR = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
+		printf("%f\n", alpha);
+	/*presR = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
 	presAlpha = atan2(xyzPres_M[1], xyzPres_M[0]);
 	if (presAlpha < 1.0f)
 		presAlpha += 2 * PI;
@@ -111,30 +113,32 @@ void iKine(float *xyz_M)
 	{
 		R = OUTER_R;
 		xyz_M[0] = OUTER_R * cos(alpha);
-		xyz_M[1] = OUTER_R * sin(alpha);
+		xyz_M[1] = OUTER_R * sin(alpha);                                   
 	}
 
-	/* Finds and checks Elbow Angle */
+	/* Finds and checks Elbow Angle *
 	if ((abs(R - presR) < 0.01) && (alpha < presAlpha))
 	{
 		q_M[2] = qPres_M[2];
 		gamma = PI - q_M[2];
 	}
 	else
-	{
+	{*/
 		gamma = acos((pow((_A1A2 + L1_XY), 2) + pow(_H_OF_L2, 2) - pow(xyz_M[0], 2) - pow(xyz_M[1], 2)) / (2 * _H_OF_L2 * (_A1A2 + L1_XY)));
-		q_M[2] = PI - gamma;
-	}
+		printf("%f\n", gamma);
+		q_M[2] = PI - gamma + _PHI;
+	//}
 
 	/* Finds and checks shoulder angle */
 	beta = asin((_H_OF_L2 * sin(gamma)) / R);
-	q_M[0] = alpha - beta + SHOULDER_OFFSET;
+	printf("%f\n", beta);
+	q_M[0] = alpha - beta;// + SHOULDER_OFFSET;
 
-	/* Check for nans */
+	/* Check for nans *
 	if (q_M[0] != q_M[0])
 		q_M[0] = qPres_M[0];
 	if (q_M[2] != q_M[2])
-		q_M[2] = qPres_M[2];
+		q_M[2] = qPres_M[2]; */
 
 	/* Check Jointspace Limits */
 	if (q_M[2] < _Q4_MIN)
@@ -157,10 +161,19 @@ void iKine(float *xyz_M)
 int main()
 {
 	iKine(goal1);
-	for (int i = 0; i < 3; i++){
-		std::cout << q_M[i];
-	}
-	std::endl;
+	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
+
+	iKine(goal2);
+	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
+
+	iKine(goal3);
+	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
+
+	iKine(goal4);
+	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
+
+	iKine(goal5);
+	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
 
 	return 0;
 }
