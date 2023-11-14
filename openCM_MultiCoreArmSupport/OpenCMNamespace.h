@@ -84,6 +84,7 @@ extern const float A1_LINK;      // Shoulder to 4bar linkage
 extern const float L1_LINK;      // length of 4bar linkage
 extern const float A2_LINK;      // 4bar linkage to elbow
 extern const float L2_LINK;      // elbow to sensor
+extern const float A3_LINK;      // Elbow Vertical Offset
 extern const float LINK_OFFSET;      // elbow to sensor offset
 
 // Spring Dynamics

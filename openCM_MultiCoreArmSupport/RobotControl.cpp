@@ -21,10 +21,11 @@
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Constructor ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl::RobotControl(const float A1, const float L1, const float A2, const float L2, const float Offset)
+RobotControl::RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float Offset)
   :_A1A2{A1 + A2},
   _L1{L1},
   _L2{L2},
+  _A3{A3},
   _OFFSET{Offset},
   _PHI{atan(Offset / L2)},
   _H_OF_L2{sqrt(pow(Offset, 2) + pow(L2, 2))},
@@ -151,8 +152,8 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   if (xyz_M[2] < -_Z_LIMIT) xyz_M[2] = -_Z_LIMIT;
 
   /* Find variables based on Z */
-  q_M[1]  = asin(xyz_M[2] / _L1);
-  L1_XY   = sqrt(pow(_L1, 2) - pow(xyz_M[2], 2));
+  q_M[1]  = asin((xyz_M[2] - _A3) / _L1);
+  L1_XY   = sqrt(pow(_L1, 2) - pow((xyz_M[2] - _A3), 2));
 
    /* Checks if X and Y are both 0 */
   if ((abs(xyz_M[0]) < 0.001) && (abs(xyz_M[1]) < 0.001)) {
@@ -165,10 +166,10 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   /* R and Alpha */
   R       = sqrt(pow(xyz_M[0], 2) + pow(xyz_M[1], 2));
   alpha   = atan2(xyz_M[1], xyz_M[0]);
-  if (alpha < 1.0f) alpha += 2 * PI;
+  if (alpha < 0.0f) alpha += 2 * PI;
   presR       = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
   presAlpha   = atan2(xyzPres_M[1], xyzPres_M[0]);
-  if (presAlpha < 1.0f) presAlpha += 2 * PI;
+  if (presAlpha < 0.0f) presAlpha += 2 * PI;
 
   /* Checks walls */
   OUTER_R = _A1A2 + _H_OF_L2 + L1_XY;
@@ -189,22 +190,23 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
     gamma = PI - q_M[2];
   } else {
     gamma = acos((pow((_A1A2 + L1_XY), 2) + pow(_H_OF_L2, 2) - pow(xyz_M[0], 2) - pow(xyz_M[1], 2)) / (2 * _H_OF_L2 * (_A1A2 + L1_XY)));
-    q_M[2] = PI - gamma;
+    q_M[2] = PI - gamma + _PHI;
   }
 
   /* Finds and checks shoulder angle */
   beta = asin((_H_OF_L2 * sin(gamma)) / R);
-  q_M[0] = alpha - beta + OCM::SHOULDER_OFFSET;
+  q_M[0] = alpha - beta;// + OCM::SHOULDER_OFFSET;
+  if (q_M[0] < 0.0f) q_M[0] += 2 * PI;
 
   /* Check for nans */
   if (q_M[0] != q_M[0]) q_M[0] = qPres_M[0];
   if (q_M[2] != q_M[2]) q_M[2] = qPres_M[2];
 
-  /* Check Jointspace Limits */
+  /* Check Jointspace Limits *
   if (q_M[2] < _Q4_MIN) q_M[2] = _Q4_MIN;
   if (q_M[2] > _Q4_MAX) q_M[2] = _Q4_MAX;
   if (q_M[0] < _Q1_MIN) q_M[0] = _Q1_MIN;
-  if (q_M[0] > _Q1_MAX) q_M[0] = _Q1_MAX;
+  if (q_M[0] > _Q1_MAX) q_M[0] = _Q1_MAX;*/
 
   /* Solve for joint angular velocities (psuedo inverse Jacobian) */
   detJ      = (-_L1 * sin(q_M[0]) - _L2 * sin(q_M[0] + q_M[2])) * (_L2 * cos(q_M[0] + q_M[2])) - (-_L2 * sin(q_M[0] + q_M[2])) * (_L1 * cos(q_M[0]) + _L2 * cos(q_M[0] + q_M[2]));

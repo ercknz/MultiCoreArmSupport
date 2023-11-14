@@ -14,13 +14,13 @@ classdef CommOpenCM < handle
         dt = 0.008
         port
         rawBytes
-        frameData = nan(1,21)
+        frameData = nan(1,24)
         
         txHeader = uint8([150, 10, 1, 101])
         txPacketLen = 60
         
         rxHeader = uint8([170, 6, 9, 69])
-        rxPacketLen = 90
+        rxPacketLen = 100
     end
     
     properties (Access = private)
@@ -79,7 +79,7 @@ classdef CommOpenCM < handle
                 obj.frameData(5) = double(typecast(uint8(obj.rawBytes(21:24)),'int32'));
                 obj.frameData(6) = double(typecast(uint8(obj.rawBytes(25:28)),'int32'));
                 obj.frameData(7) = double(typecast(uint8(obj.rawBytes(29:32)),'int32'));
-                % presCurrent
+                % presQ Cts
                 obj.frameData(8) = double(typecast(uint8(obj.rawBytes(33:36)),'int32'));
                 obj.frameData(9) = double(typecast(uint8(obj.rawBytes(37:40)),'int32'));
                 obj.frameData(10) = double(typecast(uint8(obj.rawBytes(41:44)),'int32'));
@@ -95,14 +95,19 @@ classdef CommOpenCM < handle
                 obj.frameData(17) = double(typecast(uint8(obj.rawBytes(69:72)),'int32'));
                 obj.frameData(18) = double(typecast(uint8(obj.rawBytes(73:76)),'int32'));
                 obj.frameData(19) = double(typecast(uint8(obj.rawBytes(77:80)),'int32'));
+                % goalQ cts
+                obj.frameData(20) = double(typecast(uint8(obj.rawBytes(81:84)),'int32'));
+                obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:88)),'int32'));
+                obj.frameData(22) = double(typecast(uint8(obj.rawBytes(89:92)),'int32'));
                 % Torque Mode
-                obj.frameData(20) = double(obj.rawBytes(84));
+                obj.frameData(23) = double(obj.rawBytes(94));
                 % Loop Time
-                obj.frameData(21) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                obj.frameData(24) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(21) = obj.frameData(21)*0.001;
-                obj.frameData(2:19) = obj.frameData(2:19)./10000;
+                obj.frameData(2:7) = obj.frameData(2:7)./10000;
+                obj.frameData(11:19) = obj.frameData(11:19)./10000;
+                obj.frameData(24) = obj.frameData(24)*0.001;
             end
         end
         

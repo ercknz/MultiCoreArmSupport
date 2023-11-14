@@ -93,7 +93,7 @@ void iKine(float *xyz_M)
 	/* R and Alpha */
 	R = sqrt(pow(xyz_M[0], 2) + pow(xyz_M[1], 2));
 	alpha = atan2(xyz_M[1], xyz_M[0]);
-	if (alpha < 1.0f)
+	if (alpha < 0.0f)
 		alpha += 2 * PI;
 		printf("%f\n", alpha);
 	/*presR = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
@@ -140,7 +140,7 @@ void iKine(float *xyz_M)
 	if (q_M[2] != q_M[2])
 		q_M[2] = qPres_M[2]; */
 
-	/* Check Jointspace Limits */
+	/* Check Jointspace Limits *
 	if (q_M[2] < _Q4_MIN)
 		q_M[2] = _Q4_MIN;
 	if (q_M[2] > _Q4_MAX)
@@ -148,7 +148,7 @@ void iKine(float *xyz_M)
 	if (q_M[0] < _Q1_MIN)
 		q_M[0] = _Q1_MIN;
 	if (q_M[0] > _Q1_MAX)
-		q_M[0] = _Q1_MAX;
+		q_M[0] = _Q1_MAX;*/
 
 	/* Solve for joint angular velocities (psuedo inverse Jacobian) *
 	detJ = (-_L1 * sin(q_M[0]) - _L2 * sin(q_M[0] + q_M[2])) * (_L2 * cos(q_M[0] + q_M[2])) - (-_L2 * sin(q_M[0] + q_M[2])) * (_L1 * cos(q_M[0]) + _L2 * cos(q_M[0] + q_M[2]));
@@ -160,6 +160,18 @@ void iKine(float *xyz_M)
 
 int main()
 {
+	/*printf("A1A2 = %f\n", _A1A2);
+	printf("Phi = %f\n", _PHI);
+	printf("HofL2 = %f\n", _H_OF_L2);
+	printf("Q1Max = %f\n", _Q1_MAX);
+	printf("Q1Min = %f\n", _Q1_MIN);
+	printf("Q2Limit = %f\n", _Q2_LIMIT);
+	printf("Q4max = %f\n", _Q4_MAX);
+	printf("Q4min = %f\n", _Q4_MIN);
+	printf("innerR = %f\n", _INNER_R);
+	printf("zLimit = %f\n", _Z_LIMIT);
+	printf("BetaI = %f\n", _BETAi);*/
+
 	iKine(goal1);
 	printf("%f\t%f\t%f\n", q_M[0], q_M[1], q_M[2]);
 

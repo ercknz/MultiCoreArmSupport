@@ -9,7 +9,7 @@ clear; clc; close all;
 robotSerialPort = 'COM7';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
-packetLen = 80;
+packetLen = 100;
 
 %% Log CSV file
 % logFileID = '_OpenCMframe_';

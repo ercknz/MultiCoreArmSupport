@@ -33,17 +33,19 @@ class SerialPackets {
   protected:
     const int   _BAUDRATE;
     HardwareSerial *c2cPort_M;
-    const int16_t _TX_PKT_LEN = 90;
+    const int16_t _TX_PKT_LEN = 100;
     const int16_t _RX_PKT_LEN = 60;
     const byte  _RXHEADER[4]  = {150, 10, 1, 101};
     const byte  _TXHEADER[4]  = {170, 6, 9, 69};
     const int16_t _presQ_SLOT = 8;
     const int16_t _presQDOT_SLOT = 20;
     const int16_t _presCURRENT_SLOT = 32;
+    const int16_t _presQcts_SLOT = 32;
     const int16_t _presXYZ_SLOT = 44;
     const int16_t _presXYZdot_SLOT = 56;
     const int16_t _goalQ_SLOT = 68;
-    const int16_t _BLANK_SLOT = 80;
+    const int16_t _goalQcts_SLOT = 80;
+    const int16_t _BLANK_SLOT = 92;
 
     bool testingMode_M = true;
 

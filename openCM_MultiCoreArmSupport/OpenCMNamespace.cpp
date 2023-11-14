@@ -77,13 +77,14 @@ const int VEL_MAX_LIMIT     = 100;
 const float SHOULDER_OFFSET = 0.6219;
 
 // Loop Parameters
-const float LOOP_DT     = 8; // Milliseconds
+const float LOOP_DT     = 5; // Milliseconds
 
 // Kinematic Constants
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage
 const float L1_LINK     = 0.419;      // length of 4bar linkage
 const float A2_LINK     = 0.082;      // 4bar linkage to elbow
 const float L2_LINK     = 0.520;      // elbow to sensor
+const float A3_LINK     = 0.072;      // Elbow Vertical Offset
 const float LINK_OFFSET = 0.035;      // elbow to sensor offset
 
 // Spring Dynamics
