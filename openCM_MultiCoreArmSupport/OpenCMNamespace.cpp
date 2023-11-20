@@ -73,7 +73,7 @@ const int ELEVATION_MIN_POS = 720;
 const int ELEVATION_MAX_POS = 3040;
 const int ELEVATION_CENTER  = (ELEVATION_MAX_POS + ELEVATION_MIN_POS) / 2;
 const float ELEVATION_RATIO = 2.2978;
-const int VEL_MAX_LIMIT     = 100;
+const int VEL_MAX_LIMIT     = 10;
 const float SHOULDER_OFFSET = 0.6219;
 
 // Loop Parameters

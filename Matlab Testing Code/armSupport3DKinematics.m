@@ -224,7 +224,6 @@ s_link6_YZ = plot([t6o(2,4) t7o(2,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color'
 set(plotYZHandle,'Position',[0.4 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
-iKine(t7o(1,4),t7o(2,4),t7o(3,4));
 
 % UI Controls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % buttons -----------------------------------------------------------------
@@ -257,6 +256,14 @@ set(HloopLabel,'Units','normalized','Position',[0.70 0.8 0.066 0.05],...
     'String','loopT:','Fontsize',20);
 HloopValue = uicontrol('Style','text');
 set(HloopValue,'Units','normalized','Position',[0.766 0.8 0.066 0.05],...
+    'String','0','Fontsize',20);
+
+% Drive Mode --------------------------------------------------------------
+HdriveModeLabel = uicontrol('Style','text');
+set(HdriveModeLabel,'Units','normalized','Position',[0.898 0.85 0.066 0.05],...
+    'String','DriveMode','Fontsize',16);
+HdriveModeValue = uicontrol('Style','text');
+set(HdriveModeValue,'Units','normalized','Position',[0.898 0.8 0.066 0.05],...
     'String','0','Fontsize',20);
 
 % Present Q1, Q2, Q4 ------------------------------------------------------
@@ -622,6 +629,7 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             % Time parameters
             set(HtimeValue,'String',num2str(botSerial.frameData(1)));
             set(HloopValue,'String',num2str(botSerial.frameData(24)));
+            set(HdriveModeValue,'String',num2str(botSerial.frameData(23)));
         end
     end
 

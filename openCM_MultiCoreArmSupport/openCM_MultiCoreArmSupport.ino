@@ -44,7 +44,7 @@ void setup() {
   /* Attempt to establish connection */
   //c2cComm.InitalizingComm();
   /* Wait for communication */
-  while (!Serial);// || c2cComm.InTestingMode()))
+  while (!Serial);// || c2cComm.InTestingMode()));
   /* Setup port and packet handlers */
   portHandler   = dynamixel::PortHandler::getPortHandler(OCM::DEVICEPORT);
   packetHandler = dynamixel::PacketHandler::getPacketHandler(OCM::PROTOCOL_VERSION);
@@ -74,7 +74,7 @@ void loop() {
   int  goalReturn;
   bool addParamResult = false;
   dynamixel::GroupSyncRead  syncReadPacket(portHandler, packetHandler, OCM::ADDRESS_PRESENT_VELOCITY, OCM::LEN_PRESENT_VELOCITY + OCM::LEN_PRESENT_POSITION);
-  dynamixel::GroupSyncWrite syncWritePacket(portHandler, packetHandler, OCM::ADDRESS_GOAL_POSITION, OCM::LEN_GOAL_POSITION);
+  dynamixel::GroupSyncWrite syncWritePacket(portHandler, packetHandler, OCM::ADDRESS_PROFILE_VELOCITY, OCM::LEN_GOAL_POSITION + OCM::LEN_PROFILE_VELOCITY);
   addParamResult = syncReadPacket.addParam(OCM::ID_SHOULDER);
   addParamResult = syncReadPacket.addParam(OCM::ID_ELBOW);
   addParamResult = syncReadPacket.addParam(OCM::ID_ELEVATION);
