@@ -61,7 +61,7 @@ void setup() {
 void loop() {
   delay(100);
   /* Motor Packet Configuration */
-  //ArmRobot.MotorConfig(portHandler, packetHandler);
+  ArmRobot.MotorConfig(portHandler, packetHandler);
   delay(100);
 
   /* Other Variables needed */

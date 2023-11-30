@@ -277,13 +277,13 @@ void  RobotControl::EnableTorque(dynamixel::PortHandler *portHandler, dynamixel:
   using namespace OCM;
   currentTorqueMode_M = state;
   int dxlCommResult;
-//  if ((state == 5)||(state == 10)){
-//    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_SHOULDER,     ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
-//    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_ELBOW,        ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
-//  }
-//  if ((state == 5)||(state == 15)){
-//    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_ELEVATION,    ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
-//  }
+  if ((state == 5)||(state == 10)){
+    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_SHOULDER,     ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
+    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_ELBOW,        ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
+  }
+  if ((state == 5)||(state == 15)){
+    dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_ELEVATION,    ADDRESS_TORQUE_ENABLE, ENABLE, &dxl_error);
+  }
   if ((state == 20)||(state == 10)){
     dxlCommResult = packetHandler->write1ByteTxRx(portHandler, ID_ELEVATION,    ADDRESS_TORQUE_ENABLE, DISABLE, &dxl_error);
   }
