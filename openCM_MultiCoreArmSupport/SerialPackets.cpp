@@ -24,9 +24,11 @@ SerialPackets::SerialPackets(HardwareSerial  *ptrSer, const int baudrate)
 /-------------------------------------------------------------------------------------------------------*/
 void SerialPackets::InitalizingComm(){
   c2cPort_M->begin(_BAUDRATE);
-  for (int i = 0; i < 10; i++){
+  for (int i = 0; i < 30; i++){
     if (c2cPort_M->available() > 0){
+      Serial.println("a");
       if (c2cPort_M->read() == 0x01){
+        Serial.println("b");
         c2cPort_M->write(0x02);
         digitalWrite(OCM::COMM_LED_PIN, HIGH);
         testingMode_M = false;
@@ -34,6 +36,7 @@ void SerialPackets::InitalizingComm(){
       }
     }
     delay(1000);
+    Serial.println(i);
   }
 }
 
@@ -41,7 +44,7 @@ void SerialPackets::InitalizingComm(){
 / Serial Packets Setters and  Getters -------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 bool SerialPackets::DataAvailable() {
-  if (Serial){
+  if (Serial && testingMode_M){
     return Serial.available();
   } 
   return c2cPort_M->available();
@@ -191,7 +194,7 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   // Flag Reset
   dataRequested_M = false;
   // write data packet
-  if (Serial){
+  if (Serial && testingMode_M){
     Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }
@@ -226,7 +229,7 @@ void SerialPackets::ReadPackets() {
   
   /* Check for instructions */
   unsigned long timeOUtTime = millis();
-  if (Serial){
+  if (Serial && testingMode_M){
     while (Serial.available() < _RX_PKT_LEN) {
       if (millis() - timeOUtTime > 5){
         while(Serial.available()) Serial.read();
@@ -244,7 +247,7 @@ void SerialPackets::ReadPackets() {
   
   
   /* Read Instructions */
-  if (Serial){
+  if (Serial && testingMode_M){
     for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
       dataPacket[i] = Serial.read();
     }

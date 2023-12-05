@@ -29,7 +29,7 @@ dynamixel::PacketHandler *packetHandler;
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 RobotControl    ArmRobot = RobotControl(OCM::A1_LINK, OCM::L1_LINK, OCM::A2_LINK, OCM::L2_LINK, OCM::A3_LINK, OCM::LINK_OFFSET);
-SerialPackets   c2cComm  = SerialPackets(&Serial1, OCM::SERIAL_BAUDRATE);
+SerialPackets   c2cComm  = SerialPackets(&Serial2, OCM::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
 / Setup function -------------------------------------------------------------------------/
@@ -42,9 +42,17 @@ void setup() {
   pinMode(OCM::TORQUE_SWITCH_PIN, INPUT_PULLUP);
   //pinMode(OCM::C2C_PIN, INPUT);
   /* Attempt to establish connection */
-  //c2cComm.InitalizingComm();
+  c2cComm.InitalizingComm();
+
+  while (!Serial);
+  while(Serial){
+    delay(1000);
+    Serial.println("...expired...");
+    Serial.println(c2cComm.InTestingMode());
+  }
+  
   /* Wait for communication */
-  while (!Serial);// || c2cComm.InTestingMode()));
+  while (!Serial || c2cComm.InTestingMode());
   /* Setup port and packet handlers */
   portHandler   = dynamixel::PortHandler::getPortHandler(OCM::DEVICEPORT);
   packetHandler = dynamixel::PacketHandler::getPacketHandler(OCM::PROTOCOL_VERSION);
@@ -95,7 +103,7 @@ void loop() {
   c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
   /* Main Loop */
-  while (Serial){// || !c2cComm.InTestingMode()) {
+  while (Serial || !c2cComm.InTestingMode()) {
     digitalWrite(OCM::COMM_LED_PIN, LOW);
     currentTime = millis();
 
@@ -133,7 +141,7 @@ void loop() {
       }
     }
   }
-  if (!Serial){//|| c2cComm.InTestingMode()) {
+  if (!Serial || c2cComm.InTestingMode()) {
     digitalWrite(OCM::COMM_LED_PIN, HIGH);
     ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
     while(!Serial);
