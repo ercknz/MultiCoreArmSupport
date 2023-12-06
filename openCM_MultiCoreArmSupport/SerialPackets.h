@@ -35,8 +35,8 @@ class SerialPackets {
     HardwareSerial *c2cPort_M;
     const int16_t _TX_PKT_LEN = 100;
     const int16_t _RX_PKT_LEN = 60;
-    const byte  _RXHEADER[4]  = {150, 10, 1, 101};
-    const byte  _TXHEADER[4]  = {170, 6, 9, 69};
+    const byte  _RXHEADER[4]  = {150, 10, 1, 101};  //Header for all incoming packets
+    const byte  _TXHEADER[4]  = {170, 6, 9, 69};    //Header for outgoing packets
     const int16_t _presQ_SLOT = 8;
     const int16_t _presQDOT_SLOT = 20;
     const int16_t _presCURRENT_SLOT = 32;

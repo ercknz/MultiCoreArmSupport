@@ -45,7 +45,7 @@ void setup() {
   c2cComm.InitalizingComm();
 
   while (!Serial);
-  while(Serial){
+  if (Serial){
     delay(1000);
     Serial.println("...expired...");
     Serial.println(c2cComm.InTestingMode());

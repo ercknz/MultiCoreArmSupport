@@ -32,6 +32,9 @@ void SerialPackets::InitalizingComm(){
         c2cPort_M->write(0x02);
         digitalWrite(OCM::COMM_LED_PIN, HIGH);
         testingMode_M = false;
+        while (c2cPort_M->available() > 0){
+          c2cPort_M->read();
+        }
         break;
       }
     }
@@ -46,7 +49,7 @@ void SerialPackets::InitalizingComm(){
 bool SerialPackets::DataAvailable() {
   if (Serial && testingMode_M){
     return Serial.available();
-  } 
+  }
   return c2cPort_M->available();
 }
 
@@ -199,6 +202,10 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
     return;
   }
   c2cPort_M->write(dataPacket,_TX_PKT_LEN); 
+  for (int i = 0; i < _TX_PKT_LEN; i++){
+    Serial.print(dataPacket[i]); Serial.print(" ");
+  }
+  Serial.println("");
 }
 
 /* ------------------------------------------------------------------------------------------------------/
