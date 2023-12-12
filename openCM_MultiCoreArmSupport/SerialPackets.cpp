@@ -277,6 +277,10 @@ void SerialPackets::ReadPackets() {
 
   /* Escapes */
   if (sumCheck != CHECKSUM) return;
+  if (memcmp(_ZEROHEADER, tempHeader, sizeof(_ZEROHEADER)) == 0){
+    testingMode_M = true;
+    return;
+  }
   if (memcmp(_RXHEADER, tempHeader, sizeof(_RXHEADER)) != 0) return;
   uint8_t packetType = dataPacket[5];
   if (packetType > 7) return;

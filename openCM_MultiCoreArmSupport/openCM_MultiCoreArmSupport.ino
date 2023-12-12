@@ -40,7 +40,7 @@ void setup() {
   /* Set up pins */
   pinMode(OCM::COMM_LED_PIN, OUTPUT);
   pinMode(OCM::TORQUE_SWITCH_PIN, INPUT_PULLUP);
-  //pinMode(OCM::C2C_PIN, INPUT);
+  
   /* Attempt to establish connection */
   c2cComm.InitalizingComm();
 
@@ -141,9 +141,7 @@ void loop() {
       }
     }
   }
-  if (!Serial || c2cComm.InTestingMode()) {
-    digitalWrite(OCM::COMM_LED_PIN, HIGH);
-    ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
-    while(!Serial);
-  }
+  digitalWrite(OCM::COMM_LED_PIN, HIGH);
+  ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
+  while(!Serial || c2cComm.InTestingMode());
 }
