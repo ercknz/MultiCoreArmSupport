@@ -14,7 +14,7 @@
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Contructor  -----------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
-PCComm::PCComm(HardwareSerial  *ptrSer, const int baudrate)
+PCComm::PCComm(usb_serial_class  *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
   pcPort_M = ptrSer;
@@ -25,85 +25,63 @@ PCComm::PCComm(HardwareSerial  *ptrSer, const int baudrate)
 / Serial Packets Setters and  Getters -------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 bool PCComm::DataAvailable() {
-  if (Serial){
-    return Serial.available();
-  } 
   return pcPort_M->available();
 }
 
-bool PCComm::NewGoalAvailable(){
-  return newGoal_M;
-}
-
-uint8_t PCComm::GetNewMode(){
-  return mode_M;
-}
-
-float * PCComm::GetNewGoalQ(){
-  return goalQ_M;
-}
-
-float * PCComm::GetNewGoalQdot(){
-  return goalQdot_M;
-}
-
-float * PCComm::GetNewGoalCurrent(){
-  return goalCurrent_M;
-}
-
-void PCComm::NewGoalsPulled(){
-  newGoal_M = false;
-  return;
-}
-
-bool PCComm::DataAvailable() {
-  return pcPort_M->available();
-}
 bool PCComm::ModifyMassXY() {
   return _NEW_MASS_XY;
 }
+
 bool PCComm::ModifyMassZ() {
   return _NEW_MASS_Z;
 }
+
 bool PCComm::ModifyDampingXY() {
   return _NEW_DAMPING_XY;
 }
+
 bool PCComm::ModifyDampingZ() {
   return _NEW_DAMPING_Z;
 }
+
 bool PCComm::ModifyScalingFactor() {
   return _NEW_SCALING_FACTOR;
 }
-bool PCComm::ModifyMode(){
-  return _NEW_MODE;
-}
+
 bool PCComm::ModifyFilter() {
   return _NEW_FILTER;
 }
+
 float PCComm::GetNewMassXY() {
   _NEW_MASS_XY = false;
   return newMassXY_M;
 }
+
 float PCComm::GetNewMassZ() {
   _NEW_MASS_Z = false;
   return newMassZ_M;
 }
+
 float PCComm::GetNewDampingXY() {
   _NEW_DAMPING_XY = false;
   return newDampingXY_M;
 }
+
 float PCComm::GetNewDampingZ() {
   _NEW_DAMPING_Z = false;
   return newDampingZ_M;
 }
+
 float PCComm::GetNewScalingFactor() {
   _NEW_SCALING_FACTOR = false;
   return newScalingFactor_M;
 }
+
 uint8_t PCComm::GetNewMode(){
   _NEW_MODE = false;
   return newMode_M;
 }
+
 float * PCComm::GetExternalForces(){
   if (~_NEW_EXT_FORCE_X) {
     ExtForces_M[0] = 0.0f;
@@ -126,6 +104,7 @@ float PCComm::GetNewFilter() {
 
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Writer ----------------------------------------------------------------------------------/
+/ - Streams data back to the PC for logging or inferfacing ----------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, AdmittanceModel &Model, RobotComm &Robot, unsigned long &loopTime) {
   byte dataPacket[_TX_PKT_LEN] = {0};
@@ -376,9 +355,9 @@ void PCComm::ReadPackets() {
   goalCurrent_M[0] = bytesToFloat(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
   goalCurrent_M[1] = bytesToFloat(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
   goalCurrent_M[2] = bytesToFloat(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
-}
 
-byte RXPacket[_RX_PKT_LEN];
+
+  byte RXPacket[_RX_PKT_LEN];
   byte tempHeader[4];
   int16_t SumCheck;
   int16_t CHECKSUM;

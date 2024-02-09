@@ -16,6 +16,7 @@
 #include "RobotComm.h"
 #include "AdmittanceModel.h"
 #include "PCComm.h"
+#include "ArmSupportNamespace.h"
 
 /* ---------------------------------------------------------------------------------------/
 / Model Constants and Initial Parameters -------------------------------------------------/
@@ -34,7 +35,7 @@ float initDampingZ    = 4.5f;   // N*(sec/m)
 ForceSensor     ati         = ForceSensor(0.99); 
 RobotComm       robot       = RobotComm();
 AdmittanceModel admitModel  = AdmittanceModel(initMassXY, initMassZ, initDampingXY, initDampingZ, GRAVITY, MODEL_DT);
-PCComm          pcComm      = PCComm();
+PCComm          pc          = PCComm(&Serial, ASR::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
 / Setup function -------------------------------------------------------------------------/
@@ -42,9 +43,7 @@ PCComm          pcComm      = PCComm();
 void setup() {
   /* Wait for Serial Comm */
   while (!Serial);
-  /* Set pin modes */
-  pinMode(ASR::CAL_BUTTON_PIN, INPUT_PULLDOWN);
-  pinMode(ASR::TORQUE_SWITCH_PIN, INPUT_PULLUP);
+
   delay(100);
   // Set Analog Resolution
   analogReadResolution(13);
@@ -121,8 +120,7 @@ void loop() {
       pcComm.WritePackets(totalTime, ati, admitModel, robot, loopTime);
     }
   }
-  if (!Serial) {
-    robot.WriteToRobot();
-    while (!Serial);
-  }
+  robot.WriteToRobot();
+  while (!Serial);
+  
 }

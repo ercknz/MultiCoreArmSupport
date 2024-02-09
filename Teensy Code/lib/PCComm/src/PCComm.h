@@ -14,7 +14,7 @@
 
 class PCComm {
   public:
-         PCComm(HardwareSerial  *ptrSer, const int baudrate);
+         PCComm(usb_serial_class  *ptrSer, const int baudrate);
     bool DataAvailable();
     void ReadPackets();
     void WritePackets(unsigned long &totalTime, ForceSensor &Sensor, AdmittanceModel &Model, RobotComm &Robot, unsigned long &loopTime);
@@ -36,7 +36,7 @@ class PCComm {
 
   protected:
     const int   _BAUDRATE;
-    HardwareSerial *pcPort_M;
+    usb_serial_class *pcPort_M;
     const byte  _CONFIGHEADER[4]  = {150, 0, 69, 8};
     const byte  _MODHEADER[4]     = {150, 10, 10, 96};
     const int16_t _RX_PKT_LEN = 39;
