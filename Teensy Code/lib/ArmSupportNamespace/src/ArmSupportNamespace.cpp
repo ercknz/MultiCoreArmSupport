@@ -14,7 +14,7 @@ namespace ASR
 /----------------------------------------------------------------------------------------*/
 // Dynamixel Communication Parameters
 const float   PROTOCOL_VERSION  = 2.0;
-const int     SENSOR_BAUDRATE   = 1000000;
+const int     CONTROLLER_BAUDRATE = 1000000;
 const int     SERIAL_BAUDRATE   = 115200;
 const int     MOTOR_BAUDRATE    = 1000000;
 const char   *DEVICEPORT        = "3";

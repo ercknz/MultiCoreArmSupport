@@ -14,7 +14,7 @@ namespace ASR
 /----------------------------------------------------------------------------------------*/
 // Dynamixel Communication Parameters
 extern const float   PROTOCOL_VERSION;
-extern const int     SENSOR_BAUDRATE;
+extern const int     CONTROLLER_BAUDRATE;
 extern const int     SERIAL_BAUDRATE;
 extern const int     MOTOR_BAUDRATE;
 extern const char   *DEVICEPORT;

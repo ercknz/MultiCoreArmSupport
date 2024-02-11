@@ -11,7 +11,7 @@
 
 class RobotComm {
   public:
-          RobotComm();
+          RobotComm(const int baudrate);
     void  EnableTorque();
     void  ReadRobot();
     void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
@@ -62,13 +62,13 @@ class RobotComm {
 
     int16_t torqueState_M;
 
-    const float  _A1A2,      _L1,        _L2;
-    const double _OFFSET,    _PHI,       _H_OF_L2;
-    const double _Q1_MIN,    _Q1_MAX;
-    const double _Q2_LIMIT;
-    const double _Q4_MIN,    _Q4_MAX;
-    const double _INNER_R,   _Z_LIMIT;
-    const double _SPRING_Li, _BETAi, _SPRING_Fi;
+    // const float  _A1A2,      _L1,        _L2;
+    // const double _OFFSET,    _PHI,       _H_OF_L2;
+    // const double _Q1_MIN,    _Q1_MAX;
+    // const double _Q2_LIMIT;
+    // const double _Q4_MIN,    _Q4_MAX;
+    // const double _INNER_R,   _Z_LIMIT;
+    // const double _SPRING_Li, _BETAi, _SPRING_Fi;
     
 };
 

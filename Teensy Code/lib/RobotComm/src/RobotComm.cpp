@@ -20,7 +20,9 @@
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Constructor ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotComm::RobotComm(){
+RobotComm::RobotComm(const int baudrate)
+  : _BAUDRATE{baudrate}
+{
   //scalingFactor_M = SPRING_FORCE_SCALING_FACTOR;
 }
 
@@ -205,10 +207,6 @@ void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZ
   dataPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
 
   // write data packet
-  if (Serial){
-    Serial.write(dataPacket,_TX_PKT_LEN);
-    return;
-  }
   robotPort_M->write(dataPacket,_TX_PKT_LEN); 
 }
 

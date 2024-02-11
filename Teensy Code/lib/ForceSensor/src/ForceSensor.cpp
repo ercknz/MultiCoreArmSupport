@@ -39,16 +39,20 @@ ForceSensor::ForceSensor(const float filterWeight)
 /* ---------------------------------------------------------------------------------------/
 / Force Sensor Memeber Getter and Setter Functions ---------------------------------------/
 /----------------------------------------------------------------------------------------*/
-int *ForceSensor::GetRawCtsFT(){
+int * ForceSensor::GetRawCtsFT(){
   return ftxyzRawCts_M;
 }
 
-float *ForceSensor::GetRawFT(){
+float * ForceSensor::GetRawFT(){
   return ftxyzRaw_M;
 }
 
-float *ForceSensor::GetFilteredFT(){
+float * ForceSensor::GetFilteredFT(){
   return ftxyzFilt_M;
+}
+
+float * ForceSensor::GetGlobalFT(){
+  return ftxyzGlobal_M;
 }
 
 float ForceSensor::GetFilterWeight(){
@@ -138,3 +142,14 @@ void ForceSensor::CalibrateSensor(){
       ftxyzFilt_M[i] = FilterWeight_M * (ftxyzRaw_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * ftxyzLastFilt_M[i];
     }
   }
+
+  /* ---------------------------------------------------------------------------------------/
+/ Force Sensor Global Forces -------------------------------------------------------------/
+/----------------------------------------------------------------------------------------*/
+void ForceSensor::CalculateGlobalForces(float *q) {
+  // q[] = [q1, q2, q4]
+  ReadForceSensor();
+  ftxyzGlobal_M[0] = ftxyzFilt_M[0] * ( sin(q[0] + q[2])) + ftxyzFilt_M[1] * (-cos(q[0] + q[2]));
+  ftxyzGlobal_M[1] = ftxyzFilt_M[0] * (-cos(q[0] + q[2])) + ftxyzFilt_M[1] * (-sin(q[0] + q[2]));
+  ftxyzGlobal_M[2] = -ftxyzFilt_M[2];
+}

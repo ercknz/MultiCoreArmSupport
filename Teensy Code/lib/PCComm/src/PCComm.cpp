@@ -77,11 +77,6 @@ float PCComm::GetNewScalingFactor() {
   return newScalingFactor_M;
 }
 
-uint8_t PCComm::GetNewMode(){
-  _NEW_MODE = false;
-  return newMode_M;
-}
-
 float * PCComm::GetExternalForces(){
   if (~_NEW_EXT_FORCE_X) {
     ExtForces_M[0] = 0.0f;
@@ -102,12 +97,48 @@ float PCComm::GetNewFilter() {
   return newFilter_M;
 }
 
+bool PCComm::NewGoalQAvailable(){
+  return newGoalQ_M;
+}
+
+bool PCComm::NewGoalQdotAvailable(){
+  return newGoalQdot_M;
+}
+
+bool PCComm::NewGoalCurrentAvailable(){
+  return newGoalCurrent_M;
+}
+
+float * PCComm::GetNewGoalQ(){
+  newGoalQ_M = false;
+  return goalQ_M;
+}
+
+float * PCComm::GetNewGoalQdot(){
+  newGoalQdot_M = false;
+  return goalQdot_M;
+}
+
+float * PCComm::GetNewCurrent(){
+  newGoalCurrent_M = false;
+  return goalCurrent_M;
+}
+
+bool PCComm::ChangeTorqueMode(){
+  return newTorqueMode_M;
+}
+
+uint8_t PCComm::GetNewMode(){
+  newTorqueMode_M = false;
+  return torqueMode_M;
+}
+
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Writer ----------------------------------------------------------------------------------/
 / - Streams data back to the PC for logging or inferfacing ----------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, AdmittanceModel &Model, RobotComm &Robot, unsigned long &loopTime) {
-  byte dataPacket[_TX_PKT_LEN] = {0};
+  byte RxPacket[_TX_PKT_LEN] = {0};
   int16_t slotsFilled   = 0;
   int16_t dataPosition  = 44;
   uint16_t packetSum    = 0;
@@ -115,34 +146,34 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 
   // Header Bytes 
   for (int16_t i = 0; i < 4; i++) {
-    dataPacket[i] = _WRITEHEADER[i];
+    RxPacket[i] = _WRITEHEADER[i];
   }
 
   // Elapsed Time 
-  dataPacket[4] = DXL_LOBYTE(DXL_LOWORD(totalTime));
-  dataPacket[5] = DXL_HIBYTE(DXL_LOWORD(totalTime));
-  dataPacket[6] = DXL_LOBYTE(DXL_HIWORD(totalTime));
-  dataPacket[7] = DXL_HIBYTE(DXL_HIWORD(totalTime));
+  RxPacket[4] = DXL_LOBYTE(DXL_LOWORD(totalTime));
+  RxPacket[5] = DXL_HIBYTE(DXL_LOWORD(totalTime));
+  RxPacket[6] = DXL_LOBYTE(DXL_HIWORD(totalTime));
+  RxPacket[7] = DXL_HIBYTE(DXL_HIWORD(totalTime));
 
   // Global Forces, Positions, and Velocities
   byte * GlobalF_bytes = floatArrayToBytes(Sensor.GetGlobalF());
   for (int16_t i = 8; i < 20; i++) {
-    dataPacket[i] = GlobalF_bytes[i - 8];
+    RxPacket[i] = GlobalF_bytes[i - 8];
   }
   byte * PresPos_bytes = floatArrayToBytes(Robot.GetPresPos());
   for (int16_t i = 20; i < 32; i++) {
-    dataPacket[i] = PresPos_bytes[i - 20];
+    RxPacket[i] = PresPos_bytes[i - 20];
   }
   byte * PresVel_bytes = floatArrayToBytes(Robot.GetPresVel());
   for (int16_t i = 32; i < 44; i++) {
-    dataPacket[i] = PresVel_bytes[i - 32];
+    RxPacket[i] = PresVel_bytes[i - 32];
   }
 
   // Optional Data Slots
   if (_SEND_RAWF && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * RawF_bytes = floatArrayToBytes(Sensor.GetRawF());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = RawF_bytes[i - dataPosition];
+      RxPacket[i] = RawF_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -150,7 +181,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_XYZGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * xyzGoal_bytes = floatArrayToBytes(Model.GetGoalPos());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = xyzGoal_bytes[i - dataPosition];
+      RxPacket[i] = xyzGoal_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -158,7 +189,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_XYZDOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * xyzDotGoal_bytes = floatArrayToBytes(Model.GetGoalVel());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = xyzDotGoal_bytes[i - dataPosition];
+      RxPacket[i] = xyzDotGoal_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -166,7 +197,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_XYZBOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * xyzBotGoal_bytes = floatArrayToBytes(Robot.GetGoalPos());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = xyzBotGoal_bytes[i - dataPosition];
+      RxPacket[i] = xyzBotGoal_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -174,7 +205,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_XYZDOTBOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * xyzDotBotGoal_bytes = floatArrayToBytes(Robot.GetGoalVel());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = xyzDotBotGoal_bytes[i - dataPosition];
+      RxPacket[i] = xyzDotBotGoal_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -182,7 +213,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_PRESQCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * PresQCts_bytes = int32ArrayToBytes(Robot.GetPresQCts());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = PresQCts_bytes[i - dataPosition];
+      RxPacket[i] = PresQCts_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -190,7 +221,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_PRESQDOTCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * PresQDotCts_bytes = int32ArrayToBytes(Robot.GetPresQDotCts());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = PresQDotCts_bytes[i - dataPosition];
+      RxPacket[i] = PresQDotCts_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -198,7 +229,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_PRESQ && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * PresQ_bytes = floatArrayToBytes(Robot.GetPresQ());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = PresQ_bytes[i - dataPosition];
+      RxPacket[i] = PresQ_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -206,7 +237,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_PRESQDOT && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * PresQDot_bytes = floatArrayToBytes(Robot.GetPresQDot());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = PresQDot_bytes[i - dataPosition];
+      RxPacket[i] = PresQDot_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -214,7 +245,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_GOALQCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * GoalQCts_bytes = int32ArrayToBytes(Robot.GetGoalQCts());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = GoalQCts_bytes[i - dataPosition];
+      RxPacket[i] = GoalQCts_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -222,7 +253,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_GOALQDOTCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * GoalQDotCts_bytes = int32ArrayToBytes(Robot.GetGoalQDotCts());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = GoalQDotCts_bytes[i - dataPosition];
+      RxPacket[i] = GoalQDotCts_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -230,7 +261,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_GOALQ && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * GoalQ_bytes = floatArrayToBytes(Robot.GetGoalQ());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = GoalQ_bytes[i - dataPosition];
+      RxPacket[i] = GoalQ_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -238,7 +269,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_GOALQDOT && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * GoalQDot_bytes = floatArrayToBytes(Robot.GetGoalQDot());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = GoalQDot_bytes[i - dataPosition];
+      RxPacket[i] = GoalQDot_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -246,7 +277,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_MASS && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * Mass_bytes = floatArrayToBytes(Model.GetMass());
     for (int16_t i = dataPosition; i < dataPosition + (2 * byteLen); i++) {
-      dataPacket[i] = Mass_bytes[i - dataPosition];
+      RxPacket[i] = Mass_bytes[i - dataPosition];
     }
     slotsFilled += 2;
     dataPosition += (2 * byteLen);
@@ -254,7 +285,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_DAMPING && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * Damping_bytes = floatArrayToBytes(Model.GetDamping());
     for (int16_t i = dataPosition; i < dataPosition + (2 * byteLen); i++) {
-      dataPacket[i] = Damping_bytes[i - dataPosition];
+      RxPacket[i] = Damping_bytes[i - dataPosition];
     }
     slotsFilled += 2;
     dataPosition += (2 * byteLen);
@@ -262,7 +293,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_SPRING_F && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * springF_bytes = floatToBytes(Robot.GetSpringForce());
     for (int16_t i = dataPosition; i < dataPosition + byteLen; i++) {
-      dataPacket[i] = springF_bytes[i - dataPosition];
+      RxPacket[i] = springF_bytes[i - dataPosition];
     }
     slotsFilled += 1;
     dataPosition += byteLen;
@@ -270,7 +301,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_TOTAL_FORCES && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * totalF_bytes = floatArrayToBytes(Model.GetTotalForces());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      dataPacket[i] = totalF_bytes[i - dataPosition];
+      RxPacket[i] = totalF_bytes[i - dataPosition];
     }
     slotsFilled += 3;
     dataPosition += (3 * byteLen);
@@ -278,118 +309,83 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   if (_SEND_FORCE_FILTER && slotsFilled < _MAX_TX_DATA_SLOTS) {
     byte * forceFilter_bytes = floatToBytes(Sensor.GetForceFilter());
     for (int16_t i = dataPosition; i < dataPosition + byteLen; i++) {
-      dataPacket[i] = forceFilter_bytes[i - dataPosition];
+      RxPacket[i] = forceFilter_bytes[i - dataPosition];
     }
     slotsFilled += 1;
     dataPosition += byteLen;
   }
 
   // looptime
-  dataPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 5] = DXL_HIBYTE(DXL_LOWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 4] = DXL_LOBYTE(DXL_HIWORD(loopTime));
-  dataPacket[_TX_PKT_LEN - 3] = DXL_HIBYTE(DXL_HIWORD(loopTime));
+  RxPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(loopTime));
+  RxPacket[_TX_PKT_LEN - 5] = DXL_HIBYTE(DXL_LOWORD(loopTime));
+  RxPacket[_TX_PKT_LEN - 4] = DXL_LOBYTE(DXL_HIWORD(loopTime));
+  RxPacket[_TX_PKT_LEN - 3] = DXL_HIBYTE(DXL_HIWORD(loopTime));
 
   // check Sum
   for (int16_t i = 0; i < _TX_PKT_LEN - 2; i++) {
-    packetSum += dataPacket[i];
+    packetSum += RxPacket[i];
   }
-  dataPacket[_TX_PKT_LEN - 2] = floor(packetSum / 256);
-  dataPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
+  RxPacket[_TX_PKT_LEN - 2] = floor(packetSum / 256);
+  RxPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
 
   // write data packet
-  pcPort_M->write(dataPacket,_TX_PKT_LEN);
+  pcPort_M->write(RxPacket,_TX_PKT_LEN);
 }
 
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Reader ----------------------------------------------------------------------------------/
 /-------------------------------------------------------------------------------------------------------*/
 void PCComm::ReadPackets() {
-  // RX = [Header, Mode, Q1, Q2, Q4, Qdot1, Qdot2, Qdot4, T1, T2, T4, _, CheckSum]
-  byte dataPacket[_RX_PKT_LEN];
-  byte tempHeader[4];
-  int16_t SumCheck;
-  int16_t CHECKSUM;
-  
-  unsigned long timeOUtTime = millis();
-  while (pcPort_M->available() < _RX_PKT_LEN) {
-    if (millis() - timeOUtTime > 10){
-      return;
-    }
-  }
-  
-  for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
-    dataPacket[i] = pcPort_M->read();
-  }
-  
-  CHECKSUM = bytesToCounts(dataPacket[_RX_PKT_LEN - 2], dataPacket[_RX_PKT_LEN - 1]);
-  SumCheck = 0;
-  for (int16_t i = 0; i < _RX_PKT_LEN - 2; i++) {
-    SumCheck += dataPacket[i];
-  }
-  
-  for (int16_t i = 0; i < 4; i++) {
-    tempHeader[i] = dataPacket[i];
-  }
-
-  if (SumCheck != CHECKSUM) return;
-
-  if (memcmp(_RXHEADER, tempHeader, sizeof(_RXHEADER)) != 0) return;
-  
-  newGoal_M = true;
-
-  /* Drive Mode */
-  mode_M = dataPacket[5];
-
-  /* GoalQ slot = 8 */
-  goalQ_M[0] = bytesToFloat(dataPacket[8], dataPacket[9], dataPacket[10], dataPacket[11]);
-  goalQ_M[1] = bytesToFloat(dataPacket[12], dataPacket[13], dataPacket[14], dataPacket[15]);
-  goalQ_M[2] = bytesToFloat(dataPacket[16], dataPacket[17], dataPacket[18], dataPacket[19]);
-
-  /* GoalQdot slot = 20 */
-  goalQdot_M[0] = bytesToFloat(dataPacket[20], dataPacket[21], dataPacket[22], dataPacket[23]);
-  goalQdot_M[1] = bytesToFloat(dataPacket[24], dataPacket[25], dataPacket[26], dataPacket[27]);
-  goalQdot_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
-
-  /* GoalCurrent slot = 32 */
-  goalCurrent_M[0] = bytesToFloat(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
-  goalCurrent_M[1] = bytesToFloat(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
-  goalCurrent_M[2] = bytesToFloat(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
-
-
+  /* Rx Packet Structure : Header: [ 0, 1, 2, 3,...
+                          Actions:   4, 5, 6,...
+                             Data:   7 - 47,...
+                         CheckSum:  48, 49]
+  */
   byte RXPacket[_RX_PKT_LEN];
   byte tempHeader[4];
   int16_t SumCheck;
   int16_t CHECKSUM;
-  while (pcPort_M->available() < _RX_PKT_LEN) {}
+
+  // Check for instructions
+  unsigned long timeOutTime = millis();
+  while (pcPort_M->available() < _RX_PKT_LEN) {
+    if (millis() - timeOutTime > 5){
+        while(pcPort_M->available()) pcPort_M->read();
+        return;
+    }
+  }
+  
+  // Read Instructions
   for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
     RXPacket[i] = pcPort_M->read();
   }
+
+  // Verify Packet
   CHECKSUM = bytesToCounts(RXPacket[_RX_PKT_LEN - 2], RXPacket[_RX_PKT_LEN - 1]);
   SumCheck = 0;
   for (int16_t i = 0; i < _RX_PKT_LEN - 2; i++) {
     SumCheck += RXPacket[i];
   }
+  if (SumCheck != CHECKSUM) return;
+
+  // Perform action based on type of Packet
   for (int16_t i = 0; i < 4; i++) {
     tempHeader[i] = RXPacket[i];
   }
-  if (SumCheck == CHECKSUM) {
-    if (memcmp(_CONFIGHEADER, tempHeader, sizeof(_CONFIGHEADER)) == 0) {
-      if (RXPacket[4] > 1){
-        _NEW_MODE = true;
-        newMode_M = RXPacket[4];
-      } else {
-        SendFlagResets();
-        ConfigPacketRX(RXPacket);
-      }
-    }
-    if (memcmp(_MODHEADER, tempHeader, sizeof(_MODHEADER)) == 0) {
-      ModifierPacketRX(RXPacket);
-    }
-  } else {
-    while (pcPort_M->available()) {
-      pcPort_M->read();
-    }
+  if (memcmp(_CONFIGHEADER, tempHeader, sizeof(_CONFIGHEADER)) == 0) {
+      // Found Configuration Packet
+      ConfigPacketRX(RXPacket);
+      return;
+  }
+  if (memcmp(_MODHEADER, tempHeader, sizeof(_MODHEADER)) == 0) {
+    // Found Parameter Modifier Packet
+    ModifierPacketRX(RXPacket);
+    return;
+  }
+  if (memcmp(_CTRLHEADER, tempHeader, sizeof(_CTRLHEADER)) == 0) {
+    // Found Robot Control Packet
+    ControlPacketRX(RXPacket);
+    return;
   }
 }
 
@@ -397,24 +393,28 @@ void PCComm::ReadPackets() {
 / Configuration RX Packet ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void PCComm::ConfigPacketRX(byte * RxPacket) {
-  if (RxPacket[5])  _SEND_RAWF          = true;
-  if (RxPacket[6])  _SEND_XYZGOAL       = true;
-  if (RxPacket[7])  _SEND_XYZDOTGOAL    = true;
-  if (RxPacket[8])  _SEND_XYZBOTGOAL    = true;
-  if (RxPacket[9])  _SEND_XYZDOTBOTGOAL = true;
-  if (RxPacket[10]) _SEND_PRESQCTS      = true;
-  if (RxPacket[11]) _SEND_PRESQDOTCTS   = true;
-  if (RxPacket[12]) _SEND_PRESQ         = true;
-  if (RxPacket[13]) _SEND_PRESQDOT      = true;
-  if (RxPacket[14]) _SEND_GOALQCTS      = true;
-  if (RxPacket[15]) _SEND_GOALQDOTCTS   = true;
-  if (RxPacket[16]) _SEND_GOALQ         = true;
-  if (RxPacket[17]) _SEND_GOALQDOT      = true;
-  if (RxPacket[18]) _SEND_MASS          = true;
-  if (RxPacket[19]) _SEND_DAMPING       = true;
-  if (RxPacket[20]) _SEND_SPRING_F      = true;
-  if (RxPacket[21]) _SEND_TOTAL_FORCES  = true;
-  if (RxPacket[22]) _SEND_FORCE_FILTER  = true;
+  /* Return Packet Configurator Structure:  Config Flags: 7-24,...
+            (See below) 
+  */
+  SendFlagResets();
+  if (RxPacket[7])  _SEND_RAWF          = true;
+  if (RxPacket[8])  _SEND_XYZGOAL       = true;
+  if (RxPacket[9])  _SEND_XYZDOTGOAL    = true;
+  if (RxPacket[10]) _SEND_XYZBOTGOAL    = true;
+  if (RxPacket[11]) _SEND_XYZDOTBOTGOAL = true;
+  if (RxPacket[12]) _SEND_PRESQCTS      = true;
+  if (RxPacket[13]) _SEND_PRESQDOTCTS   = true;
+  if (RxPacket[14]) _SEND_PRESQ         = true;
+  if (RxPacket[15]) _SEND_PRESQDOT      = true;
+  if (RxPacket[16]) _SEND_GOALQCTS      = true;
+  if (RxPacket[17]) _SEND_GOALQDOTCTS   = true;
+  if (RxPacket[18]) _SEND_GOALQ         = true;
+  if (RxPacket[19]) _SEND_GOALQDOT      = true;
+  if (RxPacket[20]) _SEND_MASS          = true;
+  if (RxPacket[21]) _SEND_DAMPING       = true;
+  if (RxPacket[22]) _SEND_SPRING_F      = true;
+  if (RxPacket[23]) _SEND_TOTAL_FORCES  = true;
+  if (RxPacket[24]) _SEND_FORCE_FILTER  = true;
 }
 
 void PCComm::SendFlagResets() {
@@ -442,7 +442,22 @@ void PCComm::SendFlagResets() {
 / Modifier RX Packet ---------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void PCComm::ModifierPacketRX(byte * RxPacket) {
-  // [0]:MassXY [1]:MassZ [2]:DampingXY [3]:DampingZ [4]:ScalingFactor [5]:eFx [6]:eFy [7]:eFz
+  /* Admittance Model Parameter Modifier Packet Data Structure: 
+                                          Modifier Byte 1:  4,...
+                                          Modifier Byte 2:  5,...
+    Modifier Byte 1                                     _:  6,...
+    [1]:MassXY                                 New MassXY:  7, 8, 9,10,... 
+    [2]:MassZ                                   New MassZ: 11,12,13,14,... 
+    [3]:DampingXY                           New DampingXY: 15,16,17,18,...
+    [4]:DampingZ                             New DampingZ: 19,20,21,22,...
+    [5]:eFx                               New External Fx: 23,24,25,26,...
+    [6]:eFy                               New External Fy: 27,28,29,30,...
+    [7]:eFz                               New External Fz: 31,32,33,34,...
+                                       New Scaling Factor: 35,...
+    Modifier Byte 2               New Force Sensor Filter: 36,...
+    [1]: Scaling FActor                               
+    [2]: Force Filter Value
+  */
   byte mask = 1;
   byte bitArrayLarge[7];
   byte bitArraySmall[2];
@@ -487,5 +502,57 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
   if (bitArraySmall[1] == 1) {
     _NEW_FILTER = true;
     newFilter_M = (float)(0.01 * RxPacket[36]);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------/
+/ Control RX Packet ----------------------------------------------------------------------/
+/----------------------------------------------------------------------------------------*/
+void PCComm::ControlPacketRX(byte * RxPacket) {
+  /* Robot Control Packet Data Structure:     New Q Goal Check:  4,...
+                                           New Qdot Goal Check:  5,...
+                                        New Current Goal Check:  6,...
+                                                 Goal Q1 Value:  7, 8, 9,10,...
+                                                 Goal Q2 Value: 11,12,13,14,...
+                                                 Goal Q4 Value: 15,16,17,18,...
+                                              Goal Qdot1 Value: 19,20,21,22,...
+                                              Goal Qdot2 Value: 23,24,25,26,...
+                                              Goal Qdot4 Value: 27,28,29,30,...
+                                           Goal Current1 Value: 31,32,33,34,...
+                                           Goal Current2 Value: 35,36,37,38,...
+                                           Goal Current4 Value: 39,40,41,42,...
+                                                             _: 43,44,...
+                                                   Torque Mode: 45,...
+                                                             _: 46,47,...
+  */
+
+  // New Q Goals
+  if (RxPacket[4]) {
+    newGoalQ_M = true;
+    goalQ_M[0] = bytesToFloat(RxPacket[7], RxPacket[8], RxPacket[9], RxPacket[10]);
+    goalQ_M[1] = bytesToFloat(RxPacket[11], RxPacket[12], RxPacket[13], RxPacket[14]);
+    goalQ_M[2] = bytesToFloat(RxPacket[15], RxPacket[16], RxPacket[17], RxPacket[18]);
+  }
+
+  // New Qdot Goals
+  if (RxPacket[5]) {
+    newGoalQdot_M = true;
+    goalQdot_M[0] = bytesToFloat(RxPacket[19], RxPacket[20], RxPacket[21], RxPacket[22]);
+    goalQdot_M[1] = bytesToFloat(RxPacket[23], RxPacket[24], RxPacket[25], RxPacket[26]);
+    goalQdot_M[2] = bytesToFloat(RxPacket[27], RxPacket[28], RxPacket[29], RxPacket[30]);
+  }
+
+  // New Motor Current Goals
+  if (RxPacket[6]) {
+    newGoalCurrent_M = true;
+    goalCurrent_M[0] = bytesToFloat(RxPacket[31], RxPacket[32], RxPacket[33], RxPacket[34]);
+    goalCurrent_M[1] = bytesToFloat(RxPacket[35], RxPacket[36], RxPacket[37], RxPacket[38]);
+    goalCurrent_M[2] = bytesToFloat(RxPacket[39], RxPacket[40], RxPacket[41], RxPacket[42]);
+  }
+
+  // New Drive Mode
+  if (RxPacket[45] != torqueMode_M){
+    _NEW_MODE = true;
+    torqueMode_M = RxPacket[5];
   }
 }

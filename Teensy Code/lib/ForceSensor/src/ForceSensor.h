@@ -12,12 +12,14 @@ class ForceSensor {
   public:
           ForceSensor(const float filterWeight);
     void  CalibrateSensor();
-    int* GetRawCtsFT();
-    float* GetRawFT();
-    float* GetFilteredFT();
+    int*  GetRawCtsFT();
+    float * GetRawFT();
+    float * GetFilteredFT();
+    float * GetGlobalFT();
     float  GetFilterWeight();
     void   SetFilterWeight(float newFilterValue);
-    void  ReadForceSensor();
+    void   ReadForceSensor();
+    void   CalculateGlobalForces(float * q);
     
   protected:
    
@@ -49,12 +51,14 @@ class ForceSensor {
 
     float FilterWeight_M;
 
-    int ftxyzRawCts_M[6]     = {0}; // [fxcts, fycts, fzcts, txcts, tycts, tzcts]
-    int ftxyzLastRawCts_M[6] = {0}; // [fxcts, fycts, fzcts, txcts, tycts, tzcts]
-    float ftxyzRaw_M[6]     = {0}; // [fx, fy, fz, tx, ty, tz]
-    float ftxyzLastRaw_M[6] = {0}; // [fx, fy, fz, tx, ty, tz]
-    float ftxyzFilt_M[6]    = {0.0f}; // [fx, fy, fz, tx, ty, tz]
-    float ftxyzLastFilt_M[6]= {0.0f}; // [fx, fy, fz, tx, ty, tz]
+    // Force Torque Array: [Fx, Fy, Fz, Tx, Ty, Tz]
+    int ftxyzRawCts_M[6]     = {0};
+    int ftxyzLastRawCts_M[6] = {0};
+    float ftxyzRaw_M[6]     = {0};
+    float ftxyzLastRaw_M[6] = {0};
+    float ftxyzFilt_M[6]    = {0.0f};
+    float ftxyzLastFilt_M[6]= {0.0f};
+    float ftxyzGlobal_M[6]  = {0.0f};
 
 };
 
