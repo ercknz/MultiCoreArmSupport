@@ -85,7 +85,7 @@ void loop() {
         robot.EnableTorque();
       }
       if (pc.ModifyFilter()){
-        ati.SetFilter(pc.GetNewFilter());
+        ati.SetFilterWeight(pc.GetNewFilter());
       }
     }
 
@@ -102,7 +102,7 @@ void loop() {
       ati.CalculateGlobalForces(robot.GetPresQ());
       robot.CalculateSpringForce(ati.GetGlobalFT());
       admitModel.UpdateModel(ati.GetGlobalFT(), robot.GetSpringForce(), pc.GetExternalForces());
-      robot.WriteToRobot();
+      robot.WriteToRobot(packetType, goalXYZ, goalXYZdot, torqueMode);
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
