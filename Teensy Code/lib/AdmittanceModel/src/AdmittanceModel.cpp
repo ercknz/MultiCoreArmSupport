@@ -60,7 +60,7 @@ void AdmittanceModel::SetPosition(float *newXYZ) {
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Updater ---------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void AdmittanceModel::UpdateModel(float *forceXYZ, float springFz, float *externalFxyz) {
+void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
   for (int i = 0; i < 3; i++) {
     xyzInit_M[i] = 0.0f;
 //    xyzInit_M[i]    = xyzGoal_M[i];

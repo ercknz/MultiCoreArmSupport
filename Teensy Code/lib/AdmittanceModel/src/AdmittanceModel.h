@@ -14,7 +14,7 @@ class AdmittanceModel {
   public:
            AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz, const float G, const float T);
     void   SetPosition(float *newXYZ);
-    void   UpdateModel(float *forceXYZ, float springFz, float *externalFxyz);
+    void   UpdateModel(float *forceXYZ, float *externalFxyz);
     float* GetGoalPos();
     float* GetGoalVel();
     float* GetMass();

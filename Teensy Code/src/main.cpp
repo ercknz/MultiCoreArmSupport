@@ -100,8 +100,8 @@ void loop() {
       robot.ReadRobot();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
-      robot.CalculateSpringForce(ati.GetGlobalFT());
-      admitModel.UpdateModel(ati.GetGlobalFT(), robot.GetSpringForce(), pc.GetExternalForces());
+      //robot.CalculateSpringForce(ati.GetGlobalFT()); // robot MC should be doing this
+      admitModel.UpdateModel(ati.GetGlobalFT(), pc.GetExternalForces()); //remove spring force
       robot.WriteToRobot(packetType, goalXYZ, goalXYZdot, torqueMode);
 
       /* Outgoing Data */

@@ -153,6 +153,31 @@ void RobotComm::ReadRobot(){
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Robot Writing --------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
+void RobotComm::RequestData(){
+  /*  Write function 1 for RobotComm
+      Send only Request for Data packet to robot.
+  */
+  float blankData[3] = {0.0};
+  uint8_t blankTorque = 0;
+  WriteToRobot(4, blankData, blankData, blankTorque);
+}
+
+void RobotComm::ChangeTorque(uint8_t newTorqueValue){
+  /*  Write function 2 for RobotComm
+      Only sends a torque mode change to robot. 
+  */
+  float blankData[3] = {0.0};
+  WriteToRobot(1, blankData, blankData, newTorqueValue);
+}
+
+void RobotComm::SendNewGoal(float *newXYZGoal, float * newXYZdotGoal){
+  /*  Write function 3 for RobotComm
+      Only sends new goal position and velocity to robot.
+  */
+  uint8_t blankTorque = 0;
+  WriteToRobot(2, newXYZGoal, newXYZdotGoal, blankTorque);
+}
+
 void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode){
   /* Outgoing Packet Structure:       Header: [ 0, 1, 2, 3,...
                                            _:   4,...

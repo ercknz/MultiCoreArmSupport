@@ -15,6 +15,9 @@ class RobotComm {
     void  EnableTorque();
     void  ReadRobot();
     void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
+    void  RequestData();
+    void  ChangeTorque(uint8_t newTorqueValue);
+    void  SendNewGoal(float *newXYZGoal, float * newXYZdotGoal);
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
