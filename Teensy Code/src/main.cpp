@@ -6,6 +6,14 @@
    Script by erick nunez
    created: 1/24/2023
 
+   checklist 8/1/2024:
+   - forceSensor class
+   - robotComm class
+   - admittanceModel class
+   - PCcomm class
+   - matlab testing
+   - real testing
+
 */
 /* ---------------------------------------------------------------------------------------/
 / Libraries and Headers ------------------------------------------------------------------/
