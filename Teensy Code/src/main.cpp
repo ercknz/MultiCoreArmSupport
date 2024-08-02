@@ -6,12 +6,24 @@
    Script by erick nunez
    created: 1/24/2023
 
-   checklist 8/1/2024:
+   checking code:
    - forceSensor class
+      - cpp file (8/2/2024)
+      - header file (8/2/2024)
    - robotComm class
+      - cpp file (8/2/2024)
+      - header file (8/2/2024)
    - admittanceModel class
+      - cpp file
+      - header file
    - PCcomm class
-   - matlab testing
+      - cpp file
+      - header file
+   - Namespace
+      - cpp file
+      - header file
+   - Main.cpp
+   - matlab code
    - real testing
 
 */
@@ -62,6 +74,7 @@ void loop() {
 
   /* Initialize Robot and Model */
   previousTime = millis();
+  robot.RequestDataOnly();
   robot.ReadRobot();
   ati.CalculateGlobalForces(robot.GetPresQ());
   admitModel.SetPosition(robot.GetPresPos());
@@ -90,7 +103,7 @@ void loop() {
         robot.SetScalingFactor(pc.GetNewScalingFactor());
       }
       if (pc.ChangeTorqueMode()){
-        robot.EnableTorque();
+        robot.ChangeTorqueOnly(pc.GetNewMode());
       }
       if (pc.ModifyFilter()){
         ati.SetFilterWeight(pc.GetNewFilter());
@@ -104,13 +117,15 @@ void loop() {
       totalTime += (currentTime - previousTime);
       previousTime = currentTime;
 
+      /* Request Robot Data */
+      robot.RequestDataOnly();
+
       /* Control */
       robot.ReadRobot();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
-      //robot.CalculateSpringForce(ati.GetGlobalFT()); // robot MC should be doing this
-      admitModel.UpdateModel(ati.GetGlobalFT(), pc.GetExternalForces()); //remove spring force
-      robot.WriteToRobot(packetType, goalXYZ, goalXYZdot, torqueMode);
+      admitModel.UpdateModel(ati.GetGlobalFT(), pc.GetExternalForces());
+      robot.SendNewGoalOnly(admitModel.GetGoalPos(), admitModel.GetGoalVel());
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;

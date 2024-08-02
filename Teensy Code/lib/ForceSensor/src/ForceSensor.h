@@ -1,6 +1,8 @@
 /* This establishes the force sensor class.
    Created 02/15/2023
    by erick nunez
+
+   checked code (8/2/2024)
 */
 
 #ifndef FORCE_SENSOR_H

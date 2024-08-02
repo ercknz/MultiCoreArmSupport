@@ -16,6 +16,8 @@
           y(n-1) is the last output
    Created 02/15/2023
    by erick nunez
+
+   checked code (8/2/2024)
 */
 
 #include <Arduino.h>
@@ -23,6 +25,8 @@
 
 /* ---------------------------------------------------------------------------------------/
 / Force Sensor Constructor ---------------------------------------------------------------/
+/ / / / Sets up coefficients to convert from voltage to force for each axis.
+/ / / / Only input weight for filter.
 /----------------------------------------------------------------------------------------*/
 ForceSensor::ForceSensor(const float filterWeight)
     : _AFXY_M{(_V2 * _FXY_MAX)/ _VF_MAX},
@@ -73,6 +77,7 @@ void ForceSensor::SetFilterWeight(float newFilterValue){
 
 /* ---------------------------------------------------------------------------------------/
 / Force Sensor Calibration ---------------------------------------------------------------/
+/ / / / Runs for 20 seconds collecting samples to average every 10 milliseconds.
 /----------------------------------------------------------------------------------------*/
 void ForceSensor::CalibrateSensor(){
   float newXYZcal[6] = {0.0};
@@ -106,7 +111,7 @@ void ForceSensor::CalibrateSensor(){
   / Force Sensor Reading -------------------------------------------------------------------/
   /----------------------------------------------------------------------------------------*/
   void ForceSensor::ReadForceSensor(){
-    // Saves last frames
+    // Move data from last frame
     for (int i = 0; i < 6; i++){
       ftxyzLastRawCts_M[i] = ftxyzRawCts_M[i];
       ftxyzLastRaw_M[i] = ftxyzRaw_M[i];
@@ -137,8 +142,9 @@ void ForceSensor::CalibrateSensor(){
   /----------------------------------------------------------------------------------------*/
   void ForceSensor::FilterFT(){
     for (int i = 0; i < 6; i++){
-      // Filter Forces
+      // Move data from last frame
       ftxyzLastFilt_M[i] = ftxyzFilt_M[i];
+      // Filter current frame
       ftxyzFilt_M[i] = FilterWeight_M * (ftxyzRaw_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * ftxyzLastFilt_M[i];
     }
   }

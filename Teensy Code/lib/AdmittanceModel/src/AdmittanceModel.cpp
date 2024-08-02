@@ -41,11 +41,15 @@
 / Admittance Model Constructor -----------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz, const float G, const float T)
-  : mass_M{Mxy, Mxy, Mz},
-    damping_M{Bxy, Bxy, Bz},
-    _GRAVITY{G},
+  : _GRAVITY{G},
     _DELTA_T{T}
 {
+  mass_M[0] = Mxy;
+  mass_M[1] = Mxy;
+  mass_M[2] = Mz;
+  damping_M[0] = Bxy;
+  damping_M[1] = Bxy;
+  damping_M[2] = Bz;
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -82,7 +86,8 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
   xyzDotGoal_M[1] = (totalForces_M[1] / damping_M[1]) - (damping_M[1] / mass_M[1]) * Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T);
 
   /* Coefficents and Solution for Z-Direction */
-  totalForces_M[2] = forceXYZ[2] + springFz + externalFxyz[2];
+  // FIX ME!!!!!!!!!!!
+  totalForces_M[2] = forceXYZ[2] + externalFxyz[2];
   float Cz1 = ((totalForces_M[2]  / damping_M[2]) - xyzDotInit_M[2]) * (mass_M[2] / damping_M[2]);
   float Cz2 = xyzInit_M[2] - Cz1;
   xyzGoal_M[2]    = Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T) + (totalForces_M[2] / damping_M[2]) * _DELTA_T + Cz2;

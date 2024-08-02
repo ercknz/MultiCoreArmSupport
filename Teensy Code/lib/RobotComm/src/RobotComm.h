@@ -12,12 +12,11 @@
 class RobotComm {
   public:
           RobotComm(const int baudrate);
-    void  EnableTorque();
     void  ReadRobot();
     void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
-    void  RequestData();
-    void  ChangeTorque(uint8_t newTorqueValue);
-    void  SendNewGoal(float *newXYZGoal, float * newXYZdotGoal);
+    void  RequestDataOnly();
+    void  ChangeTorqueOnly(uint8_t newTorqueValue);
+    void  SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal);
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
@@ -56,13 +55,19 @@ class RobotComm {
     const int16_t _TX_GOAL_CURRENT_SLOT = 32;
     const int16_t _TX_BLANK_SLOT = 44;    
 
+    // Receiving Data
     float qPres_M[3], qDotPres_M[3];
     float xyzPres_M[3], xyzDotPres_M[3];
+    int32_t qPresCts_M[3];
+    float qGoal_M[3];
+    int32_t qGoalCts_M[3];
+
+    // Sending Data
     float xyzGoal_M[3], xyzDotGoal_M[3];
-    float presCurrent_M[3];
+
+    //float presCurrent_M[3];
     float springF_M;
     float scalingFactor_M;
-
     int16_t torqueState_M;
 
     // const float  _A1A2,      _L1,        _L2;

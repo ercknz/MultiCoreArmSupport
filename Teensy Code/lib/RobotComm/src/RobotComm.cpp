@@ -131,49 +131,53 @@ void RobotComm::ReadRobot(){
   qDotPres_M[1] = bytesToFloat(dataPacket[24], dataPacket[25], dataPacket[26], dataPacket[27]);
   qDotPres_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
 
-  /* Pres Current slot = 32 */
-  presCurrent_M[0] = bytesToFloat(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
-  presCurrent_M[1] = bytesToFloat(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
-  presCurrent_M[2] = bytesToFloat(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
+  /* Pres Q counts slot = 32 */
+  qPresCts_M[0] = bytesToCounts(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
+  qPresCts_M[1] = bytesToCounts(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
+  qPresCts_M[2] = bytesToCounts(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
 
-  /* Qdot Goal slot = 20 */
+  /* Pres XYZ slot = 44 */
   xyzPres_M[0] = bytesToFloat(dataPacket[44], dataPacket[45], dataPacket[46], dataPacket[47]);
   xyzPres_M[1] = bytesToFloat(dataPacket[48], dataPacket[49], dataPacket[50], dataPacket[51]);
   xyzPres_M[2] = bytesToFloat(dataPacket[52], dataPacket[53], dataPacket[54], dataPacket[55]);
 
-  /* Current Goal slot = 32 */
+  /* Pres XYZdot slot = 56 */
   xyzDotPres_M[0] = bytesToFloat(dataPacket[56], dataPacket[57], dataPacket[58], dataPacket[59]);
   xyzDotPres_M[1] = bytesToFloat(dataPacket[60], dataPacket[61], dataPacket[62], dataPacket[63]);
   xyzDotPres_M[2] = bytesToFloat(dataPacket[64], dataPacket[65], dataPacket[66], dataPacket[67]);
 
+  /* Goal Q slot = 68 */
+  qGoal_M[0] = bytesToFloat(dataPacket[68], dataPacket[69], dataPacket[70], dataPacket[71]);
+  qGoal_M[1] = bytesToFloat(dataPacket[72], dataPacket[73], dataPacket[74], dataPacket[75]);
+  qGoal_M[2] = bytesToFloat(dataPacket[76], dataPacket[77], dataPacket[78], dataPacket[79]);
+
+  /* Goal Q counts slot = 80 */
+  qGoalCts_M[0] = bytesToCounts(dataPacket[80], dataPacket[81], dataPacket[82], dataPacket[83]);
+  qGoalCts_M[1] = bytesToCounts(dataPacket[84], dataPacket[85], dataPacket[86], dataPacket[87]);
+  qGoalCts_M[2] = bytesToCounts(dataPacket[88], dataPacket[89], dataPacket[90], dataPacket[91]);
+
   /* Torque State */
-  torqueState_M = dataPacket[73];
+  torqueState_M = dataPacket[93];
 }
 
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Robot Writing --------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void RobotComm::RequestData(){
-  /*  Write function 1 for RobotComm
-      Send only Request for Data packet to robot.
-  */
+void RobotComm::RequestDataOnly(){
+  //RobotComm::Send only Request for Data packet to robot.
   float blankData[3] = {0.0};
   uint8_t blankTorque = 0;
   WriteToRobot(4, blankData, blankData, blankTorque);
 }
 
-void RobotComm::ChangeTorque(uint8_t newTorqueValue){
-  /*  Write function 2 for RobotComm
-      Only sends a torque mode change to robot. 
-  */
+void RobotComm::ChangeTorqueOnly(uint8_t newTorqueValue){
+  //RobotComm::Only sends a torque mode change to robot. 
   float blankData[3] = {0.0};
   WriteToRobot(1, blankData, blankData, newTorqueValue);
 }
 
-void RobotComm::SendNewGoal(float *newXYZGoal, float * newXYZdotGoal){
-  /*  Write function 3 for RobotComm
-      Only sends new goal position and velocity to robot.
-  */
+void RobotComm::SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal){
+  //RobotComm::Only sends new goal position and velocity to robot.
   uint8_t blankTorque = 0;
   WriteToRobot(2, newXYZGoal, newXYZdotGoal, blankTorque);
 }

@@ -13,8 +13,8 @@ namespace ASR
 / Constants ------------------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 // Dynamixel Communication Parameters
-const float   PROTOCOL_VERSION  = 2.0;
-const int     CONTROLLER_BAUDRATE = 1000000;
+const float   PROTOCOL_VERSION      = 2.0;
+const int     CONTROLLER_BAUDRATE   = 1000000;
 const int     SERIAL_BAUDRATE   = 115200;
 const int     MOTOR_BAUDRATE    = 1000000;
 const char   *DEVICEPORT        = "3";
@@ -28,7 +28,7 @@ const float SENSOR_FILTER_WEIGHT = 0.05;
 // Admitance Control Constants and initial Values
 const float LOOP_DT        = 8;        // Milliseconds
 const float MODEL_DT       = 0.008;    // Secs
-const float GRAVITY        = 9.8067;  // m/sec^2
+const float GRAVITY        = 9.80665;  // m/sec^2
 float initMassXY    = 1.5f;     // kg
 float initDampingXY = 5.0f;     // N*(sec/m)
 float initMassZ     = 1.5f;     // kg
