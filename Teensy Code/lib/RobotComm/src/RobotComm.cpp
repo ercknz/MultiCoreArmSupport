@@ -132,9 +132,9 @@ void RobotComm::ReadRobot(){
   qDotPres_M[2] = bytesToFloat(dataPacket[28], dataPacket[29], dataPacket[30], dataPacket[31]);
 
   /* Pres Q counts slot = 32 */
-  qPresCts_M[0] = bytesToCounts(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
-  qPresCts_M[1] = bytesToCounts(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
-  qPresCts_M[2] = bytesToCounts(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
+  qPresCts_M[0] = bytesToInt32(dataPacket[32], dataPacket[33], dataPacket[34], dataPacket[35]);
+  qPresCts_M[1] = bytesToInt32(dataPacket[36], dataPacket[37], dataPacket[38], dataPacket[39]);
+  qPresCts_M[2] = bytesToInt32(dataPacket[40], dataPacket[41], dataPacket[42], dataPacket[43]);
 
   /* Pres XYZ slot = 44 */
   xyzPres_M[0] = bytesToFloat(dataPacket[44], dataPacket[45], dataPacket[46], dataPacket[47]);
@@ -152,9 +152,9 @@ void RobotComm::ReadRobot(){
   qGoal_M[2] = bytesToFloat(dataPacket[76], dataPacket[77], dataPacket[78], dataPacket[79]);
 
   /* Goal Q counts slot = 80 */
-  qGoalCts_M[0] = bytesToCounts(dataPacket[80], dataPacket[81], dataPacket[82], dataPacket[83]);
-  qGoalCts_M[1] = bytesToCounts(dataPacket[84], dataPacket[85], dataPacket[86], dataPacket[87]);
-  qGoalCts_M[2] = bytesToCounts(dataPacket[88], dataPacket[89], dataPacket[90], dataPacket[91]);
+  qGoalCts_M[0] = bytesToInt32(dataPacket[80], dataPacket[81], dataPacket[82], dataPacket[83]);
+  qGoalCts_M[1] = bytesToInt32(dataPacket[84], dataPacket[85], dataPacket[86], dataPacket[87]);
+  qGoalCts_M[2] = bytesToInt32(dataPacket[88], dataPacket[89], dataPacket[90], dataPacket[91]);
 
   /* Torque State */
   torqueState_M = dataPacket[93];
@@ -182,6 +182,12 @@ void RobotComm::SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal){
   WriteToRobot(2, newXYZGoal, newXYZdotGoal, blankTorque);
 }
 
+void RobotComm::SendZeroes(){
+  byte dataPacket[_TX_PKT_LEN] = {0};
+  // write data packet
+  robotPort_M->write(dataPacket,_TX_PKT_LEN); 
+}
+
 void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode){
   /* Outgoing Packet Structure:       Header: [ 0, 1, 2, 3,...
                                            _:   4,...
@@ -207,7 +213,7 @@ void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZ
 
   byte dataPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
-  int16_t byteLen       = 4;
+  //int16_t byteLen       = 4;
 
   // Header Bytes 
   for (int16_t i = 0; i < 4; i++) {

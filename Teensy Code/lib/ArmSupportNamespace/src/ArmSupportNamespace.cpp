@@ -34,12 +34,16 @@ float initDampingXY = 5.0f;     // N*(sec/m)
 float initMassZ     = 1.5f;     // kg
 float initDampingZ  = 4.5f;     // N*(sec/m)
 
-// Kinematic Constants
+// Kinematic Constants for Task Space Limits
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage
 const float L1_LINK     = 0.419;      // length of 4bar linkage
 const float A2_LINK     = 0.082;      // 4bar linkage to elbow
 const float L2_LINK     = 0.520;      // elbow to sensor
 const float LINK_OFFSET = 0.035;      // elbow to sensor offset
+const float ELEVATION_MAX_POS = 3487;
+const float ELEVATION_MIN_POS = 1137;
+const float DEGREES_PER_COUNT = 0.088;
+const float ELEVATION_RATIO   = 2.2978;
 
 // Spring Dynamics
 const int    SPRING_KS      = 8231;     // N/m

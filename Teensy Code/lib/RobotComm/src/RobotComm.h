@@ -17,6 +17,7 @@ class RobotComm {
     void  RequestDataOnly();
     void  ChangeTorqueOnly(uint8_t newTorqueValue);
     void  SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal);
+    void  SendZeroes();
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();
@@ -69,14 +70,6 @@ class RobotComm {
     float springF_M;
     float scalingFactor_M;
     int16_t torqueState_M;
-
-    // const float  _A1A2,      _L1,        _L2;
-    // const double _OFFSET,    _PHI,       _H_OF_L2;
-    // const double _Q1_MIN,    _Q1_MAX;
-    // const double _Q2_LIMIT;
-    // const double _Q4_MIN,    _Q4_MAX;
-    // const double _INNER_R,   _Z_LIMIT;
-    // const double _SPRING_Li, _BETAi, _SPRING_Fi;
     
 };
 

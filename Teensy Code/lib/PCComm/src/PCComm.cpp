@@ -156,7 +156,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   RxPacket[7] = DXL_HIBYTE(DXL_HIWORD(totalTime));
 
   // Global Forces, Positions, and Velocities
-  byte * GlobalF_bytes = floatArrayToBytes(Sensor.GetGlobalF());
+  byte * GlobalF_bytes = floatArrayToBytes(Sensor.GetGlobalFT());
   for (int16_t i = 8; i < 20; i++) {
     RxPacket[i] = GlobalF_bytes[i - 8];
   }
@@ -171,7 +171,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 
   // Optional Data Slots
   if (_SEND_RAWF && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * RawF_bytes = floatArrayToBytes(Sensor.GetRawF());
+    byte * RawF_bytes = floatArrayToBytes(Sensor.GetRawFT());
     for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
       RxPacket[i] = RawF_bytes[i - dataPosition];
     }
@@ -307,7 +307,7 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
     dataPosition += (3 * byteLen);
   }
   if (_SEND_FORCE_FILTER && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * forceFilter_bytes = floatToBytes(Sensor.GetForceFilter());
+    byte * forceFilter_bytes = floatToBytes(Sensor.GetFilterWeight());
     for (int16_t i = dataPosition; i < dataPosition + byteLen; i++) {
       RxPacket[i] = forceFilter_bytes[i - dataPosition];
     }

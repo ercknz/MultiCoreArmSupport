@@ -40,6 +40,10 @@ extern const float L1_LINK;      // length of 4bar linkage
 extern const float A2_LINK;      // 4bar linkage to elbow
 extern const float L2_LINK;      // elbow to sensor
 extern const float LINK_OFFSET;  // elbow to sensor offset
+extern const float ELEVATION_MAX_POS;
+extern const float ELEVATION_MIN_POS;
+extern const float DEGREES_PER_COUNT;
+extern const float ELEVATION_RATIO;
 
 // Spring Dynamics
 extern const int    SPRING_KS; // N/m

@@ -15,6 +15,8 @@
 
 int16_t bytesToCounts(byte hByte, byte lByte);
 
+int32_t bytesToInt32(byte byte1, byte byte2, byte byte3, byte byte4);
+
 float bytesToFloat(byte byte1, byte byte2, byte byte3, byte byte4);
 
 byte * floatArrayToBytes(float * floatValues);

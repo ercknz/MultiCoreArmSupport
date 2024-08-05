@@ -43,7 +43,7 @@
 /----------------------------------------------------------------------------------------*/
 ForceSensor     ati         = ForceSensor(0.99); 
 RobotComm       robot       = RobotComm(ASR::CONTROLLER_BAUDRATE);
-AdmittanceModel admitModel  = AdmittanceModel(ASR::initMassXY, ASR::initMassZ, ASR::initDampingXY, ASR::initDampingZ, ASR::GRAVITY, ASR::MODEL_DT);
+AdmittanceModel admitModel  = AdmittanceModel(ASR::initMassXY, ASR::initMassZ, ASR::initDampingXY, ASR::initDampingZ);
 PCComm          pc          = PCComm(&Serial, ASR::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
@@ -132,7 +132,7 @@ void loop() {
       pc.WritePackets(totalTime, ati, admitModel, robot, loopTime);
     }
   }
-  robot.WriteToRobot();
+  robot.SendZeroes();
   while (!Serial);
   
 }

@@ -36,13 +36,19 @@
 
 #include <Arduino.h>
 #include "AdmittanceModel.h"
+#include "ArmSupportNamespace.h"
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Constructor -----------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz, const float G, const float T)
-  : _GRAVITY{G},
-    _DELTA_T{T}
+AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz)
+  : _GRAVITY{ASR::GRAVITY},
+    _DELTA_T{ASR::MODEL_DT},
+    _ELEVATION_CENTER{(ASR::ELEVATION_MAX_POS + ASR::ELEVATION_MIN_POS) / 2},
+    _Z_LIMIT{abs(ASR::L1_LINK * sin((ASR::ELEVATION_MAX_POS - _ELEVATION_CENTER) * ASR::DEGREES_PER_COUNT * (PI / 180.0) * (1/ASR::ELEVATION_RATIO)))},
+    _H_OF_L2{sqrt(pow(ASR::LINK_OFFSET, 2) + pow(ASR::L2_LINK, 2))},
+    _A1A2{ASR::A1_LINK + ASR::A2_LINK},
+    _INNER_R_LIMIT{ASR::A1_LINK + ASR::L1_LINK + ASR::A2_LINK - ASR::L2_LINK}
 {
   mass_M[0] = Mxy;
   mass_M[1] = Mxy;
@@ -86,7 +92,6 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
   xyzDotGoal_M[1] = (totalForces_M[1] / damping_M[1]) - (damping_M[1] / mass_M[1]) * Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T);
 
   /* Coefficents and Solution for Z-Direction */
-  // FIX ME!!!!!!!!!!!
   totalForces_M[2] = forceXYZ[2] + externalFxyz[2];
   float Cz1 = ((totalForces_M[2]  / damping_M[2]) - xyzDotInit_M[2]) * (mass_M[2] / damping_M[2]);
   float Cz2 = xyzInit_M[2] - Cz1;
@@ -94,22 +99,22 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
   xyzDotGoal_M[2] = (totalForces_M[2] / damping_M[2]) - (damping_M[2] / mass_M[2]) * Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T);
 
   /* Check TaskSpace Limits */
-//  if (xyzGoal_M[2] >  _Z_LIMIT) xyzGoal_M[2] =  _Z_LIMIT;
-//  if (xyzGoal_M[2] < -_Z_LIMIT) xyzGoal_M[2] = -_Z_LIMIT;
-//  float outerRLimit = _A1A2 + _H_OF_L2 + sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2], 2));
-//  float Rxy = sqrt(pow(xyzGoal_M[0],2) + pow(xyzGoal_M[1],2));
-//  float alpha   = atan2(xyzGoal_M[1], xyzGoal_M[0]);
-//  if (alpha < 1.0f) alpha += 2 * PI;
-//  if (Rxy < _INNER_R_LIMIT) {
-//    Rxy           = _INNER_R_LIMIT;
-//    xyzGoal_M[0]  = _INNER_R_LIMIT * cos(alpha);
-//    xyzGoal_M[1]  = _INNER_R_LIMIT * sin(alpha);
-//  }
-//  if (Rxy > outerRLimit) {
-//    Rxy           = outerRLimit;
-//    xyzGoal_M[0]  = outerRLimit * cos(alpha);
-//    xyzGoal_M[1]  = outerRLimit * sin(alpha);
-//  } 
+  if (xyzGoal_M[2] >  _Z_LIMIT) xyzGoal_M[2] =  _Z_LIMIT;
+  if (xyzGoal_M[2] < -_Z_LIMIT) xyzGoal_M[2] = -_Z_LIMIT;
+  float outerRLimit = _A1A2 + _H_OF_L2 + sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2], 2));
+  float Rxy = sqrt(pow(xyzGoal_M[0],2) + pow(xyzGoal_M[1],2));
+  float alpha   = atan2(xyzGoal_M[1], xyzGoal_M[0]);
+  if (alpha < 1.0f) alpha += 2 * PI;
+  if (Rxy < _INNER_R_LIMIT) {
+    Rxy           = _INNER_R_LIMIT;
+    xyzGoal_M[0]  = _INNER_R_LIMIT * cos(alpha);
+    xyzGoal_M[1]  = _INNER_R_LIMIT * sin(alpha);
+  }
+  if (Rxy > outerRLimit) {
+    Rxy           = outerRLimit;
+    xyzGoal_M[0]  = outerRLimit * cos(alpha);
+    xyzGoal_M[1]  = outerRLimit * sin(alpha);
+  } 
 }
 
 /* ---------------------------------------------------------------------------------------/

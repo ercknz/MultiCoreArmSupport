@@ -12,7 +12,7 @@
 
 class AdmittanceModel {
   public:
-           AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz, const float G, const float T);
+           AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz);
     void   SetPosition(float *newXYZ);
     void   UpdateModel(float *forceXYZ, float *externalFxyz);
     float* GetGoalPos();
@@ -27,22 +27,13 @@ class AdmittanceModel {
 
   protected:
     // Model constants
-    const float _GRAVITY,       _DELTA_T;
-    // Task Space limits
-    const float A1_LINK = 0.073;
-    const float L1_LINK = 0.419;
-    const float A2_LINK = 0.082;
-    const float L2_LINK = 0.520;
-    const float ELEVATION_MAX_POS = 3487;
-    const float ELEVATION_MIN_POS = 1137;
-    const float ELEVATION_CENTER = (ELEVATION_MAX_POS + ELEVATION_MIN_POS) / 2;
-    const float DEGREES_PER_COUNT = 0.088;
-    const float ELEVATION_RATIO = 2.2978;
-    const float LINK_OFFSET = 0.035;
-    const float _H_OF_L2 = sqrt(pow(LINK_OFFSET, 2) + pow(L2_LINK, 2));      
-    const float _A1A2 = A1_LINK + A2_LINK;
-    const float _INNER_R_LIMIT = A1_LINK + L1_LINK + A2_LINK - L2_LINK;
-    const float _Z_LIMIT = abs(L1_LINK * sin((ELEVATION_MAX_POS - ELEVATION_CENTER) * DEGREES_PER_COUNT * (PI / 180.0) * (1/ELEVATION_RATIO)));
+    const float _GRAVITY;
+    const float _DELTA_T;
+    const float _ELEVATION_CENTER;
+    const float _H_OF_L2;      
+    const float _A1A2;
+    const float _INNER_R_LIMIT;
+    const float _Z_LIMIT;
 
     float mass_M[3];        // [xy, xy, z]
     float damping_M[3];     // [xy, xy, z]
