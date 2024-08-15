@@ -14,13 +14,13 @@ classdef CommOpenCM < handle
         dt = 0.008
         port
         rawBytes
-        frameData = nan(1,24)
+        frameData = nan(1,33)
         
         txHeader = uint8([150, 10, 1, 101])
         txPacketLen = 60
         
         rxHeader = uint8([170, 6, 9, 69])
-        rxPacketLen = 100
+        rxPacketLen = 150
     end
     
     properties (Access = private)
@@ -71,6 +71,7 @@ classdef CommOpenCM < handle
             if (sum(tempHeader == obj.rxHeader)==4) && (inCS == cCS)
                 % Total Time
                 obj.frameData(1) = typecast(uint8(obj.rawBytes(5:8)),'uint32');
+                
                 % presQ
                 obj.frameData(2) = double(typecast(uint8(obj.rawBytes(9:12)),'int32'));
                 obj.frameData(3) = double(typecast(uint8(obj.rawBytes(13:16)),'int32'));
@@ -79,35 +80,48 @@ classdef CommOpenCM < handle
                 obj.frameData(5) = double(typecast(uint8(obj.rawBytes(21:24)),'int32'));
                 obj.frameData(6) = double(typecast(uint8(obj.rawBytes(25:28)),'int32'));
                 obj.frameData(7) = double(typecast(uint8(obj.rawBytes(29:32)),'int32'));
-                % presQ Cts
+                % presXYZ
                 obj.frameData(8) = double(typecast(uint8(obj.rawBytes(33:36)),'int32'));
                 obj.frameData(9) = double(typecast(uint8(obj.rawBytes(37:40)),'int32'));
                 obj.frameData(10) = double(typecast(uint8(obj.rawBytes(41:44)),'int32'));
-                % presXYZ
+                % presXYZdot
                 obj.frameData(11) = double(typecast(uint8(obj.rawBytes(45:48)),'int32'));
                 obj.frameData(12) = double(typecast(uint8(obj.rawBytes(49:52)),'int32'));
                 obj.frameData(13) = double(typecast(uint8(obj.rawBytes(53:56)),'int32'));
-                % presXYZdot
+                % goalQ
                 obj.frameData(14) = double(typecast(uint8(obj.rawBytes(57:60)),'int32'));
                 obj.frameData(15) = double(typecast(uint8(obj.rawBytes(61:64)),'int32'));
                 obj.frameData(16) = double(typecast(uint8(obj.rawBytes(65:68)),'int32'));
-                % goalQ
+                % goalQdot
                 obj.frameData(17) = double(typecast(uint8(obj.rawBytes(69:72)),'int32'));
                 obj.frameData(18) = double(typecast(uint8(obj.rawBytes(73:76)),'int32'));
                 obj.frameData(19) = double(typecast(uint8(obj.rawBytes(77:80)),'int32'));
-                % goalQ cts
+                
+                % presQ Cts
                 obj.frameData(20) = double(typecast(uint8(obj.rawBytes(81:84)),'int32'));
                 obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:88)),'int32'));
                 obj.frameData(22) = double(typecast(uint8(obj.rawBytes(89:92)),'int32'));
+                % presQdot Cts
+                obj.frameData(23) = double(typecast(uint8(obj.rawBytes(93:96)),'int32'));
+                obj.frameData(24) = double(typecast(uint8(obj.rawBytes(97:100)),'int32'));
+                obj.frameData(25) = double(typecast(uint8(obj.rawBytes(101:104)),'int32'));
+                % goalQ Cts
+                obj.frameData(26) = double(typecast(uint8(obj.rawBytes(105:108)),'int32'));
+                obj.frameData(27) = double(typecast(uint8(obj.rawBytes(109:112)),'int32'));
+                obj.frameData(28) = double(typecast(uint8(obj.rawBytes(113:116)),'int32'));
+                % goalQdot Cts
+                obj.frameData(29) = double(typecast(uint8(obj.rawBytes(117:120)),'int32'));
+                obj.frameData(30) = double(typecast(uint8(obj.rawBytes(121:124)),'int32'));
+                obj.frameData(31) = double(typecast(uint8(obj.rawBytes(125:128)),'int32'));
+                
                 % Torque Mode
-                obj.frameData(23) = double(obj.rawBytes(94));
+                obj.frameData(32) = double(obj.rawBytes(144));
                 % Loop Time
-                obj.frameData(24) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                obj.frameData(33) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(2:7) = obj.frameData(2:7)./10000;
-                obj.frameData(11:19) = obj.frameData(11:19)./10000;
-                obj.frameData(24) = obj.frameData(24)*0.001;
+                obj.frameData(2:19) = obj.frameData(2:19)./10000;
+                obj.frameData(33) = obj.frameData(33)*0.001;
             end
         end
         
