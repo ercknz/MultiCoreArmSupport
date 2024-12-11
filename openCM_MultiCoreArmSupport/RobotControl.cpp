@@ -195,7 +195,7 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
 
   /* Finds and checks shoulder angle */
   beta = asin((_H_OF_L2 * sin(gamma)) / R);
-  q_M[0] = alpha - beta;// + OCM::SHOULDER_OFFSET;
+  q_M[0] = alpha - beta;  // + OCM::SHOULDER_OFFSET;
   if (q_M[0] < 0.0f) q_M[0] += 2 * PI;
 
   /* Check for nans */

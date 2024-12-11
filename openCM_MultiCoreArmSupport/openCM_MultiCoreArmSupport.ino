@@ -8,9 +8,15 @@
    Script by erick nunez
    created: 1/24/2019
 
-*/
+   Checking 12/10/2024
+   - main
+   - openCMNamespace
+   - RobotControl
+   - UtilityFunctions
+   - SerialPackets
 
-/* ---------------------------------------------------------------------------------------/
+
+/ ----------------------------------------------------------------------------------------/
 / Libraries and Headers ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 #include <DynamixelSDK.h>
@@ -44,6 +50,7 @@ void setup() {
   /* Attempt to establish connection */
   c2cComm.InitalizingComm();
 
+  // For testing purposes only
   while (!Serial);
   if (Serial){
     delay(1000);
@@ -53,6 +60,7 @@ void setup() {
   
   /* Wait for communication */
   while (!Serial || c2cComm.InTestingMode());
+  
   /* Setup port and packet handlers */
   portHandler   = dynamixel::PortHandler::getPortHandler(OCM::DEVICEPORT);
   packetHandler = dynamixel::PacketHandler::getPacketHandler(OCM::PROTOCOL_VERSION);

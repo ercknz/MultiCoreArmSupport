@@ -4,3 +4,6 @@ Teensy Code/.vscode
 Teensy Code/include/README
 Teensy Code/test
 *.csv
+
+.vscode/
+openCM_MultiCoreArmSupport/.vscode
