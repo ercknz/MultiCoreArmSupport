@@ -39,7 +39,7 @@ void SerialPackets::InitalizingComm(){
       }
     }
     delay(1000);
-    Serial.println(i);
+//    Serial.println(i);
   }
 }
 
@@ -139,7 +139,7 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   byte dataPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
   int16_t byteLen       = 4;
-  byte packetBuffer[12];
+  byte *packetBuffer;
 
   // Header Bytes 
   for (int16_t i = 0; i < 4; i++) {

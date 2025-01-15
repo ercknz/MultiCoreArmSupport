@@ -76,10 +76,10 @@ Q1 = @(alpha,beta) alpha - beta;
 
 
 %% Serial Comm
-robotSerialPort = 'COM7';
+robotSerialPort = 'COM4';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
-packetLen = 100;
+packetLen = 150;
 
 %% GUI
 % Initial Values for lines
@@ -92,7 +92,7 @@ t5o = T05(0,0,deg2rad(ELBW_LIMIT(1)));
 t6o = T06(0,0,deg2rad(ELBW_LIMIT(1)));
 t7o = T07(0,0,deg2rad(ELBW_LIMIT(1)));
 Hfigure = figure(100);
-set(Hfigure,'Units','normalized','Position',[0 0 1 1])
+set(Hfigure,'Units','normalized','Position',[0.05 0.05 0.90 0.85])
 set(Hfigure,'UserData',false);
 % set(Hfigure,'CloseRequestFcn',@closereq);
 % Top(XY) plot creation (top right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -43,7 +43,7 @@ classdef CommOpenCM < handle
         end
         
         function Stop(obj)
-            instrreset;
+            % instrreset;
             obj.serialObj = nan;
             obj.CommOpen = false;
         end

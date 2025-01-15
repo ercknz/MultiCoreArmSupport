@@ -51,15 +51,15 @@ void setup() {
   c2cComm.InitalizingComm();
 
   // For testing purposes only
-  while (!Serial);
-  if (Serial){
-    delay(1000);
-    Serial.println("...expired...");
-    Serial.println(c2cComm.InTestingMode());
-  }
+//  while (!Serial);
+//  if (Serial){
+//    delay(1000);
+//    Serial.println("...expired...");
+//    Serial.println(c2cComm.InTestingMode());
+//  }
   
   /* Wait for communication */
-  while (!Serial || c2cComm.InTestingMode());
+  while (!(Serial || !c2cComm.InTestingMode()));
   
   /* Setup port and packet handlers */
   portHandler   = dynamixel::PortHandler::getPortHandler(OCM::DEVICEPORT);

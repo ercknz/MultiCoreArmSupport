@@ -6,10 +6,10 @@ delete(instrfindall);
 clear; clc; close all;
 
 %% Ports
-robotSerialPort = 'COM7';
+robotSerialPort = 'COM4';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
-packetLen = 100;
+packetLen = 150;
 
 %% Log CSV file
 % logFileID = '_OpenCMframe_';
