@@ -20,7 +20,7 @@ testGoals = [0.750,  0.300,  0.250;
              0.650,  0.300, -0.200;
              0.650, -0.300, -0.200];
 idx = 1;
-velocityXYZ= 0.3;
+velocityXYZ= 0.2;
 
 %% Rotational Matrix Definition
 rotateX = @(a)  [1,0,0;
@@ -435,9 +435,10 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
     function sendGoal(source,eventdata)
         test = randi(5);
         while test == idx
-            test = randi(5);
+        if idx >= 5
+            idx = 1;
+      
         end
-        idx = test;
         botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
         set(HSxValue,'String',num2str(testGoals(idx,1)));
         set(HSyValue,'String',num2str(testGoals(idx,2)));

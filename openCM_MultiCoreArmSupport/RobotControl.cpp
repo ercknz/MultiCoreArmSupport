@@ -356,9 +356,9 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
 / Arm Support DXL Write Member Function ----------------------------------------/
 /------------------------------------------------------------------------------*/
 int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket) {
-  int32_t velocity = OCM::VEL_MAX_LIMIT;
+  //int32_t velocity = OCM::VEL_MAX_LIMIT;
   int dxlCommResult;
-  uint8_t elbowParam[4], shoulderParam[4], elevateParam[4];
+  uint8_t elbowParam[8], shoulderParam[8], elevateParam[8];
 
   /* Convert to Motor Counts */
   qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
@@ -377,30 +377,30 @@ int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite
   if (qCts_M[2] > OCM::ELBOW_MAX_POS) qCts_M[2] = OCM::ELBOW_MAX_POS;
 
   /* Shoulder Parameters (Goal Position and Velocity) */
-  shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[velocity]));
-  shoulderParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[velocity]));
-  shoulderParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[velocity]));
-  shoulderParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[velocity]));
+  shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[0]));
+  shoulderParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[0]));
+  shoulderParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[0]));
+  shoulderParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[0]));
   shoulderParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[0]));
   shoulderParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[0]));
   shoulderParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[0]));
   shoulderParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[0]));
 
   /* Elevation Parameters (Goal Position and Velocity) */
-  elevateParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[velocity]));
-  elevateParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[velocity]));
-  elevateParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[velocity]));
-  elevateParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[velocity]));
+  elevateParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[1]));
+  elevateParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[1]));
+  elevateParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[1]));
+  elevateParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[1]));
   elevateParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[1]));
   elevateParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[1]));
   elevateParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[1]));
   elevateParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[1]));
 
   /* Elbow Parameters (Goal Position and Velocity) */
-  elbowParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[velocity]));
-  elbowParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[velocity]));
-  elbowParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[velocity]));
-  elbowParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[velocity]));
+  elbowParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[2]));
+  elbowParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[2]));
+  elbowParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[2]));
+  elbowParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[2]));
   elbowParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[2]));
   elbowParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[2]));
   elbowParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[2]));
