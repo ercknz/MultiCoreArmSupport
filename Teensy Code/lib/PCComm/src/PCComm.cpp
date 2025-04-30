@@ -78,13 +78,13 @@ float PCComm::GetNewScalingFactor() {
 }
 
 float * PCComm::GetExternalForces(){
-  if (~_NEW_EXT_FORCE_X) {
+  if (!_NEW_EXT_FORCE_X) {
     ExtForces_M[0] = 0.0f;
   }
-  if (~_NEW_EXT_FORCE_Y) {
+  if (!_NEW_EXT_FORCE_Y) {
     ExtForces_M[1] = 0.0f;
   }
-  if (~_NEW_EXT_FORCE_Z) {
+  if (!_NEW_EXT_FORCE_Z) {
     ExtForces_M[2] = 0.0f;
   }
   _NEW_EXT_FORCE_X = false;
