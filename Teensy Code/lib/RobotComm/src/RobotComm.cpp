@@ -20,9 +20,10 @@
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Constructor ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotComm::RobotComm(const int baudrate)
+RobotComm::RobotComm(HardwareSerial *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
+  robotPort_M = ptrSer;
   //scalingFactor_M = SPRING_FORCE_SCALING_FACTOR;
 }
 

@@ -24,6 +24,7 @@ class PCComm {
     bool ModifyDampingZ();
     bool ModifyScalingFactor();
     bool ModifyFilter();
+    bool NewExternalForces();
     float GetNewMassXY();
     float GetNewMassZ();
     float GetNewDampingXY();
@@ -84,9 +85,7 @@ class PCComm {
     bool _NEW_DAMPING_Z       = false;
     bool _NEW_SCALING_FACTOR  = false;
     bool _NEW_MODE            = false;
-    bool _NEW_EXT_FORCE_X     = false;
-    bool _NEW_EXT_FORCE_Y     = false;
-    bool _NEW_EXT_FORCE_Z     = false;
+    bool _NEW_EXT_FORCES     = false;
     bool _NEW_FILTER          = false;
     float newMassXY_M,    newMassZ_M;
     float newDampingXY_M, newDampingZ_M;

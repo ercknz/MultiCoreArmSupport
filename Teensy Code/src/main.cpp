@@ -42,7 +42,7 @@
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 ForceSensor     ati         = ForceSensor(0.99); 
-RobotComm       robot       = RobotComm(ASR::CONTROLLER_BAUDRATE);
+RobotComm       robot       = RobotComm(&Serial1, ASR::CONTROLLER_BAUDRATE);
 AdmittanceModel admitModel  = AdmittanceModel(ASR::initMassXY, ASR::initMassZ, ASR::initDampingXY, ASR::initDampingZ);
 PCComm          pc          = PCComm(&Serial, ASR::SERIAL_BAUDRATE);
 

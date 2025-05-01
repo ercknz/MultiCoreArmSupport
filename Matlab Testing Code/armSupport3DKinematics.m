@@ -394,12 +394,6 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#7E2F8E');
 
 %% Callback Functions
-%     function closereq(source,eventdata)
-%         testRunning = get(Hfigure,'UserData');
-%         if  testRunning
-%             botSerial.Stop();
-%         end
-%     end
 
     function startOpenCM(source,eventdata)
         testRunning = get(Hfigure,'UserData');

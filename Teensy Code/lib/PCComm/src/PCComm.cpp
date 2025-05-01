@@ -52,6 +52,10 @@ bool PCComm::ModifyFilter() {
   return _NEW_FILTER;
 }
 
+bool PCComm::NewExternalForces() {
+  return _NEW_EXT_FORCES;
+}
+
 float PCComm::GetNewMassXY() {
   _NEW_MASS_XY = false;
   return newMassXY_M;
@@ -78,20 +82,10 @@ float PCComm::GetNewScalingFactor() {
 }
 
 float * PCComm::GetExternalForces(){
-  if (!_NEW_EXT_FORCE_X) {
-    ExtForces_M[0] = 0.0f;
-  }
-  if (!_NEW_EXT_FORCE_Y) {
-    ExtForces_M[1] = 0.0f;
-  }
-  if (!_NEW_EXT_FORCE_Z) {
-    ExtForces_M[2] = 0.0f;
-  }
-  _NEW_EXT_FORCE_X = false;
-  _NEW_EXT_FORCE_Y = false;
-  _NEW_EXT_FORCE_Z = false;
+  _NEW_EXT_FORCES = false;
   return ExtForces_M;
 }
+
 float PCComm::GetNewFilter() {
   _NEW_FILTER = false;
   return newFilter_M;
@@ -450,9 +444,9 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
     [2]:MassZ                                   New MassZ: 11,12,13,14,... 
     [3]:DampingXY                           New DampingXY: 15,16,17,18,...
     [4]:DampingZ                             New DampingZ: 19,20,21,22,...
-    [5]:eFx                               New External Fx: 23,24,25,26,...
-    [6]:eFy                               New External Fy: 27,28,29,30,...
-    [7]:eFz                               New External Fz: 31,32,33,34,...
+    [5]:eForces                           New External Fx: 23,24,25,26,...
+                                          New External Fy: 27,28,29,30,...
+                                          New External Fz: 31,32,33,34,...
                                        New Scaling Factor: 35,...
     Modifier Byte 2               New Force Sensor Filter: 36,...
     [1]: Scaling FActor                               
@@ -484,15 +478,9 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
     newDampingZ_M = bytesToFloat(RxPacket[19], RxPacket[20], RxPacket[21], RxPacket[22]);
   }
   if (bitArrayLarge[4] == 1) {
-    _NEW_EXT_FORCE_X = true;
+    _NEW_EXT_FORCES = true;
     ExtForces_M[0] = bytesToFloat(RxPacket[23], RxPacket[24], RxPacket[25], RxPacket[26]);
-  }
-  if (bitArrayLarge[5] == 1) {
-    _NEW_EXT_FORCE_Y = true;
     ExtForces_M[1] = bytesToFloat(RxPacket[27], RxPacket[28], RxPacket[29], RxPacket[30]);
-  }
-  if (bitArrayLarge[6] == 1) {
-    _NEW_EXT_FORCE_Z = true;
     ExtForces_M[2] = bytesToFloat(RxPacket[31], RxPacket[32], RxPacket[33], RxPacket[34]);
   }
   if (bitArraySmall[0] == 1) {

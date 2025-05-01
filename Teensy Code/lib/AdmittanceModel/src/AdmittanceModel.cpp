@@ -45,8 +45,8 @@ AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz)
   : _GRAVITY{ASR::GRAVITY},
     _DELTA_T{ASR::MODEL_DT},
     _ELEVATION_CENTER{(ASR::ELEVATION_MAX_POS + ASR::ELEVATION_MIN_POS) / 2},
-    _Z_LIMIT{abs(ASR::L1_LINK * sin((ASR::ELEVATION_MAX_POS - _ELEVATION_CENTER) * ASR::DEGREES_PER_COUNT * (PI / 180.0) * (1/ASR::ELEVATION_RATIO)))},
-    _H_OF_L2{sqrt(pow(ASR::LINK_OFFSET, 2) + pow(ASR::L2_LINK, 2))},
+    _Z_LIMIT{abs(static_cast<float>(ASR::L1_LINK * sin((ASR::ELEVATION_MAX_POS - _ELEVATION_CENTER) * ASR::DEGREES_PER_COUNT * (PI / 180.0) * (1/ASR::ELEVATION_RATIO))))},
+    _H_OF_L2{static_cast<float>((pow(ASR::LINK_OFFSET, 2) + pow(ASR::L2_LINK, 2)))},
     _A1A2{ASR::A1_LINK + ASR::A2_LINK},
     _INNER_R_LIMIT{ASR::A1_LINK + ASR::L1_LINK + ASR::A2_LINK - ASR::L2_LINK}
 {

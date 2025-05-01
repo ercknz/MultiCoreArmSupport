@@ -12,7 +12,7 @@
 
 class RobotComm {
   public:
-          RobotComm(const int baudrate);
+          RobotComm(HardwareSerial *ptrSer, const int baudrate);
     void  ReadRobot();
     void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
     void  RequestDataOnly();
