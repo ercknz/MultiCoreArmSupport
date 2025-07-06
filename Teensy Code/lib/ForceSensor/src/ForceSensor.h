@@ -14,7 +14,7 @@ class ForceSensor {
   public:
           ForceSensor(const float filterWeight);
     void  CalibrateSensor();
-    int*  GetRawCtsFT();
+    u_int16_t * GetRawCtsFT();
     float * GetRawFT();
     float * GetFilteredFT();
     float * GetGlobalFT();
@@ -54,8 +54,8 @@ class ForceSensor {
     float FilterWeight_M;
 
     // Force Torque Array: [Fx, Fy, Fz, Tx, Ty, Tz]
-    int ftxyzRawCts_M[6]     = {0};
-    int ftxyzLastRawCts_M[6] = {0};
+    uint16_t ftxyzRawCts_M[6]     = {0};
+    uint16_t ftxyzLastRawCts_M[6] = {0};
     float ftxyzRaw_M[6]     = {0};
     float ftxyzLastRaw_M[6] = {0};
     float ftxyzFilt_M[6]    = {0.0f};

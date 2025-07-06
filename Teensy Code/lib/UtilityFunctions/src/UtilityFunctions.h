@@ -25,4 +25,6 @@ byte * floatToBytes(float floatValue);
 
 byte * int32ArrayToBytes(int32_t * int32Values);
 
+byte* uint16ArrayToBytes(uint16_t* uint16Values);
+
 #endif // UTILITY_FUNCTIONS_H

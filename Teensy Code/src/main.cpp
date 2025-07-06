@@ -102,7 +102,7 @@ void loop() {
       if (pc.ModifyScalingFactor()) {
         robot.SetScalingFactor(pc.GetNewScalingFactor());
       }
-      if (pc.ChangeTorqueMode()){
+      if (pc.SetTorqueMode()){
         robot.ChangeTorqueOnly(pc.GetNewMode());
       }
       if (pc.ModifyFilter()){

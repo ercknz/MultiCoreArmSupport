@@ -77,3 +77,15 @@ byte * int32ArrayToBytes(int32_t * int32Values) {
   }
   return bytesOut;
 }
+
+/* ---------------------------------------------------------------------------------------/
+/ UInt16 Array to Byte Array Function -----------------------------------------------------/
+/----------------------------------------------------------------------------------------*/
+byte* uint16ArrayToBytes(uint16_t* uint16Values) {
+  static byte bytesOut[12];  // 6 values × 2 bytes = 12 bytes
+  for (int16_t i = 0; i < 6; i++) {
+    bytesOut[2 * i]     = DXL_LOBYTE(uint16Values[i]);
+    bytesOut[2 * i + 1] = DXL_HIBYTE(uint16Values[i]);
+  }
+  return bytesOut;
+}

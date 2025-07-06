@@ -43,7 +43,7 @@ ForceSensor::ForceSensor(const float filterWeight)
 /* ---------------------------------------------------------------------------------------/
 / Force Sensor Memeber Getter and Setter Functions ---------------------------------------/
 /----------------------------------------------------------------------------------------*/
-int * ForceSensor::GetRawCtsFT(){
+uint16_t * ForceSensor::GetRawCtsFT(){
   return ftxyzRawCts_M;
 }
 
