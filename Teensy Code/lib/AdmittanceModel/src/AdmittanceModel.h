@@ -5,10 +5,10 @@
    by erick nunez
 */
 
-#include <Arduino.h>
-
 #ifndef ADMITTANCE_MODEL_H
 #define ADMITTANCE_MODEL_H
+
+#include <Arduino.h>
 
 class AdmittanceModel {
   public:
@@ -35,8 +35,8 @@ class AdmittanceModel {
     const float _A1A2;
     const float _INNER_R_LIMIT;
 
-    float mass_M[3];        // [xy, xy, z]
-    float damping_M[3];     // [xy, xy, z]
+    float mass_M[3];        // [x, y, z]
+    float damping_M[3];     // [x, y, z]
     float xyzGoal_M[3]      = {0.0f};
     float xyzDotGoal_M[3]   = {0.0f};
     float xyzInit_M[3]      = {0.0f};

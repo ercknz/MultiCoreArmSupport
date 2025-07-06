@@ -38,7 +38,7 @@ class PCComm {
     float * GetNewGoalQ();
     float * GetNewGoalQdot();
     float * GetNewCurrent();
-    bool ChangeTorqueMode();
+    bool SetTorqueMode();
     uint8_t GetNewMode();
 
   protected:
@@ -49,8 +49,8 @@ class PCComm {
     const byte  _CTRLHEADER[4]    = {150, 50, 50, 175};
     const int16_t _RX_PKT_LEN = 50;
     const byte  _WRITEHEADER[4]   = {170, 8, 69, 0};
-    const int16_t _TX_PKT_LEN = 150;
-    const int16_t _MAX_TX_DATA_SLOTS = 24;
+    const int16_t _TX_PKT_LEN = 230;
+    // const int16_t _MAX_TX_DATA_SLOTS = 24;
 
     void ConfigPacketRX(byte * RxPacket);
     void ModifierPacketRX(byte * RxPacket);
@@ -84,7 +84,6 @@ class PCComm {
     bool _NEW_DAMPING_XY      = false;
     bool _NEW_DAMPING_Z       = false;
     bool _NEW_SCALING_FACTOR  = false;
-    bool _NEW_MODE            = false;
     bool _NEW_EXT_FORCES     = false;
     bool _NEW_FILTER          = false;
     float newMassXY_M,    newMassZ_M;

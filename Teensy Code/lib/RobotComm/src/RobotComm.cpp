@@ -24,7 +24,25 @@ RobotComm::RobotComm(HardwareSerial *ptrSer, const int baudrate)
   : _BAUDRATE{baudrate}
 {
   robotPort_M = ptrSer;
-  //scalingFactor_M = SPRING_FORCE_SCALING_FACTOR;
+  scalingFactor_M = 1.0f;
+  springF_M = 0.0f;
+  torqueState_M = 0;
+  
+  // Initialize arrays to zero
+  for(int i = 0; i < 3; i++) {
+    qPres_M[i] = 0.0f;
+    qDotPres_M[i] = 0.0f;
+    qPresCts_M[i] = 0;
+    qDotPresCts_M[i] = 0;
+    xyzPres_M[i] = 0.0f;
+    xyzDotPres_M[i] = 0.0f;
+    qGoal_M[i] = 0.0f;
+    qDotGoal_M[i] = 0.0f;
+    qGoalCts_M[i] = 0;
+    qDotGoalCts_M[i] = 0;
+    xyzGoal_M[i] = 0.0f;
+    xyzDotGoal_M[i] = 0.0f;
+  }
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -214,14 +232,14 @@ void RobotComm::ReadRobot(){
 /----------------------------------------------------------------------------------------*/
 void RobotComm::RequestDataOnly(){
   //RobotComm::Send only Request for Data packet to robot.
-  float blankData[3] = {0.0};
+  float blankData[3] = {0.0f, 0.0f, 0.0f};
   uint8_t blankTorque = 0;
   WriteToRobot(4, blankData, blankData, blankTorque);
 }
 
 void RobotComm::ChangeTorqueOnly(uint8_t newTorqueValue){
   //RobotComm::Only sends a torque mode change to robot. 
-  float blankData[3] = {0.0};
+  float blankData[3] = {0.0f, 0.0f, 0.0f};
   WriteToRobot(1, blankData, blankData, newTorqueValue);
 }
 

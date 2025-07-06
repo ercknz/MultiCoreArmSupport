@@ -37,15 +37,15 @@ class ForceSensor {
     const uint8_t _TY_PIN = 1;
     const uint8_t _TZ_PIN = 0;
 
-    const float _FXY_MAX    = 290;
-    const float _FZ_MAX     = 580;
-    const float _TXYZ_MAX   = 10;
-    const float _VF_MAX     = 10;
-    const float _AIN_TOL    = 3.3;
-    const float _R1         = 2200;
-    const float _R3         = 330;
-    const float _AIN_RES    = pow(2, 13);
-    const float _V2         = 11.66;
+    const float _FXY_MAX    = 290;          // Max Force in X and Y (N)
+    const float _FZ_MAX     = 580;          // Max Force in Z (N)
+    const float _TXYZ_MAX   = 10;           // Max Torque in X, Y, Z (Nm)
+    const float _VF_MAX     = 10;           // Max Voltage Force (V)
+    const float _AIN_TOL    = 3.3;          // Analog Input Tolerance (V)
+    const float _R1         = 2200;         // Resistor 1 Value (Ohms)
+    const float _R3         = 330;          // Resistor 3 Value (Ohms)
+    const float _AIN_RES    = pow(2, 13);   // Analog Input Resolution (13 bits)
+    const float _V2         = 11.66;        // OpAmp V2 Voltage Value (V)
 
     const float _AFXY_M, _BFXY_M;   //Const Coefficients
     const float _AFZ_M, _BFZ_M;     //Const Coefficients
