@@ -76,11 +76,12 @@ Q1 = @(alpha,beta) alpha - beta;
 
 
 
-%% Serial Comm
+%% Serial Comm and Robot Variables
 robotSerialPort = 'COM4';
 robotBaud = 115200;
 botSerial = [];
 fullRobot = false;
+torqueToggle = false;
 
 %% GUI
 % Initial Values for lines
@@ -126,7 +127,7 @@ s_link4_XY = plot([t4o(1,4) t5o(1,4)], [t4o(2,4) t5o(2,4)],'LineWidth',2,'Color'
 s_link5_XY = plot([t5o(1,4) t6o(1,4)], [t5o(2,4) t6o(2,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_XY = plot([t6o(1,4) t7o(1,4)], [t6o(2,4) t7o(2,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
 % Model XY
-modelXY = plot(t7o(1,4),t7o(2,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
+modelXY = plot(t7o(1,4),t7o(2,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2);
 set(plotXYHandle,'Position',[0.05 0.575 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Y');
@@ -160,11 +161,11 @@ s_link4_3d = plot3([t4o(1,4) t5o(1,4)], [t4o(2,4) t5o(2,4)], [t4o(3,4) t5o(3,4)]
 s_link5_3d = plot3([t5o(1,4) t6o(1,4)], [t5o(2,4) t6o(2,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_3d = plot3([t6o(1,4) t7o(1,4)], [t6o(2,4) t7o(2,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
 % ModelXYZ
-modelXYZ = plot3(t7o(1,4),t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
+modelXYZ = plot3(t7o(1,4),t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2);
 set(plot3DHandle,'Position',[0.4 0.575 0.3 0.4])
 set(plot3DHandle,'View',[45,45])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
-legend([link2_3d, end_3d, g_link2_3d, g_end_3d, s_link2_3d],'presR','presXYZ','rGoal','rGoalXYZ','goalSet','Location','northwest');
+legend([link2_3d, end_3d, g_link2_3d, g_end_3d, s_link2_3d, modelXYZ],'presR','presXYZ','rGoal','rGoalXYZ','goalSet','model','Location','northwest');
 xlabel('X');ylabel('Y');zlabel('Z');
 % Front(XZ) plot creation (bottom left) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXZHandle = subplot(2,2,3);
@@ -196,7 +197,7 @@ s_link4_XZ = plot([t4o(1,4) t5o(1,4)], [t4o(3,4) t5o(3,4)],'LineWidth',2,'Color'
 s_link5_XZ = plot([t5o(1,4) t6o(1,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_XZ = plot([t6o(1,4) t7o(1,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
 % Model XZ
-modelXZ = plot(t7o(1,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
+modelXZ = plot(t7o(1,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2);
 set(plotXZHandle,'Position',[0.05 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Z');
@@ -230,7 +231,7 @@ s_link4_YZ = plot([t4o(2,4) t5o(2,4)], [t4o(3,4) t5o(3,4)],'LineWidth',2,'Color'
 s_link5_YZ = plot([t5o(2,4) t6o(2,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_YZ = plot([t6o(2,4) t7o(2,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
 % Model YZ
-modelYZ = plot(t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
+modelYZ = plot(t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2);
 set(plotYZHandle,'Position',[0.4 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
@@ -238,168 +239,227 @@ xlabel('Y');ylabel('Z');
 % UI Controls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % buttons -----------------------------------------------------------------
 HbttnOpenCMStart = uicontrol('Style','pushbutton');
-set(HbttnOpenCMStart,'Units','normalized','Position',[0.70 0.95 0.1 0.05],...
-    'String','Start OpenCM','Callback',@startOpenCM);
+set(HbttnOpenCMStart,'Units','normalized','Position',[0.70 0.95 0.05 0.05],...
+    'String','<html>Start<br />OpenCM</html>','Callback',@startOpenCM);
 HbttnOpenCMStop = uicontrol('Style','pushbutton');
-set(HbttnOpenCMStop,'Units','normalized','Position',[0.80 0.95 0.1 0.05],...
-    'String','Stop OpenCM','Callback',@stopOpenCM);
+set(HbttnOpenCMStop,'Units','normalized','Position',[0.75 0.95 0.05 0.05],...
+    'String','<html>Stop<br />OpenCM</html>','Callback',@stopOpenCM);
 HbttnTeensyStart = uicontrol('Style','pushbutton');
-set(HbttnTeensyStart,'Units','normalized','Position',[0.70 0.9 0.1 0.05],...
-    'String','Start Teensy','Callback',@startTeensy);
+set(HbttnTeensyStart,'Units','normalized','Position',[0.80 0.95 0.05 0.05],...
+    'String','<html>Start<br />Teensy</html>','Callback',@startTeensy);
 HbttnTeensyStop = uicontrol('Style','pushbutton');
-set(HbttnTeensyStop,'Units','normalized','Position',[0.80 0.9 0.1 0.05],...
-    'String','Stop Teensy','Callback',@stopTeensy);
+set(HbttnTeensyStop,'Units','normalized','Position',[0.85 0.95 0.05 0.05],...
+    'String','<html>Stop<br />Teensy</html>','Callback',@stopTeensy);
+HbttnTorque = uicontrol('Style','pushbutton');
+set(HbttnTorque,'Units','normalized','Position',[0.90 0.95 0.05, 0.05],...
+    'String','Torque','Callback',@changeTorque);
 HbttnTestGoal = uicontrol('Style','pushbutton');
-set(HbttnTestGoal,'Units','normalized','Position',[0.90 0.9 0.05, 0.1],...
+set(HbttnTestGoal,'Units','normalized','Position',[0.95 0.95 0.05, 0.05],...
     'String','<html>Send<br />Goal</html>','Callback',@sendGoal);
 
-% time --------------------------------------------------------------------
+% elapsed time ------------------------------------------------------------
 HtimeLabel = uicontrol('Style','text');
-set(HtimeLabel,'Units','normalized','Position',[0.70 0.85 0.066 0.05],...
+set(HtimeLabel,'Units','normalized','Position',[0.933 0.9 0.066 0.05],...
     'String','elapsedT:','Fontsize',18);
 HtimeValue = uicontrol('Style','text');
-set(HtimeValue,'Units','normalized','Position',[0.766 0.85 0.066 0.05],...
+set(HtimeValue,'Units','normalized','Position',[0.933 0.85 0.066 0.05],...
     'String','0','Fontsize',20);
 
+% loop time ---------------------------------------------------------------
 HloopLabel = uicontrol('Style','text');
-set(HloopLabel,'Units','normalized','Position',[0.70 0.8 0.066 0.05],...
+set(HloopLabel,'Units','normalized','Position',[0.933 0.8 0.066 0.05],...
     'String','loopT:','Fontsize',20);
 HloopValue = uicontrol('Style','text');
-set(HloopValue,'Units','normalized','Position',[0.766 0.8 0.066 0.05],...
+set(HloopValue,'Units','normalized','Position',[0.933 0.75 0.066 0.05],...
     'String','0','Fontsize',20);
 
 % Drive Mode --------------------------------------------------------------
 HdriveModeLabel = uicontrol('Style','text');
-set(HdriveModeLabel,'Units','normalized','Position',[0.898 0.85 0.066 0.05],...
-    'String','DriveMode','Fontsize',16);
+set(HdriveModeLabel,'Units','normalized','Position',[0.933 0.7 0.066 0.05],...
+    'String','DriveMode:','Fontsize',16);
 HdriveModeValue = uicontrol('Style','text');
-set(HdriveModeValue,'Units','normalized','Position',[0.898 0.8 0.066 0.05],...
+set(HdriveModeValue,'Units','normalized','Position',[0.933 0.65 0.066 0.05],...
     'String','0','Fontsize',20);
 
 % Present Q1, Q2, Q4 ------------------------------------------------------
 HalphaLabel = uicontrol('Style','text');
-set(HalphaLabel,'Units','normalized','Position',[0.7 0.75 0.066 0.05],...
+set(HalphaLabel,'Units','normalized','Position',[0.7 0.9 0.066 0.05],...
     'String','rQ1:','Fontsize',20);
 Hq1Value = uicontrol('Style','text');
-set(Hq1Value,'Units','normalized','Position',[0.766 0.75 0.066 0.05],...
+set(Hq1Value,'Units','normalized','Position',[0.766 0.9 0.066 0.05],...
     'String','0','Fontsize',20);
 Hq1CtsValue = uicontrol('Style','text');
-set(Hq1CtsValue,'Units','normalized','Position',[0.832 0.75 0.066 0.05],...
+set(Hq1CtsValue,'Units','normalized','Position',[0.832 0.9 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor',"#7E2F8E");
 
 HbetaLabel = uicontrol('Style','text');
-set(HbetaLabel,'Units','normalized','Position',[0.7 0.7 0.066 0.05],...
+set(HbetaLabel,'Units','normalized','Position',[0.7 0.85 0.066 0.05],...
     'String','rQ2:','Fontsize',20);
 Hq2Value = uicontrol('Style','text');
-set(Hq2Value,'Units','normalized','Position',[0.766 0.7 0.066 0.05],...
+set(Hq2Value,'Units','normalized','Position',[0.766 0.85 0.066 0.05],...
     'String','0','Fontsize',20);
 Hq2CtsValue = uicontrol('Style','text');
-set(Hq2CtsValue,'Units','normalized','Position',[0.832 0.7 0.066 0.05],...
+set(Hq2CtsValue,'Units','normalized','Position',[0.832 0.85 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor',"#7E2F8E");
 
 HthetaLabel = uicontrol('Style','text');
-set(HthetaLabel,'Units','normalized','Position',[0.7 0.65 0.066 0.05],...
+set(HthetaLabel,'Units','normalized','Position',[0.7 0.8 0.066 0.05],...
     'String','rQ4:','Fontsize',20);
 Hq4Value = uicontrol('Style','text');
-set(Hq4Value,'Units','normalized','Position',[0.766 0.65 0.066 0.05],...
+set(Hq4Value,'Units','normalized','Position',[0.766 0.8 0.066 0.05],...
     'String','0','Fontsize',20);
 Hq4CtsValue = uicontrol('Style','text');
-set(Hq4CtsValue,'Units','normalized','Position',[0.832 0.65 0.066 0.05],...
+set(Hq4CtsValue,'Units','normalized','Position',[0.832 0.8 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor',"#7E2F8E");
 
 % Present X, Y, Z ---------------------------------------------------------
 HRxLabel = uicontrol('Style','text');
-set(HRxLabel,'Units','normalized','Position',[0.7 0.6 0.066 0.05],...
+set(HRxLabel,'Units','normalized','Position',[0.7 0.75 0.066 0.05],...
     'String','rX:','Fontsize',20);
 HRxValue = uicontrol('Style','text');
-set(HRxValue,'Units','normalized','Position',[0.766 0.6 0.066 0.05],...
+set(HRxValue,'Units','normalized','Position',[0.766 0.75 0.066 0.05],...
     'String','0','Fontsize',20);
 
 HRyLabel = uicontrol('Style','text');
-set(HRyLabel,'Units','normalized','Position',[0.7 0.55 0.066 0.05],...
+set(HRyLabel,'Units','normalized','Position',[0.7 0.7 0.066 0.05],...
     'String','rY:','Fontsize',20);
 HRyValue = uicontrol('Style','text');
-set(HRyValue,'Units','normalized','Position',[0.766 0.55 0.066 0.05],...
+set(HRyValue,'Units','normalized','Position',[0.766 0.7 0.066 0.05],...
     'String','0','Fontsize',20);
 
 HRzLabel = uicontrol('Style','text');
-set(HRzLabel,'Units','normalized','Position',[0.7 0.5 0.066 0.05],...
+set(HRzLabel,'Units','normalized','Position',[0.7 0.65 0.066 0.05],...
     'String','rZ:','Fontsize',20);
 HRzValue = uicontrol('Style','text');
-set(HRzValue,'Units','normalized','Position',[0.766 0.5 0.066 0.05],...
+set(HRzValue,'Units','normalized','Position',[0.766 0.65 0.066 0.05],...
     'String','0','Fontsize',20);
 
-% Goal X, Y, Z ---------------------------------------------------------
+% Goal X, Y, Z ------------------------------------------------------------
 HGxLabel = uicontrol('Style','text');
-set(HGxLabel,'Units','normalized','Position',[0.7 0.45 0.066 0.05],...
+set(HGxLabel,'Units','normalized','Position',[0.7 0.6 0.066 0.05],...
     'String','gX:','Fontsize',20);
 HGxValue = uicontrol('Style','text');
-set(HGxValue,'Units','normalized','Position',[0.766 0.45 0.066 0.05],...
+set(HGxValue,'Units','normalized','Position',[0.766 0.6 0.066 0.05],...
     'String','0','Fontsize',20);
 HSxValue = uicontrol('Style','text');
-set(HSxValue,'Units','normalized','Position',[0.832 0.45 0.066 0.05],...
+set(HSxValue,'Units','normalized','Position',[0.832 0.6 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 
 
 HGyLabel = uicontrol('Style','text');
-set(HGyLabel,'Units','normalized','Position',[0.7 0.4 0.066 0.05],...
+set(HGyLabel,'Units','normalized','Position',[0.7 0.55 0.066 0.05],...
     'String','gY:','Fontsize',20);
 HGyValue = uicontrol('Style','text');
-set(HGyValue,'Units','normalized','Position',[0.766 0.4 0.066 0.05],...
+set(HGyValue,'Units','normalized','Position',[0.766 0.55 0.066 0.05],...
     'String','0','Fontsize',20);
 HSyValue = uicontrol('Style','text');
-set(HSyValue,'Units','normalized','Position',[0.832 0.4 0.066 0.05],...
+set(HSyValue,'Units','normalized','Position',[0.832 0.55 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 
 HGzLabel = uicontrol('Style','text');
-set(HGzLabel,'Units','normalized','Position',[0.7 0.35 0.066 0.05],...
+set(HGzLabel,'Units','normalized','Position',[0.7 0.5 0.066 0.05],...
     'String','gZ:','Fontsize',20);
 HGzValue = uicontrol('Style','text');
-set(HGzValue,'Units','normalized','Position',[0.766 0.35 0.066 0.05],...
+set(HGzValue,'Units','normalized','Position',[0.766 0.5 0.066 0.05],...
     'String','0','Fontsize',20);
 HSzValue = uicontrol('Style','text');
-set(HSzValue,'Units','normalized','Position',[0.832 0.35 0.066 0.05],...
+set(HSzValue,'Units','normalized','Position',[0.832 0.5 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 
-% Goal Q1, Q2, Q4 ------------------------------------------------------
+% Goal Q1, Q2, Q4 ---------------------------------------------------------
 HgoalQ1Label = uicontrol('Style','text');
-set(HgoalQ1Label,'Units','normalized','Position',[0.7 0.3 0.066 0.05],...
+set(HgoalQ1Label,'Units','normalized','Position',[0.7 0.45 0.066 0.05],...
     'String','gQ1:','Fontsize',20);
 HgoalQ1Value = uicontrol('Style','text');
-set(HgoalQ1Value,'Units','normalized','Position',[0.766 0.3 0.066 0.05],...
+set(HgoalQ1Value,'Units','normalized','Position',[0.766 0.45 0.066 0.05],...
     'String','0','Fontsize',20);
 HsQ1Value = uicontrol('Style','text');
-set(HsQ1Value,'Units','normalized','Position',[0.832 0.3 0.066 0.05],...
+set(HsQ1Value,'Units','normalized','Position',[0.832 0.45 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 HgoalQ1ctsValue = uicontrol('Style','text');
-set(HgoalQ1ctsValue,'Units','normalized','Position',[0.898 0.3 0.066 0.05],...
+set(HgoalQ1ctsValue,'Units','normalized','Position',[0.898 0.45 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#7E2F8E');
 
 HgoalQ2Label = uicontrol('Style','text');
-set(HgoalQ2Label,'Units','normalized','Position',[0.7 0.25 0.066 0.05],...
+set(HgoalQ2Label,'Units','normalized','Position',[0.7 0.4 0.066 0.05],...
     'String','gQ2:','Fontsize',20);
 HgoalQ2Value = uicontrol('Style','text');
-set(HgoalQ2Value,'Units','normalized','Position',[0.766 0.25 0.066 0.05],...
+set(HgoalQ2Value,'Units','normalized','Position',[0.766 0.4 0.066 0.05],...
     'String','0','Fontsize',20);
 HsQ2Value = uicontrol('Style','text');
-set(HsQ2Value,'Units','normalized','Position',[0.832 0.25 0.066 0.05],...
+set(HsQ2Value,'Units','normalized','Position',[0.832 0.4 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 HgoalQ2ctsValue = uicontrol('Style','text');
-set(HgoalQ2ctsValue,'Units','normalized','Position',[0.898 0.25 0.066 0.05],...
+set(HgoalQ2ctsValue,'Units','normalized','Position',[0.898 0.4 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#7E2F8E');
 
 HgoalQ4Label = uicontrol('Style','text');
-set(HgoalQ4Label,'Units','normalized','Position',[0.7 0.2 0.066 0.05],...
+set(HgoalQ4Label,'Units','normalized','Position',[0.7 0.35 0.066 0.05],...
     'String','gQ4:','Fontsize',20);
 HgoalQ4Value = uicontrol('Style','text');
-set(HgoalQ4Value,'Units','normalized','Position',[0.766 0.2 0.066 0.05],...
+set(HgoalQ4Value,'Units','normalized','Position',[0.766 0.35 0.066 0.05],...
     'String','0','Fontsize',20);
 HsQ4Value = uicontrol('Style','text');
-set(HsQ4Value,'Units','normalized','Position',[0.832 0.2 0.066 0.05],...
+set(HsQ4Value,'Units','normalized','Position',[0.832 0.35 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 HgoalQ4ctsValue = uicontrol('Style','text');
-set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
+set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.35 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#7E2F8E');
+
+% Model X, Y, Z -----------------------------------------------------------
+HMxLabel = uicontrol('Style','text');
+set(HMxLabel,'Units','normalized','Position',[0.7 0.3 0.066 0.05],...
+    'String','mX:','Fontsize',20);
+HMxValue = uicontrol('Style','text');
+set(HMxValue,'Units','normalized','Position',[0.766 0.3 0.066 0.05],...
+    'String','0','Fontsize',20);
+
+HMyLabel = uicontrol('Style','text');
+set(HMyLabel,'Units','normalized','Position',[0.7 0.25 0.066 0.05],...
+    'String','mY:','Fontsize',20);
+HMyValue = uicontrol('Style','text');
+set(HMyValue,'Units','normalized','Position',[0.766 0.25 0.066 0.05],...
+    'String','0','Fontsize',20);
+
+HMzLabel = uicontrol('Style','text');
+set(HMzLabel,'Units','normalized','Position',[0.7 0.2 0.066 0.05],...
+    'String','mZ:','Fontsize',20);
+HMzValue = uicontrol('Style','text');
+set(HMzValue,'Units','normalized','Position',[0.766 0.2 0.066 0.05],...
+    'String','0','Fontsize',20);
+
+% Force X, Y, Z -----------------------------------------------------------
+HFxLabel = uicontrol('Style','text');
+set(HFxLabel,'Units','normalized','Position',[0.7 0.15 0.066 0.05],...
+    'String','Fx:','Fontsize',20);
+HFxValue = uicontrol('Style','text');
+set(HFxValue,'Units','normalized','Position',[0.766 0.15 0.066 0.05],...
+    'String','0','Fontsize',20);
+HFxCtsValue = uicontrol('Style','text');
+set(HFxCtsValue,'Units','normalized','Position',[0.832 0.15 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
+
+HFyLabel = uicontrol('Style','text');
+set(HFyLabel,'Units','normalized','Position',[0.7 0.1 0.066 0.05],...
+    'String','Fy:','Fontsize',20);
+HFyValue = uicontrol('Style','text');
+set(HFyValue,'Units','normalized','Position',[0.766 0.1 0.066 0.05],...
+    'String','0','Fontsize',20);
+HFyCtsValue = uicontrol('Style','text');
+set(HFyCtsValue,'Units','normalized','Position',[0.832 0.1 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
+HFzLabel = uicontrol('Style','text');
+set(HFzLabel,'Units','normalized','Position',[0.7 0.05 0.066 0.05],...
+    'String','Fz:','Fontsize',20);
+HFzValue = uicontrol('Style','text');
+set(HFzValue,'Units','normalized','Position',[0.766 0.05 0.066 0.05],...
+    'String','0','Fontsize',20);
+HFzCtsValue = uicontrol('Style','text');
+set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
+    'String','0','Fontsize',20,'ForegroundColor','#A2142F');
+
 
 %% Callback Functions
 
@@ -443,13 +503,32 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
         end
     end
 
+    function changeTorque(source,eventdata)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning
+            if torqueToggle
+                botSerial.SendTorqueChange(20);
+                torqueToggle = false;
+                set(HbttnTorque,'String','<html>torque<br/>OFF</html>','ForegroundColor','red');
+            else
+                botSerial.SendTorqueChange(5);
+                torqueToggle = true;
+                set(HbttnTorque,'String','<html>torque<br/>ON</html>','ForegroundColor','green');
+            end
+        end
+    end
+
     function sendGoal(source,eventdata)
         test = randi(5);
         while test == idx
             test = randi(5);
         end
         idx = test;
-        botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
+        if fullRobot
+            botSerial.SendNewModelGoals(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
+        else
+            botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
+        end
         set(HSxValue,'String',num2str(testGoals(idx,1)));
         set(HSyValue,'String',num2str(testGoals(idx,2)));
         set(HSzValue,'String',num2str(testGoals(idx,3)));
@@ -528,7 +607,15 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             goalQ2 = botSerial.frameData(15);
             goalQ4 = botSerial.frameData(16);
             if fullRobot
-
+                forceXcts = botSerial.frameData(20);
+                forceYcts = botSerial.frameDate(21);
+                forceZcts = botSerial.frameData(22);
+                forceX = botSerial.frameData(26);
+                forceY = botSerial.frameData(27);
+                forceZ = botSerial.frameData(28);
+                modelX = botSerial.frameData(32);
+                modelY = botSerial.frameData(33);
+                modelZ = botSerial.frameData(34);
             else
                 q1Cts = botSerial.frameData(20);
                 q2Cts = botSerial.frameData(21);
@@ -644,7 +731,15 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             set(HdriveModeValue,'String',num2str(botSerial.frameData(23)));
             % Differences between packets from each MCU.
             if fullRobot
-
+                set(HMxValue,'String',num2str(modelX));
+                set(HMyValue,'String',num2str(modelY));
+                set(HMzValue,'String',num2str(modelZ));
+                set(HFxValue,'String',num2str(forceX));
+                set(HFyValue,'String',num2str(forceY));
+                set(HFzValue,'String',num2str(forceZ));
+                set(HFxCtsValue,'String',num2str(forceXcts));
+                set(HFyCtsValue,'String',num2str(forceYcts));
+                set(HFzCtsValue,'String',num2str(forceZcts));
             else
                 set(HgoalQ1ctsValue,'String',num2str(gQ1cts));
                 set(HgoalQ2ctsValue,'String',num2str(gQ2cts));
