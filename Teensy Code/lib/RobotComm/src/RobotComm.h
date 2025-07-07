@@ -33,7 +33,8 @@ class RobotComm {
     float *   GetGoalVel();
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
-    
+    uint8_t   GetTorqueState();
+
   protected:
 
     HardwareSerial *robotPort_M;
@@ -70,7 +71,7 @@ class RobotComm {
     //float presCurrent_M[3];
     float springF_M;
     float scalingFactor_M;
-    int16_t torqueState_M;
+    uint8_t torqueState_M;
     
 };
 

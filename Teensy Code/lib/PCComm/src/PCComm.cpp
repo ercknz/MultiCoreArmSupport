@@ -118,6 +118,24 @@ float * PCComm::GetNewCurrent(){
   return goalCurrent_M;
 }
 
+bool PCComm::NewGoalXYZAvailable(){
+  return newGoalXYZ_M;
+}
+
+bool PCComm::NewGoalXYZdotAvailable(){
+  return newGoalXYZdot_M;
+}
+
+float * PCComm::GetNewGoalXYZ(){
+  newGoalXYZ_M = false;
+  return goalXYZ_M;
+}
+
+float * PCComm::GetNewGoalXYZdot(){
+  newGoalXYZdot_M = false;
+  return goalXYZdot_M;
+}
+
 bool PCComm::SetTorqueMode(){
   return newTorqueMode_M;
 }
@@ -153,32 +171,30 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
                         goalQ2dot(rad/sec):   72, 73, 74, 75,...
                         goalQ4dot(rad/sec):   76, 77, 78, 79,...
                                           :   80-81,...
-                                RawFx(cts):   82, 83, 84, 85,...
-                                RawFy(cts):   86, 87, 88, 89,...
-                                RawFz(cts):   90, 91, 92, 93,...
-                                RawTx(cts):   94, 95, 96, 97,...
-                                RawTy(cts):   98, 99,100,101,...
-                                RawTz(cts):  102,103,104,105,...
-                               GlobalFx(N):  106,107,108,109,...
-                               GlobalFy(N):  110,111,112,113,...
-                               GlobalFz(N):  114,115,116,117,...
-                              GlobalTx(Nm):  118,119,120,121,...
-                              GlobalTy(Nm):  122,123,124,125,...
-                              GlobalTz(Nm):  126,127,128,129,...
-                                 Modelx(m):  130,131,132,133,...
-                                 Modely(m):  134,135,136,137,...
-                                 Modelz(m):  138,139,140,141,...
-                            Modelxdot(m/s):  142,143,144,145,...
-                            Modelydot(m/s):  146,147,148,149,...
-                            Modelzdot(m/s):  150,151,152,153,...
-                                          :  154-162,...
+                                RawFx(cts):   82, 83,...
+                                RawFy(cts):   84, 85,...
+                                RawFz(cts):   86, 87,...
+                                RawTx(cts):   88, 89,...
+                                RawTy(cts):   90, 91,...
+                                RawTz(cts):   92, 93,...
+                               GlobalFx(N):   94, 95, 96, 97,...
+                               GlobalFy(N):   98, 99,100,101,...
+                               GlobalFz(N):  102,103,104,105,...
+                              GlobalTx(Nm):  106,107,108,109,...
+                              GlobalTy(Nm):  110,111,112,113,...
+                              GlobalTz(Nm):  114,115,116,117,...
+                                 Modelx(m):  118,119,120,121,...
+                                 Modely(m):  122,123,124,125,...
+                                 Modelz(m):  126,127,128,129,...
+                            Modelxdot(m/s):  130,131,132,133,...
+                            Modelydot(m/s):  134,135,136,137,...
+                            Modelzdot(m/s):  138,139,140,141,...
+                                          :  142-162,...
                           currentDriveMode:  163,...
                                   loopTime:  164,165,166,167,...
                                   CheckSum:  168,169]
   */
   byte RxPacket[_TX_PKT_LEN] = {0};
-  int16_t slotsFilled   = 0;
-  int16_t dataPosition  = 44;
   uint16_t packetSum    = 0;
   int16_t byteLen       = 4;
 
@@ -209,170 +225,18 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 
   // Model State Variables
   // Raw Forces and Torques (counts)
-  memcpy(&RxPacket[82], floatArrayToBytes(Sensor.GetRawCtsFT()), 6 * byteLen);
-  
+  memcpy(&RxPacket[82], uint16ArrayToBytes(Sensor.GetRawCtsFT()), 6 * 2);
   // Global Forces (Newtons)
+  memcpy(&RxPacket[94], floatArrayToBytes(Sensor.GetGlobalForces()), 3 * byteLen);
   // Global Torques (Newton-meters)
+  memcpy(&RxPacket[106], floatArrayToBytes(Sensor.GetGlobalTorques()), 3 * byteLen);
   // Model Position (meters)
+  memcpy(&RxPacket[118], floatArrayToBytes(Model.GetGoalPos()), 3 * byteLen);
   // Model Velocity (meters/sec)
-  byte * GlobalF_bytes = floatArrayToBytes(Sensor.GetGlobalFT());
-  for (int16_t i = 8; i < 20; i++) {
-    RxPacket[i] = GlobalF_bytes[i - 8];
-  }
-  byte * PresPos_bytes = floatArrayToBytes(Robot.GetPresPos());
-  for (int16_t i = 20; i < 32; i++) {
-    RxPacket[i] = PresPos_bytes[i - 20];
-  }
-  byte * PresVel_bytes = floatArrayToBytes(Robot.GetPresVel());
-  for (int16_t i = 32; i < 44; i++) {
-    RxPacket[i] = PresVel_bytes[i - 32];
-  }
+  memcpy(&RxPacket[130], floatArrayToBytes(Model.GetGoalVel()), 3 * byteLen);
 
-  // Optional Data Slots
-  if (_SEND_RAWF && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * RawF_bytes = floatArrayToBytes(Sensor.GetRawFT());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = RawF_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_XYZGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * xyzGoal_bytes = floatArrayToBytes(Model.GetGoalPos());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = xyzGoal_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_XYZDOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * xyzDotGoal_bytes = floatArrayToBytes(Model.GetGoalVel());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = xyzDotGoal_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_XYZBOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * xyzBotGoal_bytes = floatArrayToBytes(Robot.GetGoalPos());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = xyzBotGoal_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_XYZDOTBOTGOAL && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * xyzDotBotGoal_bytes = floatArrayToBytes(Robot.GetGoalVel());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = xyzDotBotGoal_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_PRESQCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * PresQCts_bytes = int32ArrayToBytes(Robot.GetPresQCts());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = PresQCts_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_PRESQDOTCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * PresQDotCts_bytes = int32ArrayToBytes(Robot.GetPresQDotCts());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = PresQDotCts_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_PRESQ && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * PresQ_bytes = floatArrayToBytes(Robot.GetPresQ());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = PresQ_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_PRESQDOT && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * PresQDot_bytes = floatArrayToBytes(Robot.GetPresQDot());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = PresQDot_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_GOALQCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * GoalQCts_bytes = int32ArrayToBytes(Robot.GetGoalQCts());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = GoalQCts_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_GOALQDOTCTS && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * GoalQDotCts_bytes = int32ArrayToBytes(Robot.GetGoalQDotCts());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = GoalQDotCts_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_GOALQ && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * GoalQ_bytes = floatArrayToBytes(Robot.GetGoalQ());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = GoalQ_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_GOALQDOT && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * GoalQDot_bytes = floatArrayToBytes(Robot.GetGoalQDot());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = GoalQDot_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_MASS && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * Mass_bytes = floatArrayToBytes(Model.GetMass());
-    for (int16_t i = dataPosition; i < dataPosition + (2 * byteLen); i++) {
-      RxPacket[i] = Mass_bytes[i - dataPosition];
-    }
-    slotsFilled += 2;
-    dataPosition += (2 * byteLen);
-  }
-  if (_SEND_DAMPING && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * Damping_bytes = floatArrayToBytes(Model.GetDamping());
-    for (int16_t i = dataPosition; i < dataPosition + (2 * byteLen); i++) {
-      RxPacket[i] = Damping_bytes[i - dataPosition];
-    }
-    slotsFilled += 2;
-    dataPosition += (2 * byteLen);
-  }
-  if (_SEND_SPRING_F && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * springF_bytes = floatToBytes(Robot.GetSpringForce());
-    for (int16_t i = dataPosition; i < dataPosition + byteLen; i++) {
-      RxPacket[i] = springF_bytes[i - dataPosition];
-    }
-    slotsFilled += 1;
-    dataPosition += byteLen;
-  }
-  if (_SEND_TOTAL_FORCES && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * totalF_bytes = floatArrayToBytes(Model.GetTotalForces());
-    for (int16_t i = dataPosition; i < dataPosition + (3 * byteLen); i++) {
-      RxPacket[i] = totalF_bytes[i - dataPosition];
-    }
-    slotsFilled += 3;
-    dataPosition += (3 * byteLen);
-  }
-  if (_SEND_FORCE_FILTER && slotsFilled < _MAX_TX_DATA_SLOTS) {
-    byte * forceFilter_bytes = floatToBytes(Sensor.GetFilterWeight());
-    for (int16_t i = dataPosition; i < dataPosition + byteLen; i++) {
-      RxPacket[i] = forceFilter_bytes[i - dataPosition];
-    }
-    slotsFilled += 1;
-    dataPosition += byteLen;
-  }
+  // Robot Drive Mode
+  RxPacket[163] = Robot.GetTorqueState();
 
   // looptime
   RxPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(loopTime));
@@ -514,8 +378,8 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
                                           New External Fz: 31,32,33,34,...
                                        New Scaling Factor: 35,...
     Modifier Byte 2               New Force Sensor Filter: 36,...
-    [1]: Scaling FActor                               
-    [2]: Force Filter Value
+    [1]: Scaling Factor                                  : 37-47,...                                                  
+    [2]: Force Filter Value                      CheckSum: 58,59] 
   */
   byte mask = 1;
   byte bitArrayLarge[7];
@@ -562,21 +426,25 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
 / Control RX Packet ----------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void PCComm::ControlPacketRX(byte * RxPacket) {
-  /* Robot Control Packet Data Structure:     New Q Goal Check:  4,...
-                                           New Qdot Goal Check:  5,...
-                                        New Current Goal Check:  6,...
+  /* Robot Control Packet Data Structure: New Robot Goal Check:  4,...
+                                          New Model Goal Check:  5,...
+                                                New Drive mode:  6,...
                                                  Goal Q1 Value:  7, 8, 9,10,...
                                                  Goal Q2 Value: 11,12,13,14,...
                                                  Goal Q4 Value: 15,16,17,18,...
                                               Goal Qdot1 Value: 19,20,21,22,...
                                               Goal Qdot2 Value: 23,24,25,26,...
                                               Goal Qdot4 Value: 27,28,29,30,...
-                                           Goal Current1 Value: 31,32,33,34,...
-                                           Goal Current2 Value: 35,36,37,38,...
-                                           Goal Current4 Value: 39,40,41,42,...
-                                                             _: 43,44,...
-                                                   Torque Mode: 45,...
-                                                             _: 46,47,...
+                                         Goal Model PosX Value: 31,32,33,34,...
+                                         Goal Model PosY Value: 35,36,37,38,...
+                                         Goal Model PosZ Value: 39,40,41,42,...
+                                         Goal Model VelX Value: 43,44,45,46,...
+                                         Goal Model VelY Value: 47,48,49,50,...
+                                         Goal Model VelZ Value: 51,52,53,54,...
+                                                             _: 55,...
+                                                   Torque Mode: 56,...
+                                                             _: 57,...
+                                                      CheckSum: 58,59] 
   */
 
   // New Q Goals
@@ -587,25 +455,17 @@ void PCComm::ControlPacketRX(byte * RxPacket) {
     goalQ_M[2] = bytesToFloat(RxPacket[15], RxPacket[16], RxPacket[17], RxPacket[18]);
   }
 
-  // New Qdot Goals
+  // New Model XYZ Goals
   if (RxPacket[5]) {
-    newGoalQdot_M = true;
-    goalQdot_M[0] = bytesToFloat(RxPacket[19], RxPacket[20], RxPacket[21], RxPacket[22]);
-    goalQdot_M[1] = bytesToFloat(RxPacket[23], RxPacket[24], RxPacket[25], RxPacket[26]);
-    goalQdot_M[2] = bytesToFloat(RxPacket[27], RxPacket[28], RxPacket[29], RxPacket[30]);
-  }
-
-  // New Motor Current Goals
-  if (RxPacket[6]) {
-    newGoalCurrent_M = true;
-    goalCurrent_M[0] = bytesToFloat(RxPacket[31], RxPacket[32], RxPacket[33], RxPacket[34]);
-    goalCurrent_M[1] = bytesToFloat(RxPacket[35], RxPacket[36], RxPacket[37], RxPacket[38]);
-    goalCurrent_M[2] = bytesToFloat(RxPacket[39], RxPacket[40], RxPacket[41], RxPacket[42]);
+    newGoalXYZ_M = true;
+    goalXYZ_M[0] = bytesToFloat(RxPacket[31], RxPacket[32], RxPacket[33], RxPacket[34]);
+    goalXYZ_M[1] = bytesToFloat(RxPacket[35], RxPacket[36], RxPacket[37], RxPacket[38]);
+    goalXYZ_M[2] = bytesToFloat(RxPacket[39], RxPacket[40], RxPacket[41], RxPacket[42]);
   }
 
   // New Drive Mode
-  if (RxPacket[45] != torqueMode_M){
+  if (RxPacket[6] && RxPacket[56] != torqueMode_M) {
     newTorqueMode_M = true;
-    torqueMode_M = RxPacket[45];
+    torqueMode_M = RxPacket[56];
   }
 }

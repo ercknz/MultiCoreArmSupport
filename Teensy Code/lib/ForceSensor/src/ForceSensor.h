@@ -17,7 +17,8 @@ class ForceSensor {
     u_int16_t * GetRawCtsFT();
     float * GetRawFT();
     float * GetFilteredFT();
-    float * GetGlobalFT();
+    float * GetGlobalForces();
+    float * GetGlobalTorques();
     float  GetFilterWeight();
     void   SetFilterWeight(float newFilterValue);
     void   ReadForceSensor();
@@ -60,7 +61,8 @@ class ForceSensor {
     float ftxyzLastRaw_M[6] = {0};
     float ftxyzFilt_M[6]    = {0.0f};
     float ftxyzLastFilt_M[6]= {0.0f};
-    float ftxyzGlobal_M[6]  = {0.0f};
+    float FxyzGlobal_M[3]  = {0.0f};
+    float TxyzGlobal_M[3] = {0.0f};
 
 };
 

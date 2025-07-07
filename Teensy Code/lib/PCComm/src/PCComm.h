@@ -38,6 +38,10 @@ class PCComm {
     float * GetNewGoalQ();
     float * GetNewGoalQdot();
     float * GetNewCurrent();
+    bool NewGoalXYZAvailable();
+    bool NewGoalXYZdotAvailable();
+    float * GetNewGoalXYZ();
+    float * GetNewGoalXYZdot();
     bool SetTorqueMode();
     uint8_t GetNewMode();
 
@@ -47,10 +51,9 @@ class PCComm {
     const byte  _CONFIGHEADER[4]  = {150, 0, 69, 8};
     const byte  _MODHEADER[4]     = {150, 10, 10, 96};
     const byte  _CTRLHEADER[4]    = {150, 50, 50, 175};
-    const int16_t _RX_PKT_LEN = 50;
+    const int16_t _RX_PKT_LEN = 60;
     const byte  _WRITEHEADER[4]   = {170, 8, 69, 0};
-    const int16_t _TX_PKT_LEN = 230;
-    // const int16_t _MAX_TX_DATA_SLOTS = 24;
+    const int16_t _TX_PKT_LEN = 170;
 
     void ConfigPacketRX(byte * RxPacket);
     void ModifierPacketRX(byte * RxPacket);
@@ -101,6 +104,10 @@ class PCComm {
     float   goalQ_M[3]        = {0.0f};
     float   goalQdot_M[3]     = {0.0f};
     float   goalCurrent_M[3]  = {0.0f};
+    bool    newGoalXYZ_M      = false;
+    bool    newGoalXYZdot_M   = false;
+    float   goalXYZ_M[3]      = {0.0f};
+    float   goalXYZdot_M[3]   = {0.0f};
 };
 
 #endif // PC_COMM_H

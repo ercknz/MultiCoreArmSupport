@@ -79,8 +79,8 @@ Q1 = @(alpha,beta) alpha - beta;
 %% Serial Comm
 robotSerialPort = 'COM4';
 robotBaud = 115200;
-botSerial = CommOpenCM(robotSerialPort, robotBaud);
-packetLen = 150;
+botSerial = [];
+fullRobot = false;
 
 %% GUI
 % Initial Values for lines
@@ -125,6 +125,8 @@ s_link3_XY = plot([t3o(1,4) t4o(1,4)], [t3o(2,4) t4o(2,4)],'LineWidth',2,'Color'
 s_link4_XY = plot([t4o(1,4) t5o(1,4)], [t4o(2,4) t5o(2,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link5_XY = plot([t5o(1,4) t6o(1,4)], [t5o(2,4) t6o(2,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_XY = plot([t6o(1,4) t7o(1,4)], [t6o(2,4) t7o(2,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
+% Model XY
+modelXY = plot(t7o(1,4),t7o(2,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
 set(plotXYHandle,'Position',[0.05 0.575 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Y');
@@ -157,6 +159,8 @@ s_link3_3d = plot3([t3o(1,4) t4o(1,4)], [t3o(2,4) t4o(2,4)], [t3o(3,4) t4o(3,4)]
 s_link4_3d = plot3([t4o(1,4) t5o(1,4)], [t4o(2,4) t5o(2,4)], [t4o(3,4) t5o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link5_3d = plot3([t5o(1,4) t6o(1,4)], [t5o(2,4) t6o(2,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_3d = plot3([t6o(1,4) t7o(1,4)], [t6o(2,4) t7o(2,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
+% ModelXYZ
+modelXYZ = plot3(t7o(1,4),t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
 set(plot3DHandle,'Position',[0.4 0.575 0.3 0.4])
 set(plot3DHandle,'View',[45,45])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
@@ -191,6 +195,8 @@ s_link3_XZ = plot([t3o(1,4) t4o(1,4)], [t3o(3,4) t4o(3,4)],'LineWidth',2,'Color'
 s_link4_XZ = plot([t4o(1,4) t5o(1,4)], [t4o(3,4) t5o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link5_XZ = plot([t5o(1,4) t6o(1,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_XZ = plot([t6o(1,4) t7o(1,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
+% Model XZ
+modelXZ = plot(t7o(1,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
 set(plotXZHandle,'Position',[0.05 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2]);
 xlabel('X');ylabel('Z');
@@ -223,6 +229,8 @@ s_link3_YZ = plot([t3o(2,4) t4o(2,4)], [t3o(3,4) t4o(3,4)],'LineWidth',2,'Color'
 s_link4_YZ = plot([t4o(2,4) t5o(2,4)], [t4o(3,4) t5o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link5_YZ = plot([t5o(2,4) t6o(2,4)], [t5o(3,4) t6o(3,4)],'LineWidth',2,'Color',[1 0 0 0.25]);
 s_link6_YZ = plot([t6o(2,4) t7o(2,4)], [t6o(3,4) t7o(3,4)],'LineWidth',2,'Color',[0 1 0 0.25]);
+% Model YZ
+modelYZ = plot(t7o(2,4),t7o(3,4),'o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5]);
 set(plotYZHandle,'Position',[0.4 0.125 0.3 0.4])
 axis([-1.2 1.2 -1.2 1.2 -1.2 1.2]);
 xlabel('Y');ylabel('Z');
@@ -398,6 +406,8 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
     function startOpenCM(source,eventdata)
         testRunning = get(Hfigure,'UserData');
         if  ~testRunning
+            botSerial = CommOpenCM(robotSerialPort, robotBaud);
+            fullRobot = false;
             botSerial.Start();
             set(Hfigure,'UserData',true);
             animatedata();
@@ -409,20 +419,27 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
         if  testRunning
             set(Hfigure,'UserData',false);
             botSerial.Stop();
+            fullRobot = false;
         end
     end
 
     function startTeensy(source,eventdata)
         testRunning = get(Hfigure,'UserData');
         if  ~testRunning
-            
+            botSerial = ArmSupportRobot(robotSerialPort, robotBaud);
+            fullRobot = true;
+            botSerial.Start();
+            set(Hfigure,'UserData',true);
+            animatedata();
         end
     end
 
     function stopTeensy(source,eventdata)
         testRunning = get(Hfigure,'UserData');
         if  testRunning
-           
+           set(Hfigure,'UserData',false);
+           botSerial.Stop();
+           fullRobot = false;
         end
     end
 
@@ -496,9 +513,9 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             end
             % Data Request
             botSerial.SendRequest();
-            while botSerial.BytesAvailable < packetLen
+            while botSerial.BytesAvailable < botSerial.rxPacketLen
             end
-            if botSerial.BytesAvailable >= packetLen
+            if botSerial.BytesAvailable >= botSerial.rxPacketLen
                 ReadFrame(botSerial);
             end
             q1 = botSerial.frameData(2);% + 0.6219; % offset 35.63deg
@@ -510,12 +527,17 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             goalQ1 = botSerial.frameData(14);
             goalQ2 = botSerial.frameData(15);
             goalQ4 = botSerial.frameData(16);
-            q1Cts = botSerial.frameData(20);
-            q2Cts = botSerial.frameData(21);
-            q4Cts = botSerial.frameData(22);
-            gQ1cts = botSerial.frameData(26);
-            gQ2cts = botSerial.frameData(27);
-            gQ4cts = botSerial.frameData(28);
+            if fullRobot
+
+            else
+                q1Cts = botSerial.frameData(20);
+                q2Cts = botSerial.frameData(21);
+                q4Cts = botSerial.frameData(22);
+                gQ1cts = botSerial.frameData(26);
+                gQ2cts = botSerial.frameData(27);
+                gQ4cts = botSerial.frameData(28);
+            end
+            
             % ROBOT Kinematics Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             t0_r = [0,0,0];
             t1_r = T01(q1);
@@ -565,9 +587,6 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             set(Hq1Value,'String',num2str(q1));
             set(Hq2Value,'String',num2str(q2));
             set(Hq4Value,'String',num2str(q4));
-            set(Hq1CtsValue,'String',num2str(q1Cts));
-            set(Hq2CtsValue,'String',num2str(q2Cts));
-            set(Hq4CtsValue,'String',num2str(q4Cts));
             set(HRxValue,'String',num2str(x));
             set(HRyValue,'String',num2str(y));
             set(HRzValue,'String',num2str(z));
@@ -616,9 +635,6 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             set(HgoalQ1Value,'String',num2str(goalQ1));
             set(HgoalQ2Value,'String',num2str(goalQ2));
             set(HgoalQ4Value,'String',num2str(goalQ4));
-            set(HgoalQ1ctsValue,'String',num2str(gQ1cts));
-            set(HgoalQ2ctsValue,'String',num2str(gQ2cts));
-            set(HgoalQ4ctsValue,'String',num2str(gQ4cts));
             set(HGxValue,'String',num2str(t7_g(1,4)));
             set(HGyValue,'String',num2str(t7_g(2,4)));
             set(HGzValue,'String',num2str(t7_g(3,4)));
@@ -626,6 +642,17 @@ set(HgoalQ4ctsValue,'Units','normalized','Position',[0.898 0.2 0.066 0.05],...
             set(HtimeValue,'String',num2str(botSerial.frameData(1)));
             set(HloopValue,'String',num2str(botSerial.frameData(24)));
             set(HdriveModeValue,'String',num2str(botSerial.frameData(23)));
+            % Differences between packets from each MCU.
+            if fullRobot
+
+            else
+                set(HgoalQ1ctsValue,'String',num2str(gQ1cts));
+                set(HgoalQ2ctsValue,'String',num2str(gQ2cts));
+                set(HgoalQ4ctsValue,'String',num2str(gQ4cts));
+                set(Hq1CtsValue,'String',num2str(q1Cts));
+                set(Hq2CtsValue,'String',num2str(q2Cts));
+                set(Hq4CtsValue,'String',num2str(q4Cts));
+            end
         end
     end
 

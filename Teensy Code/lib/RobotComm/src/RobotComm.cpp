@@ -100,6 +100,10 @@ float*   RobotComm::GetGoalQDot(){
   return qDotGoal_M;
 }
 
+uint8_t RobotComm::GetTorqueState(){
+  return torqueState_M;
+}
+
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Robot Reading --------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
@@ -280,7 +284,6 @@ void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZ
 
   byte dataPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
-  //int16_t byteLen       = 4;
 
   // Header Bytes 
   for (int16_t i = 0; i < 4; i++) {

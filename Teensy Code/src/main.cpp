@@ -124,7 +124,7 @@ void loop() {
       robot.ReadRobot();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
-      admitModel.UpdateModel(ati.GetGlobalFT(), pc.GetExternalForces());
+      admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());
       robot.SendNewGoalOnly(admitModel.GetGoalPos(), admitModel.GetGoalVel());
 
       /* Outgoing Data */
