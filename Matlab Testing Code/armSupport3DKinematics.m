@@ -345,7 +345,6 @@ HSxValue = uicontrol('Style','text');
 set(HSxValue,'Units','normalized','Position',[0.832 0.6 0.066 0.05],...
     'String','0','Fontsize',20,'ForegroundColor','#A2142F');
 
-
 HGyLabel = uicontrol('Style','text');
 set(HGyLabel,'Units','normalized','Position',[0.7 0.55 0.066 0.05],...
     'String','gY:','Fontsize',20);
@@ -468,6 +467,10 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
         if  ~testRunning
             botSerial = CommOpenCM(robotSerialPort, robotBaud);
             fullRobot = false;
+            set(modelXYZ,'XData',0,'YData',0,'ZData',0);
+            set(modelXY,'XData',0,'YData',0);
+            set(modelXZ,'XData',0,'YData',0);
+            set(modelYZ,'XData',0,'YData',0);
             botSerial.Start();
             set(Hfigure,'UserData',true);
             animatedata();
@@ -718,7 +721,14 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
             set(g_link4_YZ,'XData',[t4_g(2,4) t5_g(2,4)],'YData',[t4_g(3,4) t5_g(3,4)])
             set(g_link5_YZ,'XData',[t5_g(2,4) t6_g(2,4)],'YData',[t5_g(3,4) t6_g(3,4)])
             set(g_link6_YZ,'XData',[t6_g(2,4) t7_g(2,4)],'YData',[t6_g(3,4) t7_g(3,4)])
-            % Values update
+            % Model Updating %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            if fullRobot
+                set(modelXYZ,'XData',modelX,'YData',modelY,'ZData',modelZ);
+                set(modelXY,'XData',modelX,'YData',modelY);
+                set(modelXZ,'XData',modelX,'YData',modelZ);
+                set(modelYZ,'XData',modelY,'YData',modelZ);  
+            end
+            % Values update %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             set(HgoalQ1Value,'String',num2str(goalQ1));
             set(HgoalQ2Value,'String',num2str(goalQ2));
             set(HgoalQ4Value,'String',num2str(goalQ4));
