@@ -222,7 +222,7 @@ void  RobotControl::fKine() {
   /* Calculates the Taskspace Position */
   xyzPres_M[0] = _A1A2 * cos(qPres_M[0]) + _L1 * cos(qPres_M[0]) * cos(qPres_M[1]) + _OFFSET * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
   xyzPres_M[1] = _A1A2 * sin(qPres_M[0]) + _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) - _OFFSET * cos(qPres_M[0] + qPres_M[2]) + _L2 * sin(qPres_M[0] + qPres_M[2]);
-  xyzPres_M[2] =   _L1 * sin(qPres_M[1]);
+  xyzPres_M[2] =   _L1 * sin(qPres_M[1]) + _A3;
 
   /* Calculates Jacobian Matrix */
   J_M[0][0] = - _A1A2   * sin(qPres_M[0]) - _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) + _OFFSET * cos(qPres_M[0] + qPres_M[2]) - _L2 * sin(qPres_M[0] + qPres_M[2]);

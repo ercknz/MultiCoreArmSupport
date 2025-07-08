@@ -20,7 +20,7 @@ testGoals = [0.750,  0.300,  0.250;
              0.650,  0.300, -0.200;
              0.650, -0.300, -0.200];
 idx = 1;
-velocityXYZ= 0.3;
+velocityXYZ= 0.5;
 
 %% Rotational Matrix Definition
 rotateX = @(a)  [1,0,0;
@@ -77,7 +77,7 @@ Q1 = @(alpha,beta) alpha - beta;
 
 
 %% Serial Comm and Robot Variables
-robotSerialPort = 'COM4';
+robotSerialPort = 'COM7';
 robotBaud = 115200;
 botSerial = [];
 fullRobot = false;
@@ -489,7 +489,7 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
     function startTeensy(source,eventdata)
         testRunning = get(Hfigure,'UserData');
         if  ~testRunning
-            botSerial = ArmSupportRobot(robotSerialPort, robotBaud);
+            botSerial = armSupportRobot(robotSerialPort, robotBaud);
             fullRobot = true;
             botSerial.Start();
             set(Hfigure,'UserData',true);
@@ -594,7 +594,9 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
                 break;
             end
             % Data Request
-            botSerial.SendRequest();
+            if ~fullRobot
+                botSerial.SendRequest();
+            end
             while botSerial.BytesAvailable < botSerial.rxPacketLen
             end
             if botSerial.BytesAvailable >= botSerial.rxPacketLen
@@ -611,7 +613,7 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
             goalQ4 = botSerial.frameData(16);
             if fullRobot
                 forceXcts = botSerial.frameData(20);
-                forceYcts = botSerial.frameDate(21);
+                forceYcts = botSerial.frameData(21);
                 forceZcts = botSerial.frameData(22);
                 forceX = botSerial.frameData(26);
                 forceY = botSerial.frameData(27);
@@ -619,6 +621,8 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
                 modelX = botSerial.frameData(32);
                 modelY = botSerial.frameData(33);
                 modelZ = botSerial.frameData(34);
+                torqueVal = botSerial.frameData(38);
+                lTime = botSerial.frameData(39);
             else
                 q1Cts = botSerial.frameData(20);
                 q2Cts = botSerial.frameData(21);
@@ -626,6 +630,8 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
                 gQ1cts = botSerial.frameData(26);
                 gQ2cts = botSerial.frameData(27);
                 gQ4cts = botSerial.frameData(28);
+                torqueVal = botSerial.frameData(32);
+                lTime = botSerial.frameData(33);
             end
             
             % ROBOT Kinematics Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -737,8 +743,8 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
             set(HGzValue,'String',num2str(t7_g(3,4)));
             % Time parameters
             set(HtimeValue,'String',num2str(botSerial.frameData(1)));
-            set(HloopValue,'String',num2str(botSerial.frameData(24)));
-            set(HdriveModeValue,'String',num2str(botSerial.frameData(23)));
+            set(HloopValue,'String',num2str(lTime));
+            set(HdriveModeValue,'String',num2str(torqueVal));
             % Differences between packets from each MCU.
             if fullRobot
                 set(HMxValue,'String',num2str(modelX));

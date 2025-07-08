@@ -16,7 +16,7 @@ classdef armSupportRobot < handle
         rawBytes
         frameData = nan(1,39)
         
-        configHeader = unit([150, 0, 69, 8])
+        configHeader = uint8([150, 0, 69, 8])
         modHeader = uint8([150, 10, 10, 96])
         ctrlHeader = uint8([150, 50, 50, 175])
         txPacketLen = 60
@@ -40,7 +40,7 @@ classdef armSupportRobot < handle
         end
         
         function Start(obj)
-            obj.serialObj = serialPort(obj.port, obj.baud);
+            obj.serialObj = serialport(obj.port, obj.baud);
             obj.CommOpen = true;
         end
         
@@ -115,7 +115,7 @@ classdef armSupportRobot < handle
                 obj.frameData(31) = double(typecast(uint8(obj.rawBytes(115:118)),'int32'));
                 % Model XYZ Pos 
                 obj.frameData(32) = double(typecast(uint8(obj.rawBytes(119:122)),'int32'));
-                obj.frameData(33) = double(typecast(uint8(obj.rawBytes(121:126)),'int32'));
+                obj.frameData(33) = double(typecast(uint8(obj.rawBytes(123:126)),'int32'));
                 obj.frameData(34) = double(typecast(uint8(obj.rawBytes(127:130)),'int32'));
                 % Model XYZ Vel
                 obj.frameData(35) = double(typecast(uint8(obj.rawBytes(131:134)),'int32'));
@@ -130,7 +130,7 @@ classdef armSupportRobot < handle
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./10000;
                 obj.frameData(26:37) = obj.frameData(26:37)./10000;
-                obj.frameData(33) = obj.frameData(33)*0.001;
+                obj.frameData(39) = obj.frameData(39)*0.001;
             end
         end
         

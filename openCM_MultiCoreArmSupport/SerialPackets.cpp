@@ -222,16 +222,17 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
 
   // Flag Reset
   dataRequested_M = false;
+  
   // write data packet
   if (Serial && testingMode_M){
     Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }
   c2cPort_M->write(dataPacket,_TX_PKT_LEN); 
-  for (int i = 0; i < _TX_PKT_LEN; i++){
-    Serial.print(dataPacket[i]); Serial.print(" ");
-  }
-  Serial.println("");
+  // for (int i = 0; i < _TX_PKT_LEN; i++){
+  //   Serial.print(dataPacket[i]); Serial.print(" ");
+  // }
+  // Serial.println("");
 }
 
 /* ------------------------------------------------------------------------------------------------------/
