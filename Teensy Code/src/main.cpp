@@ -53,6 +53,11 @@ void setup() {
   /* Wait for Serial Comm */
   while (!Serial);
 
+  /* Initialize Robot Comm */
+  if (!robot.Connect2Robot()){
+    while (1);
+  }
+
   delay(100);
   // Set Analog Resolution
   analogReadResolution(13);

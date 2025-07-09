@@ -34,6 +34,8 @@ class RobotComm {
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
     uint8_t   GetTorqueState();
+    int       Connect2Robot();
+    bool      IsConnected();
 
   protected:
 
@@ -42,12 +44,6 @@ class RobotComm {
 
     const byte _READ_HEADER[4]  = {170,  6, 9,  69};
     const int16_t _RX_PKT_LEN = 150;
-    // const int16_t _RX_presQ_SLOT = 8;
-    // const int16_t _RX_presQDOT_SLOT = 20;
-    // const int16_t _RX_presCURRENT_SLOT = 32;
-    // const int16_t _RX_presXYZ_SLOT = 44;
-    // const int16_t _RX_presXYZdot_SLOT = 56;
-    // const int16_t _RX_BLANK_SLOT = 68;
 
     const byte _WRITE_HEADER[4] = {150, 10, 1, 101};
     const int16_t _TX_PKT_LEN = 60;
@@ -72,6 +68,8 @@ class RobotComm {
     float springF_M;
     float scalingFactor_M;
     uint8_t torqueState_M;
+
+    bool connected2Robot_M = false;
     
 };
 

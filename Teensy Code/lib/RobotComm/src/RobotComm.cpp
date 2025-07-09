@@ -45,6 +45,38 @@ RobotComm::RobotComm(HardwareSerial *ptrSer, const int baudrate)
   }
 }
 
+int RobotComm::Connect2Robot(){
+  robotPort_M->begin(_BAUDRATE);
+  for (int i = 0; i < 10; i++)
+  {
+    robotPort_M->write(0x01);
+    if (robotPort_M->available() > 0)
+    {
+      if (robotPort_M->read() == 0x02)
+      {
+        // CONNECTION SUCCESSFUL
+        while (robotPort_M->available() > 0)
+        {
+          // Clear buffer
+          robotPort_M->read();
+        }
+        // Blink LED to signal connection
+        for (int j = 0; j < 2; j++)
+        {
+          digitalWrite(13, HIGH);
+          delay(1000);
+          digitalWrite(13, LOW);
+          delay(100);
+        }
+        connected2Robot_M = true;
+        return 1;
+      }
+    }
+    delay(1000);
+  }
+  return 0;
+}
+
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Get Member functions -------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
@@ -102,6 +134,10 @@ float*   RobotComm::GetGoalQDot(){
 
 uint8_t RobotComm::GetTorqueState(){
   return torqueState_M;
+}
+
+bool RobotComm::IsConnected(){
+  return connected2Robot_M;
 }
 
 /* ---------------------------------------------------------------------------------------/
