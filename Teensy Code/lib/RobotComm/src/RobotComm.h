@@ -34,7 +34,7 @@ class RobotComm {
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
     uint8_t   GetTorqueState();
-    int       Connect2Robot();
+    int       Connect2Robot(uint8_t LEDpin);
     bool      IsConnected();
 
   protected:
@@ -70,6 +70,7 @@ class RobotComm {
     uint8_t torqueState_M;
 
     bool connected2Robot_M = false;
+    
     
 };
 

@@ -45,9 +45,10 @@ RobotComm::RobotComm(HardwareSerial *ptrSer, const int baudrate)
   }
 }
 
-int RobotComm::Connect2Robot(){
+int RobotComm::Connect2Robot(uint8_t LEDpin){
+  pinMode(LEDpin, OUTPUT);
   robotPort_M->begin(_BAUDRATE);
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 30; i++)
   {
     robotPort_M->write(0x01);
     if (robotPort_M->available() > 0)
@@ -63,16 +64,16 @@ int RobotComm::Connect2Robot(){
         // Blink LED to signal connection
         for (int j = 0; j < 2; j++)
         {
-          digitalWrite(13, HIGH);
-          delay(1000);
-          digitalWrite(13, LOW);
-          delay(100);
+          digitalWrite(LEDpin, HIGH);
         }
         connected2Robot_M = true;
         return 1;
       }
     }
-    delay(1000);
+    digitalWrite(LEDpin, HIGH);
+    delay(500);
+    digitalWrite(LEDpin, LOW);
+    delay(500);
   }
   return 0;
 }

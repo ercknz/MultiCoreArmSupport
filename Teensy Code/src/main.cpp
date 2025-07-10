@@ -54,7 +54,9 @@ void setup() {
   while (!Serial);
 
   /* Initialize Robot Comm */
-  if (!robot.Connect2Robot()){
+  robot.Connect2Robot(ASR::LED_PIN);
+  if (!robot.IsConnected()) {
+    Serial.println("Robot not connected. Check connections and power.");
     while (1);
   }
 
