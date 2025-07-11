@@ -19,6 +19,7 @@ class RobotComm {
     void  ChangeTorqueOnly(uint8_t newTorqueValue);
     void  SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal);
     void  SendZeroes();
+    int   BytesAvailable();
     float *   GetPresQ();
     float *   GetPresQDot();
     int32_t * GetPresQCts();

@@ -59,6 +59,7 @@ void setup() {
     Serial.println("Robot not connected. Check connections and power.");
     while (1);
   }
+  Serial.println("1");
 
   delay(100);
   // Set Analog Resolution
@@ -70,9 +71,11 @@ void setup() {
 /----------------------------------------------------------------------------------------*/
 void loop() {
   /* Calibrate Force Sensor */
+  Serial.println("2");
   delay(100);
   ati.CalibrateSensor();
   delay(100);
+  Serial.println("3");
 
   /* Other Variables needed */
   unsigned long previousTime, currentTime;
@@ -89,6 +92,7 @@ void loop() {
 
   /* Main Loop */
   while (Serial) {
+    Serial.println("4");
     currentTime = millis();
 
     /* Incoming Data check */
@@ -115,6 +119,9 @@ void loop() {
       if (pc.ModifyFilter()){
         ati.SetFilterWeight(pc.GetNewFilter());
       }
+      if (pc.NewGoalXYZAvailable()) {
+        admitModel.SetPosition(pc.GetNewGoalXYZ());
+      }
     }
 
     /* Admittance Loop */
@@ -125,10 +132,12 @@ void loop() {
       previousTime = currentTime;
 
       /* Request Robot Data */
-      robot.RequestDataOnly();
+      // robot.RequestDataOnly();
 
       /* Control */
-      robot.ReadRobot();
+      if (robot.BytesAvailable() > 0) {
+        robot.ReadRobot();
+      }
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
       admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());

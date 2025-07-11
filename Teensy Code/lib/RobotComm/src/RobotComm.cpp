@@ -81,6 +81,11 @@ int RobotComm::Connect2Robot(uint8_t LEDpin){
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Get Member functions -------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
+
+int RobotComm::BytesAvailable(){
+  return robotPort_M->available();
+}
+
 float* RobotComm::GetPresQ(){
   return qPres_M;
 }
@@ -191,6 +196,7 @@ void RobotComm::ReadRobot(){
   unsigned long timeOUtTime = millis();
   while (robotPort_M->available() < _RX_PKT_LEN) {
     if (millis() - timeOUtTime > 10){
+      Serial.println("Timed out");
       return;
     }
   }
@@ -266,6 +272,13 @@ void RobotComm::ReadRobot(){
 
   /* Torque State */
   torqueState_M = dataPacket[143];
+
+  for (int i =0; i < _RX_PKT_LEN; i++){
+    Serial.print(dataPacket[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+
 }
 
 /* ---------------------------------------------------------------------------------------/

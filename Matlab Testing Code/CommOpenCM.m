@@ -120,7 +120,7 @@ classdef CommOpenCM < handle
                 obj.frameData(33) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(2:19) = obj.frameData(2:19)./10000;
+                obj.frameData(2:19) = obj.frameData(2:19)./1000;
                 obj.frameData(33) = obj.frameData(33)*0.001;
             end
         end
@@ -129,12 +129,12 @@ classdef CommOpenCM < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.txHeader;
             writePacket(6) = uint8(2);
-            writePacket(9:12) = typecast(int32(X*10000),'uint8');
-            writePacket(13:16) = typecast(int32(Y*10000),'uint8');
-            writePacket(17:20) = typecast(int32(Z*10000),'uint8');
-            writePacket(21:24) = typecast(int32(Xdot*10000),'uint8');
-            writePacket(25:28) = typecast(int32(Ydot*10000),'uint8');
-            writePacket(29:32) = typecast(int32(Zdot*10000),'uint8');
+            writePacket(9:12) = typecast(int32(X*1000),'uint8');
+            writePacket(13:16) = typecast(int32(Y*1000),'uint8');
+            writePacket(17:20) = typecast(int32(Z*1000),'uint8');
+            writePacket(21:24) = typecast(int32(Xdot*1000),'uint8');
+            writePacket(25:28) = typecast(int32(Ydot*1000),'uint8');
+            writePacket(29:32) = typecast(int32(Zdot*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));

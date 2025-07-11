@@ -49,14 +49,6 @@ void setup() {
   
   /* Attempt to establish connection */
   c2cComm.InitalizingComm();
-
-  // For testing purposes only
-//  while (!Serial);
-//  if (Serial){
-//    delay(1000);
-//    Serial.println("...expired...");
-//    Serial.println(c2cComm.InTestingMode());
-//  }
   
   /* Wait for communication */
   while (!(Serial || !c2cComm.InTestingMode()));
@@ -112,7 +104,7 @@ void loop() {
 
   /* Main Loop */
   while (Serial || !c2cComm.InTestingMode()) {
-    digitalWrite(OCM::COMM_LED_PIN, LOW);
+    // digitalWrite(OCM::COMM_LED_PIN, LOW);
     currentTime = millis();
 
     /* Motor Write/Read Loop */
@@ -144,12 +136,12 @@ void loop() {
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-      if (c2cComm.DataRequested()) {
+      if (!c2cComm.InTestingMode() || c2cComm.DataRequested()) {
         c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
       }
     }
   }
-  digitalWrite(OCM::COMM_LED_PIN, HIGH);
+  // digitalWrite(OCM::COMM_LED_PIN, HIGH);
   ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
   while(!Serial || c2cComm.InTestingMode());
 }

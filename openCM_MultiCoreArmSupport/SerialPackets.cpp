@@ -26,9 +26,7 @@ void SerialPackets::InitalizingComm(){
   c2cPort_M->begin(_BAUDRATE);
   for (int i = 0; i < 30; i++){
     if (c2cPort_M->available() > 0){
-      // Serial.println("a");
       if (c2cPort_M->read() == 0x01){
-        // Serial.println("b");
         c2cPort_M->write(0x02);
         digitalWrite(OCM::COMM_LED_PIN, HIGH);
         testingMode_M = false;
@@ -230,7 +228,13 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
     Serial.write(dataPacket,_TX_PKT_LEN);
     return;
   }
-  c2cPort_M->write(dataPacket,_TX_PKT_LEN); 
+
+  c2cPort_M->write(dataPacket, _TX_PKT_LEN); 
+  
+  // digitalWrite(OCM::COMM_LED_PIN, LOW);
+  // delay(500);
+  // digitalWrite(OCM::COMM_LED_PIN, HIGH); 
+  // delay(500);
   // for (int i = 0; i < _TX_PKT_LEN; i++){
   //   Serial.print(dataPacket[i]); Serial.print(" ");
   // }

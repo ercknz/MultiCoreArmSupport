@@ -128,8 +128,8 @@ classdef armSupportRobot < handle
                 obj.frameData(39) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
-                obj.frameData(2:19) = obj.frameData(2:19)./10000;
-                obj.frameData(26:37) = obj.frameData(26:37)./10000;
+                obj.frameData(2:19) = obj.frameData(2:19)./1000;
+                obj.frameData(26:37) = obj.frameData(26:37)./1000;
                 obj.frameData(39) = obj.frameData(39)*0.001;
             end
         end
@@ -138,7 +138,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(1);
-            writePacket(6:9) = typecast(int32(MassXY*10000),'uint8');
+            writePacket(6:9) = typecast(int32(MassXY*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -151,7 +151,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(2);
-            writePacket(10:13) = typecast(int32(MassZ*10000),'uint8');
+            writePacket(10:13) = typecast(int32(MassZ*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -164,7 +164,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(4);
-            writePacket(14:17) = typecast(int32(DampingXY*10000),'uint8');
+            writePacket(14:17) = typecast(int32(DampingXY*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -177,7 +177,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(8);
-            writePacket(18:21) = typecast(int32(DampingZ*10000),'uint8');
+            writePacket(18:21) = typecast(int32(DampingZ*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -216,9 +216,9 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(16);
-            writePacket(24:27) = typecast(int32(eFx*10000),'uint8');
-            writePacket(28:31) = typecast(int32(eFy*10000),'uint8');
-            writePacket(32:35) = typecast(int32(eFz*10000),'uint8');
+            writePacket(24:27) = typecast(int32(eFx*1000),'uint8');
+            writePacket(28:31) = typecast(int32(eFy*1000),'uint8');
+            writePacket(32:35) = typecast(int32(eFz*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -231,9 +231,9 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.ctrlHeader;
             writePacket(5) = uint8(1);
-            writePacket(8:11) = typecast(int32(q1*10000),'uint8');
-            writePacket(12:15) = typecast(int32(q2*10000),'uint8');
-            writePacket(16:19) = typecast(int32(q4*10000),'uint8');
+            writePacket(8:11) = typecast(int32(q1*1000),'uint8');
+            writePacket(12:15) = typecast(int32(q2*1000),'uint8');
+            writePacket(16:19) = typecast(int32(q4*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -246,9 +246,9 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.ctrlHeader;
             writePacket(6) = uint8(1);
-            writePacket(32:35) = typecast(int32(X*10000),'uint8');
-            writePacket(36:39) = typecast(int32(Y*10000),'uint8');
-            writePacket(40:43) = typecast(int32(Z*10000),'uint8');
+            writePacket(32:35) = typecast(int32(X*1000),'uint8');
+            writePacket(36:39) = typecast(int32(Y*1000),'uint8');
+            writePacket(40:43) = typecast(int32(Z*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
