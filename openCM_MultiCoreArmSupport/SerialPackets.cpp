@@ -230,15 +230,6 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
   }
 
   c2cPort_M->write(dataPacket, _TX_PKT_LEN); 
-  
-  // digitalWrite(OCM::COMM_LED_PIN, LOW);
-  // delay(500);
-  // digitalWrite(OCM::COMM_LED_PIN, HIGH); 
-  // delay(500);
-  // for (int i = 0; i < _TX_PKT_LEN; i++){
-  //   Serial.print(dataPacket[i]); Serial.print(" ");
-  // }
-  // Serial.println("");
 }
 
 /* ------------------------------------------------------------------------------------------------------/

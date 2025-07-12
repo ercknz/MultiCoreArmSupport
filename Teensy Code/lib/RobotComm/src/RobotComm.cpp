@@ -43,11 +43,13 @@ RobotComm::RobotComm(HardwareSerial *ptrSer, const int baudrate)
     xyzGoal_M[i] = 0.0f;
     xyzDotGoal_M[i] = 0.0f;
   }
+
 }
 
 int RobotComm::Connect2Robot(uint8_t LEDpin){
   pinMode(LEDpin, OUTPUT);
   robotPort_M->begin(_BAUDRATE);
+  robotPort_M->addMemoryForRead(_serialRXbuffer_M, _RX_BUFFER_SIZE);
   for (int i = 0; i < 30; i++)
   {
     robotPort_M->write(0x01);
@@ -191,12 +193,29 @@ void RobotComm::ReadRobot(){
   byte tempHeader[4];
   int16_t sumCheck;
   int16_t CHECKSUM;
+
+  // Serial.print("Bytes available: ");
+  //   Serial.println(robotPort_M->available());
+    
+  //   if (robotPort_M->available() > 0) {
+  //       Serial.print("Raw bytes: ");
+  //       for (int i = 0; i < min(10, robotPort_M->available()); i++) {
+  //           byte b = robotPort_M->read();
+  //           Serial.print(b, HEX);
+  //           Serial.print(" ");
+  //       }
+  //       Serial.println();
+  //   }
+    
+  //   delay(100);
+
+  //   return;
+
   
   /* Check for instructions */
   unsigned long timeOUtTime = millis();
   while (robotPort_M->available() < _RX_PKT_LEN) {
     if (millis() - timeOUtTime > 10){
-      Serial.println("Timed out");
       return;
     }
   }
@@ -272,13 +291,6 @@ void RobotComm::ReadRobot(){
 
   /* Torque State */
   torqueState_M = dataPacket[143];
-
-  for (int i =0; i < _RX_PKT_LEN; i++){
-    Serial.print(dataPacket[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
-
 }
 
 /* ---------------------------------------------------------------------------------------/

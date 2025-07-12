@@ -42,6 +42,8 @@ class RobotComm {
 
     HardwareSerial *robotPort_M;
     const int _BAUDRATE;
+    static const size_t _RX_BUFFER_SIZE = 512; // Receiving Data Buffer Size
+    uint8_t _serialRXbuffer_M[_RX_BUFFER_SIZE];
 
     const byte _READ_HEADER[4]  = {170,  6, 9,  69};
     const int16_t _RX_PKT_LEN = 150;

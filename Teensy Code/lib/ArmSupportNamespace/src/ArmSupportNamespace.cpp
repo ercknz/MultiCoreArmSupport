@@ -21,6 +21,8 @@ const char   *DEVICEPORT        = "3";
 const uint8_t CAL_BUTTON_PIN    = 23;
 const uint8_t TORQUE_SWITCH_PIN = 1;
 const uint8_t LED_PIN          = 13;
+const uint8_t ROBOT_RX_PIN     = 0; // RX pin for Robot Communication
+const uint8_t ROBOT_TX_PIN     = 1; // TX pin for Robot Communication
 
 // Force Sensor Constants
 const float xyzSens[3] = {0.0496, 0.0494, 0.6231};

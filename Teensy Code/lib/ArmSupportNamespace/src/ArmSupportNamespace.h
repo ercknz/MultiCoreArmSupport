@@ -21,6 +21,8 @@ extern const char   *DEVICEPORT;
 extern const uint8_t CAL_BUTTON_PIN;
 extern const uint8_t TORQUE_SWITCH_PIN;
 extern const uint8_t LED_PIN;
+extern const uint8_t ROBOT_RX_PIN;
+extern const uint8_t ROBOT_TX_PIN;
 
 // Force Sensor Constants
 extern const float xyzSens[3];

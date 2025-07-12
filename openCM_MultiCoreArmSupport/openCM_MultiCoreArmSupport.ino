@@ -104,7 +104,6 @@ void loop() {
 
   /* Main Loop */
   while (Serial || !c2cComm.InTestingMode()) {
-    // digitalWrite(OCM::COMM_LED_PIN, LOW);
     currentTime = millis();
 
     /* Motor Write/Read Loop */
@@ -136,12 +135,15 @@ void loop() {
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-      if (!c2cComm.InTestingMode() || c2cComm.DataRequested()) {
+      // if (!c2cComm.InTestingMode() || c2cComm.DataRequested()) {
+      if (c2cComm.DataRequested()) {
         c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
       }
     }
   }
-  // digitalWrite(OCM::COMM_LED_PIN, HIGH);
+  /* End of Loop */
+  /* Disable Torque */
+  digitalWrite(OCM::COMM_LED_PIN, LOW);
   ArmRobot.EnableTorque(portHandler, packetHandler, OCM::FULL_PASSIVE);
   while(!Serial || c2cComm.InTestingMode());
 }

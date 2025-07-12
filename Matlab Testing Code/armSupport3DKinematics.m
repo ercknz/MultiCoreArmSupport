@@ -78,7 +78,7 @@ Q1 = @(alpha,beta) alpha - beta;
 
 %% Serial Comm and Robot Variables
 robotSerialPort = 'COM7';
-robotBaud = 115200;
+robotBaud = 1000000;
 botSerial = [];
 fullRobot = false;
 torqueToggle = false;
@@ -95,7 +95,7 @@ t6o = T06(0,0,deg2rad(ELBW_LIMIT(1)));
 t7o = T07(0,0,deg2rad(ELBW_LIMIT(1)));
 Hfigure = figure(100);
 set(Hfigure,'Units','normalized','Position',[0.05 0.05 0.90 0.85])
-set(Hfigure,'UserData',false);
+set(Hfigure,'UserData',false,'Render','opengl','DoubleBuffer','on');
 % set(Hfigure,'CloseRequestFcn',@closereq);
 % Top(XY) plot creation (top right) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plotXYHandle = subplot(2,2,1);
@@ -597,7 +597,13 @@ set(HFzCtsValue,'Units','normalized','Position',[0.832 0.05 0.066 0.05],...
             if ~fullRobot
                 botSerial.SendRequest();
             end
+            timeout = 0.01;
+            startTime = tic;
             while botSerial.BytesAvailable < botSerial.rxPacketLen
+                if toc(startTime) > timeout
+                    return;
+                end
+                pause(0.001);
             end
             if botSerial.BytesAvailable >= botSerial.rxPacketLen
                 ReadFrame(botSerial);

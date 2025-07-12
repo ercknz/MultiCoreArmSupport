@@ -59,7 +59,6 @@ void setup() {
     Serial.println("Robot not connected. Check connections and power.");
     while (1);
   }
-  Serial.println("1");
 
   delay(100);
   // Set Analog Resolution
@@ -71,11 +70,9 @@ void setup() {
 /----------------------------------------------------------------------------------------*/
 void loop() {
   /* Calibrate Force Sensor */
-  Serial.println("2");
   delay(100);
   ati.CalibrateSensor();
   delay(100);
-  Serial.println("3");
 
   /* Other Variables needed */
   unsigned long previousTime, currentTime;
@@ -92,7 +89,6 @@ void loop() {
 
   /* Main Loop */
   while (Serial) {
-    Serial.println("4");
     currentTime = millis();
 
     /* Incoming Data check */
@@ -132,7 +128,7 @@ void loop() {
       previousTime = currentTime;
 
       /* Request Robot Data */
-      // robot.RequestDataOnly();
+      robot.RequestDataOnly();
 
       /* Control */
       if (robot.BytesAvailable() > 0) {
@@ -148,7 +144,7 @@ void loop() {
       pc.WritePackets(totalTime, ati, admitModel, robot, loopTime);
     }
   }
+  digitalWrite(ASR::LED_PIN, LOW); // Turn off LED
   robot.SendZeroes();
   while (!Serial);
-  
 }
