@@ -6,8 +6,8 @@ function testTeensy()
 delete(instrfindall);
 
 %% Ports
-robotSerialPort = 'COM5';
-robotBaud = 115200;
+robotSerialPort = 'COM7';
+robotBaud = 1000000;
 robotPktLen = 60;
 rawPacket = nan(1,robotPktLen);
 botSerial = serialport(robotSerialPort, robotBaud);

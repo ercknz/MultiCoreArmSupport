@@ -193,24 +193,6 @@ void RobotComm::ReadRobot(){
   byte tempHeader[4];
   int16_t sumCheck;
   int16_t CHECKSUM;
-
-  // Serial.print("Bytes available: ");
-  //   Serial.println(robotPort_M->available());
-    
-  //   if (robotPort_M->available() > 0) {
-  //       Serial.print("Raw bytes: ");
-  //       for (int i = 0; i < min(10, robotPort_M->available()); i++) {
-  //           byte b = robotPort_M->read();
-  //           Serial.print(b, HEX);
-  //           Serial.print(" ");
-  //       }
-  //       Serial.println();
-  //   }
-    
-  //   delay(100);
-
-  //   return;
-
   
   /* Check for instructions */
   unsigned long timeOUtTime = millis();

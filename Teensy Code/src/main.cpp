@@ -41,7 +41,7 @@
 /* ---------------------------------------------------------------------------------------/
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-ForceSensor     ati         = ForceSensor(0.99); 
+ForceSensor     ati         = ForceSensor(0.95); 
 RobotComm       robot       = RobotComm(&Serial1, ASR::CONTROLLER_BAUDRATE);
 AdmittanceModel admitModel  = AdmittanceModel(ASR::initMassXY, ASR::initMassZ, ASR::initDampingXY, ASR::initDampingZ);
 PCComm          pc          = PCComm(&Serial, ASR::SERIAL_BAUDRATE);
@@ -131,9 +131,7 @@ void loop() {
       robot.RequestDataOnly();
 
       /* Control */
-      if (robot.BytesAvailable() > 0) {
-        robot.ReadRobot();
-      }
+      robot.ReadRobot();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
       admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());

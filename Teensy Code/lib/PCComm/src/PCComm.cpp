@@ -252,7 +252,22 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   RxPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
 
   // write data packet
-  pcPort_M->write(RxPacket,_TX_PKT_LEN);
+  // pcPort_M->write(RxPacket,_TX_PKT_LEN);
+  for(int16_t i = 0; i < 3; i++) {
+    Serial.print(Robot.GetPresQ()[i]); 
+    Serial.print("\t\t");
+  }
+
+  for(int16_t i = 0; i < 3; i++) {
+    Serial.print(Sensor.GetRawFT()[i]); 
+    Serial.print("\t\t");
+  }
+
+  Serial.print(totalTime); 
+  Serial.print("\t\t");
+  Serial.print(loopTime);
+  Serial.println("\t\t");
+
 }
 
 /* ------------------------------------------------------------------------------------------------------/
