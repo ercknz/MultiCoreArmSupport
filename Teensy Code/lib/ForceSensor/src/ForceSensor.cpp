@@ -55,14 +55,6 @@ float * ForceSensor::GetFilteredFT(){
   return ftxyzFilt_M;
 }
 
-float * ForceSensor::GetGlobalForces(){
-  return FxyzGlobal_M;
-}
-
-float * ForceSensor::GetGlobalTorques(){
-  return TxyzGlobal_M;
-}
-
 float ForceSensor::GetFilterWeight(){
   return FilterWeight_M;
 }
@@ -137,30 +129,4 @@ void ForceSensor::CalibrateSensor(){
     ftxyzRaw_M[4] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[4];
     ftxyzRaw_M[5] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
-    // Filter Values
-    FilterFT();
   }
-
-  /* ---------------------------------------------------------------------------------------/
-  / Force Sensor Filter --------------------------------------------------------------------/
-  /----------------------------------------------------------------------------------------*/
-  void ForceSensor::FilterFT(){
-    for (int i = 0; i < 6; i++){
-      // Move data from last frame
-      ftxyzLastFilt_M[i] = ftxyzFilt_M[i];
-      // Filter current frame
-      ftxyzFilt_M[i] = FilterWeight_M * (ftxyzRaw_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * ftxyzLastFilt_M[i];
-    }
-  }
-
-  /* ---------------------------------------------------------------------------------------/
-/ Force Sensor Global Forces -------------------------------------------------------------/
-/----------------------------------------------------------------------------------------*/
-void ForceSensor::CalculateGlobalForces(float *q) {
-  // q[] = [q1, q2, q4] corresponding to the angles of the arm joints.
-  // q[0] = q1, q[1] = q2, q[2] = q4
-  ReadForceSensor();
-  FxyzGlobal_M[0] = ftxyzFilt_M[0] * ( sin(q[0] + q[2])) + ftxyzFilt_M[1] * (-cos(q[0] + q[2]));
-  FxyzGlobal_M[1] = ftxyzFilt_M[0] * (-cos(q[0] + q[2])) + ftxyzFilt_M[1] * (-sin(q[0] + q[2]));
-  FxyzGlobal_M[2] = -ftxyzFilt_M[2];
-}
