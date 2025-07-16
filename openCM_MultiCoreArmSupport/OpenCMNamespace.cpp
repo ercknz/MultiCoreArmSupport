@@ -77,7 +77,7 @@ const int VEL_MAX_LIMIT     = 15;
 const float SHOULDER_OFFSET = 0.6219;
 
 // Loop Parameters
-const float LOOP_DT     = 5; // Milliseconds
+const float LOOP_DT     = 2; // Milliseconds
 
 // Kinematic Constants
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage

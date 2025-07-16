@@ -14,6 +14,7 @@ class RobotComm {
   public:
           RobotComm(HardwareSerial *ptrSer, const int baudrate);
     void  ReadRobot();
+    void  ReadRobotMultipleTimes();
     void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
     void  RequestDataOnly();
     void  ChangeTorqueOnly(uint8_t newTorqueValue);
@@ -42,7 +43,7 @@ class RobotComm {
 
     HardwareSerial *robotPort_M;
     const int _BAUDRATE;
-    static const size_t _RX_BUFFER_SIZE = 512; // Receiving Data Buffer Size
+    static const size_t _RX_BUFFER_SIZE = 1024; // Receiving Data Buffer Size
     uint8_t _serialRXbuffer_M[_RX_BUFFER_SIZE];
 
     const byte _READ_HEADER[4]  = {170,  6, 9,  69};

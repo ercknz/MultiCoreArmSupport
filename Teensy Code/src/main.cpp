@@ -127,11 +127,8 @@ void loop() {
       totalTime += (currentTime - previousTime);
       previousTime = currentTime;
 
-      /* Request Robot Data */
-      robot.RequestDataOnly();
-
       /* Control */
-      robot.ReadRobot();
+      robot.ReadRobotMultipleTimes();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
       admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());

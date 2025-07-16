@@ -135,8 +135,7 @@ void loop() {
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;
-      // if (!c2cComm.InTestingMode() || c2cComm.DataRequested()) {
-      if (c2cComm.DataRequested()) {
+      if (!c2cComm.InTestingMode() || c2cComm.DataRequested()) {
         c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
       }
     }

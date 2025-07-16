@@ -275,6 +275,105 @@ void RobotComm::ReadRobot(){
   torqueState_M = dataPacket[143];
 }
 
+void RobotComm::ReadRobotMultipleTimes(){
+  /* Reads multiple packets from the robot and finds the latest complete data
+     Robot is sending 4 packets at a time
+     Reading in up to 4 x 150 bytes */
+  byte allData[4 * _RX_PKT_LEN] = {0}; 
+  byte goodPacket[_RX_PKT_LEN] = {0};
+  byte tempHeader[4] = {0};
+  int16_t sumCheck;
+  int16_t CHECKSUM;
+
+  /* Wait for enough data */
+  while (robotPort_M->available() < 3 * _RX_PKT_LEN);
+  for (int i = 0; i < robotPort_M->available(); i++) {
+    allData[i] = robotPort_M->read();
+  }
+
+  /* Find the latest complete packet */
+  for (int16_t i = 600 - _RX_PKT_LEN; i > 1; i--) {
+    // Get Header
+    for (int16_t j = 0; j < 4; j++){
+      tempHeader[j] = allData[i + j];
+    }
+
+    // Check Header
+    if (memcmp(_READ_HEADER, tempHeader, sizeof(_READ_HEADER)) != 0) continue;
+    
+    // Copy packet with good header
+    for (int16_t j = 0; j < _RX_PKT_LEN; j++) {
+      goodPacket[j] = allData[i + j];
+    } 
+    
+    // Verify Packet
+    CHECKSUM = bytesToCounts(goodPacket[_RX_PKT_LEN - 2], goodPacket[_RX_PKT_LEN - 1]);
+    sumCheck = 0;
+    for (int16_t j = 0; j < _RX_PKT_LEN - 2; j++){
+      sumCheck += goodPacket[j];
+    }
+
+    // Checksum
+    if (sumCheck != CHECKSUM) continue;
+    
+    break; // Exit loop if a good packet is found
+  }
+
+  /* Extract Data ---------------- */
+  /* presQ(rad)         slot = 8   */
+  qPres_M[0] = bytesToFloat(goodPacket[8], goodPacket[9], goodPacket[10], goodPacket[11]);
+  qPres_M[1] = bytesToFloat(goodPacket[12], goodPacket[13], goodPacket[14], goodPacket[15]);
+  qPres_M[2] = bytesToFloat(goodPacket[16], goodPacket[17], goodPacket[18], goodPacket[19]);
+
+  /* presQdot(rad/sec)  slot = 20  */
+  qDotPres_M[0] = bytesToFloat(goodPacket[20], goodPacket[21], goodPacket[22], goodPacket[23]);
+  qDotPres_M[1] = bytesToFloat(goodPacket[24], goodPacket[25], goodPacket[26], goodPacket[27]);
+  qDotPres_M[2] = bytesToFloat(goodPacket[28], goodPacket[29], goodPacket[30], goodPacket[31]);
+
+  /* presXYZ(m)         slot = 32  */
+  xyzPres_M[0] = bytesToFloat(goodPacket[32], goodPacket[33], goodPacket[34], goodPacket[35]);
+  xyzPres_M[1] = bytesToFloat(goodPacket[36], goodPacket[37], goodPacket[38], goodPacket[39]);
+  xyzPres_M[2] = bytesToFloat(goodPacket[40], goodPacket[41], goodPacket[42], goodPacket[43]);
+
+  /* presXYZdot(m/s)    slot = 44  */
+  xyzDotPres_M[0] = bytesToFloat(goodPacket[44], goodPacket[45], goodPacket[46], goodPacket[47]);
+  xyzDotPres_M[1] = bytesToFloat(goodPacket[48], goodPacket[49], goodPacket[50], goodPacket[51]);
+  xyzDotPres_M[2] = bytesToFloat(goodPacket[52], goodPacket[53], goodPacket[54], goodPacket[55]);
+
+  /* goalQ(rad)         slot = 56  */
+  qGoal_M[0] = bytesToFloat(goodPacket[56], goodPacket[57], goodPacket[58], goodPacket[59]);
+  qGoal_M[1] = bytesToFloat(goodPacket[60], goodPacket[61], goodPacket[62], goodPacket[63]);
+  qGoal_M[2] = bytesToFloat(goodPacket[64], goodPacket[65], goodPacket[66], goodPacket[67]);
+
+  /* goalQdot(rad/sec)  slot = 68  */
+  qDotGoal_M[0] = bytesToFloat(goodPacket[68], goodPacket[69], goodPacket[70], goodPacket[71]);
+  qDotGoal_M[1] = bytesToFloat(goodPacket[72], goodPacket[73], goodPacket[74], goodPacket[75]);
+  qDotGoal_M[2] = bytesToFloat(goodPacket[76], goodPacket[77], goodPacket[78], goodPacket[79]);
+
+  /* presQ(cts)         slot = 80  */
+  qPresCts_M[0] = bytesToInt32(goodPacket[80], goodPacket[81], goodPacket[82], goodPacket[83]);
+  qPresCts_M[1] = bytesToInt32(goodPacket[84], goodPacket[85], goodPacket[86], goodPacket[87]);
+  qPresCts_M[2] = bytesToInt32(goodPacket[88], goodPacket[89], goodPacket[90], goodPacket[91]);
+
+  /* presQdot(cts)      slot = 92  */
+  qDotPresCts_M[0] = bytesToInt32(goodPacket[92], goodPacket[93], goodPacket[94], goodPacket[95]);
+  qDotPresCts_M[1] = bytesToInt32(goodPacket[96], goodPacket[97], goodPacket[98], goodPacket[99]);
+  qDotPresCts_M[2] = bytesToInt32(goodPacket[100], goodPacket[101], goodPacket[102], goodPacket[103]);
+
+  /* goalQ(cts)         slot = 104 */
+  qGoalCts_M[0] = bytesToInt32(goodPacket[104], goodPacket[105], goodPacket[106], goodPacket[107]);
+  qGoalCts_M[1] = bytesToInt32(goodPacket[108], goodPacket[109], goodPacket[110], goodPacket[111]);
+  qGoalCts_M[2] = bytesToInt32(goodPacket[112], goodPacket[113], goodPacket[114], goodPacket[115]);
+
+  /* goalQdot(cts)      slot = 116 */
+  qDotGoalCts_M[0] = bytesToInt32(goodPacket[116], goodPacket[117], goodPacket[118], goodPacket[119]);
+  qDotGoalCts_M[1] = bytesToInt32(goodPacket[120], goodPacket[121], goodPacket[122], goodPacket[123]);
+  qDotGoalCts_M[2] = bytesToInt32(goodPacket[124], goodPacket[125], goodPacket[126], goodPacket[127]);
+
+  /* Torque State */
+  torqueState_M = goodPacket[143];
+}
+
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Robot Writing --------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
