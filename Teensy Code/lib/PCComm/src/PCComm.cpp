@@ -145,6 +145,10 @@ uint8_t PCComm::GetNewMode(){
   return torqueMode_M;
 }
 
+bool PCComm::DataRequested() {
+  return dataRequested_M;
+}
+
 /* ------------------------------------------------------------------------------------------------------/
 / Serial Packet Writer ----------------------------------------------------------------------------------/
 / - Streams data back to the PC for logging or inferfacing ----------------------------------------------/
@@ -284,27 +288,11 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   RxPacket[_TX_PKT_LEN - 2] = floor(packetSum / 256);
   RxPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
 
+  // Reset the data requested flag
+  dataRequested_M = false;
+
   // write data packet
   pcPort_M->write(RxPacket,_TX_PKT_LEN);
-  // for(int16_t i = 0; i < _TX_PKT_LEN; i++) {
-  //   Serial.print(RxPacket[i]);
-  //   Serial.print(" ");
-  // }
-  // Serial.println();
-  // for(int16_t i = 0; i < 3; i++) {
-  //   Serial.print(Robot.GetPresQ()[i]); 
-  //   Serial.print("\t\t");
-  // }
-
-  // for(int16_t i = 0; i < 3; i++) {
-  //   Serial.print(Sensor.GetRawFT()[i]); 
-  //   Serial.print("\t\t");
-  // }
-
-  // Serial.print(totalTime); 
-  // Serial.print("\t\t");
-  // Serial.print(loopTime);
-  // Serial.println("\t\t");
 
 }
 
@@ -314,8 +302,8 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 void PCComm::ReadPackets() {
   /* Rx Packet Structure : Header: [ 0, 1, 2, 3,...
                           Actions:   4, 5, 6,...
-                             Data:   7 - 47,...
-                         CheckSum:  48, 49]
+                             Data:   7 - 57,...
+                         CheckSum:  58, 59]
   */
   byte RXPacket[_RX_PKT_LEN];
   byte tempHeader[4];
@@ -347,6 +335,11 @@ void PCComm::ReadPackets() {
   // Perform action based on type of Packet
   for (int16_t i = 0; i < 4; i++) {
     tempHeader[i] = RXPacket[i];
+  }
+  if(memcmp(_REQUESTHEADER, tempHeader, sizeof(_REQUESTHEADER)) == 0){
+    // Frame requested
+    dataRequested_M = true;
+    return;
   }
   if (memcmp(_CONFIGHEADER, tempHeader, sizeof(_CONFIGHEADER)) == 0) {
       // Found Configuration Packet

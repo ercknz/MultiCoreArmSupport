@@ -128,18 +128,27 @@ void loop() {
       totalTime += (currentTime - previousTime);
       previousTime = currentTime;
 
-      /* Control */
+      // Request data from robot and read it
       robot.RequestDataOnly();
+      delay(1);
       robot.ReadRobot();
-      // robot.ReadRobotMultipleTimes();
+      
+      // Force Sensor and Admittance Model Update
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
       admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());
-      robot.SendNewGoalOnly(admitModel.GetGoalPos(), admitModel.GetGoalVel());
 
-      /* Outgoing Data */
+      // Update Robot with new goal position and velocity
+      robot.SendNewGoalOnly(admitModel.GetGoalPos(), admitModel.GetGoalVel());
+      delay(1);
+
+      // looptime calculation
       loopTime = millis() - startLoop;
-      pc.WritePackets(totalTime, ati, admitModel, robot, loopTime);
+
+      // Send data if requested
+      if (pc.DataRequested()){
+        pc.WritePackets(totalTime, ati, admitModel, robot, loopTime);
+      }
     }
   }
   digitalWrite(ASR::LED_PIN, LOW); // Turn off LED

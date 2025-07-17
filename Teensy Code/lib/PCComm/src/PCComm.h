@@ -44,6 +44,7 @@ class PCComm {
     float * GetNewGoalXYZdot();
     bool SetTorqueMode();
     uint8_t GetNewMode();
+    bool DataRequested();
 
   protected:
     const int   _BAUDRATE;
@@ -51,6 +52,7 @@ class PCComm {
     const byte  _CONFIGHEADER[4]  = {150, 0, 69, 8};
     const byte  _MODHEADER[4]     = {150, 10, 10, 96};
     const byte  _CTRLHEADER[4]    = {150, 50, 50, 175};
+    const byte _REQUESTHEADER[4] = {151, 125, 125, 251};
     const int16_t _RX_PKT_LEN = 60;
     const byte  _WRITEHEADER[4]   = {170, 8, 69, 0};
     const int16_t _TX_PKT_LEN = 150;
@@ -107,6 +109,7 @@ class PCComm {
     float newScalingFactor_M;
     float ExtForces_M[3] = {0.0f};
     float newFilter_M;
+    bool dataRequested_M = false;
 
     // Ctrl Parameters
     bool newTorqueMode_M      = false;

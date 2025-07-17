@@ -29,13 +29,13 @@ const float xyzSens[3] = {0.0496, 0.0494, 0.6231};
 const float SENSOR_FILTER_WEIGHT = 0.05;
 
 // Admitance Control Constants and initial Values
-const float LOOP_DT        = 8;        // Milliseconds
-const float MODEL_DT       = 0.008;    // Secs
+const float LOOP_DT        = 5;        // Milliseconds
+const float MODEL_DT       = 0.005;    // Secs
 const float GRAVITY        = 9.80665;  // m/sec^2
-float initMassXY    = 1.5f;     // kg
+float initMassXY    = 2.5f;     // kg
 float initDampingXY = 5.0f;     // N*(sec/m)
-float initMassZ     = 1.5f;     // kg
-float initDampingZ  = 4.5f;     // N*(sec/m)
+float initMassZ     = 2.5f;     // kg
+float initDampingZ  = 5.0f;     // N*(sec/m)
 
 // Kinematic Constants for Task Space Limits
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage

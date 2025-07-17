@@ -19,6 +19,7 @@ classdef armSupportRobot < handle
         configHeader = uint8([150, 0, 69, 8])
         modHeader = uint8([150, 10, 10, 96])
         ctrlHeader = uint8([150, 50, 50, 175])
+        requestHeader = uint8([151, 125, 125, 251])
         txPacketLen = 60
         
         rxHeader = uint8([170, 8, 69, 0])
@@ -125,13 +126,23 @@ classdef armSupportRobot < handle
                 % Torque Mode
                 obj.frameData(38) = double(obj.rawBytes(144));
                 % Loop Time
-                obj.rawBytes(end-5:end-2)
                 obj.frameData(39) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./1000;
                 obj.frameData(26:37) = obj.frameData(26:37)./1000;
                 obj.frameData(39) = obj.frameData(39)*0.001;
+            end
+        end
+
+        function SendRequest(obj)
+            writePacket = uint8(zeros(1,obj.txPacketLen));
+            writePacket(1:4) = obj.requestHeader;
+            checkSum = sum(writePacket);
+            writePacket(end-1) = uint8(floor(checkSum/256));
+            writePacket(end) = uint8(mod(checkSum,256));
+            if obj.CommOpen
+                write(obj.serialObj,writePacket,'uint8');
             end
         end
         

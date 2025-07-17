@@ -438,10 +438,8 @@ initializeAnimatedLines();
                 break;
             end
             
-            % Data Request for OpenCM
-            if ~fullRobot
-                botSerial.SendRequest();
-            end
+            % Data Request for OpenCM/Teensy
+            botSerial.SendRequest();
             
             % Non-blocking wait with timeout
             if waitForSerialData()
