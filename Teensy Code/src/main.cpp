@@ -77,7 +77,8 @@ void loop() {
   /* Other Variables needed */
   unsigned long previousTime, currentTime;
   unsigned long totalTime = 0;
-  unsigned long loopTime, startLoop;
+  unsigned long loopTime = 0;
+  unsigned long startLoop;
 
   /* Initialize Robot and Model */
   previousTime = millis();
@@ -128,7 +129,9 @@ void loop() {
       previousTime = currentTime;
 
       /* Control */
-      robot.ReadRobotMultipleTimes();
+      robot.RequestDataOnly();
+      robot.ReadRobot();
+      // robot.ReadRobotMultipleTimes();
       ati.ReadForceSensor();
       ati.CalculateGlobalForces(robot.GetPresQ());
       admitModel.UpdateModel(ati.GetGlobalForces(), pc.GetExternalForces());

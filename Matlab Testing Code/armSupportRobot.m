@@ -22,7 +22,7 @@ classdef armSupportRobot < handle
         txPacketLen = 60
         
         rxHeader = uint8([170, 8, 69, 0])
-        rxPacketLen = 170
+        rxPacketLen = 150
     end
     
     properties (Access = private)
@@ -99,37 +99,38 @@ classdef armSupportRobot < handle
                 obj.frameData(18) = double(typecast(uint8(obj.rawBytes(73:76)),'int32'));
                 obj.frameData(19) = double(typecast(uint8(obj.rawBytes(77:80)),'int32'));
                 % Raw Force and Torque Values (Cts)
-                % obj.frameData(20) = double(typecast(uint8(obj.rawBytes(83:84)),'uint16'));
-                % obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:86)),'uint16'));
-                % obj.frameData(22) = double(typecast(uint8(obj.rawBytes(87:88)),'uint16'));
-                % obj.frameData(23) = double(typecast(uint8(obj.rawBytes(89:90)),'uint16'));
-                % obj.frameData(24) = double(typecast(uint8(obj.rawBytes(91:92)),'uint16'));
-                % obj.frameData(25) = double(typecast(uint8(obj.rawBytes(93:94)),'uint16'));
+                obj.frameData(20) = double(typecast(uint8(obj.rawBytes(83:84)),'uint16'));
+                obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:86)),'uint16'));
+                obj.frameData(22) = double(typecast(uint8(obj.rawBytes(87:88)),'uint16'));
+                obj.frameData(23) = double(typecast(uint8(obj.rawBytes(89:90)),'uint16'));
+                obj.frameData(24) = double(typecast(uint8(obj.rawBytes(91:92)),'uint16'));
+                obj.frameData(25) = double(typecast(uint8(obj.rawBytes(93:94)),'uint16'));
                 % XYZ Global Forces
-                % obj.frameData(26) = double(typecast(uint8(obj.rawBytes(95:98)),'int32'));
-                % obj.frameData(27) = double(typecast(uint8(obj.rawBytes(99:102)),'int32'));
-                % obj.frameData(28) = double(typecast(uint8(obj.rawBytes(103:106)),'int32'));
-                % % XYZ Global Torques
-                % obj.frameData(29) = double(typecast(uint8(obj.rawBytes(107:110)),'int32'));
-                % obj.frameData(30) = double(typecast(uint8(obj.rawBytes(111:114)),'int32'));
-                % obj.frameData(31) = double(typecast(uint8(obj.rawBytes(115:118)),'int32'));
-                % % Model XYZ Pos 
-                % obj.frameData(32) = double(typecast(uint8(obj.rawBytes(119:122)),'int32'));
-                % obj.frameData(33) = double(typecast(uint8(obj.rawBytes(123:126)),'int32'));
-                % obj.frameData(34) = double(typecast(uint8(obj.rawBytes(127:130)),'int32'));
-                % % Model XYZ Vel
-                % obj.frameData(35) = double(typecast(uint8(obj.rawBytes(131:134)),'int32'));
-                % obj.frameData(36) = double(typecast(uint8(obj.rawBytes(135:138)),'int32'));
-                % obj.frameData(37) = double(typecast(uint8(obj.rawBytes(139:142)),'int32'));
+                obj.frameData(26) = double(typecast(uint8(obj.rawBytes(95:98)),'int32'));
+                obj.frameData(27) = double(typecast(uint8(obj.rawBytes(99:102)),'int32'));
+                obj.frameData(28) = double(typecast(uint8(obj.rawBytes(103:106)),'int32'));
+                % XYZ Global Torques
+                obj.frameData(29) = double(typecast(uint8(obj.rawBytes(107:110)),'int32'));
+                obj.frameData(30) = double(typecast(uint8(obj.rawBytes(111:114)),'int32'));
+                obj.frameData(31) = double(typecast(uint8(obj.rawBytes(115:118)),'int32'));
+                % Model XYZ Pos 
+                obj.frameData(32) = double(typecast(uint8(obj.rawBytes(119:122)),'int32'));
+                obj.frameData(33) = double(typecast(uint8(obj.rawBytes(123:126)),'int32'));
+                obj.frameData(34) = double(typecast(uint8(obj.rawBytes(127:130)),'int32'));
+                % Model XYZ Vel
+                obj.frameData(35) = double(typecast(uint8(obj.rawBytes(131:134)),'int32'));
+                obj.frameData(36) = double(typecast(uint8(obj.rawBytes(135:138)),'int32'));
+                obj.frameData(37) = double(typecast(uint8(obj.rawBytes(139:142)),'int32'));
                 
                 % Torque Mode
-                obj.frameData(38) = double(obj.rawBytes(164));
+                obj.frameData(38) = double(obj.rawBytes(144));
                 % Loop Time
+                obj.rawBytes(end-5:end-2)
                 obj.frameData(39) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./1000;
-                % obj.frameData(26:37) = obj.frameData(26:37)./1000;
+                obj.frameData(26:37) = obj.frameData(26:37)./1000;
                 obj.frameData(39) = obj.frameData(39)*0.001;
             end
         end

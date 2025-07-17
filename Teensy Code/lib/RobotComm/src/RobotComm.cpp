@@ -277,30 +277,34 @@ void RobotComm::ReadRobot(){
 
 void RobotComm::ReadRobotMultipleTimes(){
   /* Reads multiple packets from the robot and finds the latest complete data
-     Robot is sending 4 packets at a time
-     Reading in up to 4 x 150 bytes */
-  byte allData[4 * _RX_PKT_LEN] = {0}; 
+     Robot is sending 2 packets at a time
+     Reading in up to 2 x 150 bytes */
+  byte allData[2 * _RX_PKT_LEN] = {0}; 
   byte goodPacket[_RX_PKT_LEN] = {0};
   byte tempHeader[4] = {0};
   int16_t sumCheck;
   int16_t CHECKSUM;
 
+  /* Clear Buffer */
+  robotPort_M->flush();
+
   /* Wait for enough data */
-  while (robotPort_M->available() < 3 * _RX_PKT_LEN);
-  for (int i = 0; i < robotPort_M->available(); i++) {
+  while (robotPort_M->available() < 2 * _RX_PKT_LEN);
+  
+  for (int i = 0; i < 2 * _RX_PKT_LEN; i++) {
     allData[i] = robotPort_M->read();
   }
 
   /* Find the latest complete packet */
-  for (int16_t i = 600 - _RX_PKT_LEN; i > 1; i--) {
+  for (int16_t i = 0; i < _RX_PKT_LEN + 1; i++) {
     // Get Header
     for (int16_t j = 0; j < 4; j++){
       tempHeader[j] = allData[i + j];
     }
-
+  
     // Check Header
     if (memcmp(_READ_HEADER, tempHeader, sizeof(_READ_HEADER)) != 0) continue;
-    
+
     // Copy packet with good header
     for (int16_t j = 0; j < _RX_PKT_LEN; j++) {
       goodPacket[j] = allData[i + j];
@@ -315,7 +319,7 @@ void RobotComm::ReadRobotMultipleTimes(){
 
     // Checksum
     if (sumCheck != CHECKSUM) continue;
-    
+
     break; // Exit loop if a good packet is found
   }
 

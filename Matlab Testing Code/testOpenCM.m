@@ -6,7 +6,7 @@ delete(instrfindall);
 clear; clc; close all;
 
 %% Ports
-robotSerialPort = 'COM4';
+robotSerialPort = 'COM5';
 robotBaud = 115200;
 botSerial = CommOpenCM(robotSerialPort, robotBaud);
 packetLen = 150;
@@ -50,8 +50,3 @@ end
 instrreset;
 botSerial.Stop();
 disp('.........Closing Port to Robot...............')
-
-% test = readmatrix(csvFile);
-% subplot(3,1,1)
-% plot(test(:,1));
-% grid on; title('Robot Read Times Per Loop');

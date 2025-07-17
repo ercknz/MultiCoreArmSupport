@@ -189,14 +189,14 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
                             Modelxdot(m/s):  130,131,132,133,...
                             Modelydot(m/s):  134,135,136,137,...
                             Modelzdot(m/s):  138,139,140,141,...
-                                          :  142-162,...
-                          currentDriveMode:  163,...
-                                  loopTime:  164,165,166,167,...
-                                  CheckSum:  168,169]
+                                          :  142,...
+                          currentDriveMode:  143,...
+                                  loopTime:  144,145,146,147,...
+                                  CheckSum:  148,149]
   */
   byte RxPacket[_TX_PKT_LEN] = {0};
   uint16_t packetSum    = 0;
-  int16_t byteLen       = 4;
+  byte *packetBuffer    = nullptr;
 
   // Header Bytes 
   for (int16_t i = 0; i < 4; i++) {
@@ -210,33 +210,66 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   RxPacket[7] = DXL_HIBYTE(DXL_HIWORD(totalTime));
 
   // Robot State Variables
-  // Motor's PresQ (Radians) 
-  memcpy(&RxPacket[8], floatArrayToBytes(Robot.GetPresQ()), 3 * byteLen);
+  // Motor's PresQ (Radians)
+  packetBuffer = floatArrayToBytes(Robot.GetPresQ());
+  for (int16_t i = _TX_presQ_SLOT; i < _TX_presQDOT_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_presQ_SLOT];
+  }
   // Motor PresQdot (radians/sec)
-  memcpy(&RxPacket[20], floatArrayToBytes(Robot.GetPresQDot()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Robot.GetPresQDot());
+  for (int16_t i = _TX_presQDOT_SLOT; i < _TX_presXYZ_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_presQDOT_SLOT];
+  }
   // Robot Present XYZ (meters)
-  memcpy(&RxPacket[32], floatArrayToBytes(Robot.GetPresPos()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Robot.GetPresPos());
+  for (int16_t i = _TX_presXYZ_SLOT; i < _TX_presXYZdot_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_presXYZ_SLOT];
+  }
   // Robot Present XYZdot (meters/sec)
-  memcpy(&RxPacket[44], floatArrayToBytes(Robot.GetPresVel()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Robot.GetPresVel());
+  for (int16_t i = _TX_presXYZdot_SLOT; i < _TX_goalQ_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_presXYZdot_SLOT];
+  }
   // Motor GoalQ (radians)
-  memcpy(&RxPacket[56], floatArrayToBytes(Robot.GetGoalQ()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Robot.GetGoalQ());
+  for (int16_t i = _TX_goalQ_SLOT; i < _TX_goalQDOT_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_goalQ_SLOT];
+  }
   // Motor GoalQdot (radians/sec)
-  memcpy(&RxPacket[68], floatArrayToBytes(Robot.GetGoalQDot()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Robot.GetGoalQDot());
+  for (int16_t i = _TX_goalQDOT_SLOT; i < _TX_1stBlank_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_goalQDOT_SLOT];
+  }
 
   // Model State Variables
   // Raw Forces and Torques (counts)
-  memcpy(&RxPacket[82], uint16ArrayToBytes(Sensor.GetRawCtsFT()), 6 * 2);
+  packetBuffer = uint16ArrayToBytes(Sensor.GetRawCtsFT());
+  for (int16_t i = _TX_rawFTcts_SLOT; i < _TX_globalF_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_rawFTcts_SLOT];
+  }
   // Global Forces (Newtons)
-  memcpy(&RxPacket[94], floatArrayToBytes(Sensor.GetGlobalForces()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Sensor.GetGlobalForces());
+  for (int16_t i = _TX_globalF_SLOT; i < _TX_globalT_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_globalF_SLOT];
+  }
   // Global Torques (Newton-meters)
-  memcpy(&RxPacket[106], floatArrayToBytes(Sensor.GetGlobalTorques()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Sensor.GetGlobalTorques());
+  for (int16_t i = _TX_globalT_SLOT; i < _TX_modelXYZ_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_globalT_SLOT];
+  }
   // Model Position (meters)
-  memcpy(&RxPacket[118], floatArrayToBytes(Model.GetGoalPos()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Model.GetGoalPos());
+  for (int16_t i = _TX_modelXYZ_SLOT; i < _TX_modelXYZdot_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_modelXYZ_SLOT];
+  }
   // Model Velocity (meters/sec)
-  memcpy(&RxPacket[130], floatArrayToBytes(Model.GetGoalVel()), 3 * byteLen);
+  packetBuffer = floatArrayToBytes(Model.GetGoalVel());
+  for (int16_t i = _TX_modelXYZdot_SLOT; i < _TX_2ndBlank_SLOT; i++){
+    RxPacket[i] = packetBuffer[i - _TX_modelXYZdot_SLOT];
+  }
 
   // Robot Drive Mode
-  RxPacket[163] = Robot.GetTorqueState();
+  RxPacket[_TX_PKT_LEN - 7] = Robot.GetTorqueState();
 
   // looptime
   RxPacket[_TX_PKT_LEN - 6] = DXL_LOBYTE(DXL_LOWORD(loopTime));
@@ -252,21 +285,26 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
   RxPacket[_TX_PKT_LEN - 1] = floor(packetSum % 256);
 
   // write data packet
-  // pcPort_M->write(RxPacket,_TX_PKT_LEN);
-  for(int16_t i = 0; i < 3; i++) {
-    Serial.print(Robot.GetPresQ()[i]); 
-    Serial.print("\t\t");
-  }
+  pcPort_M->write(RxPacket,_TX_PKT_LEN);
+  // for(int16_t i = 0; i < _TX_PKT_LEN; i++) {
+  //   Serial.print(RxPacket[i]);
+  //   Serial.print(" ");
+  // }
+  // Serial.println();
+  // for(int16_t i = 0; i < 3; i++) {
+  //   Serial.print(Robot.GetPresQ()[i]); 
+  //   Serial.print("\t\t");
+  // }
 
-  for(int16_t i = 0; i < 3; i++) {
-    Serial.print(Sensor.GetRawFT()[i]); 
-    Serial.print("\t\t");
-  }
+  // for(int16_t i = 0; i < 3; i++) {
+  //   Serial.print(Sensor.GetRawFT()[i]); 
+  //   Serial.print("\t\t");
+  // }
 
-  Serial.print(totalTime); 
-  Serial.print("\t\t");
-  Serial.print(loopTime);
-  Serial.println("\t\t");
+  // Serial.print(totalTime); 
+  // Serial.print("\t\t");
+  // Serial.print(loopTime);
+  // Serial.println("\t\t");
 
 }
 

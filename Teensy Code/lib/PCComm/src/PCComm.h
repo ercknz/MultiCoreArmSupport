@@ -53,7 +53,20 @@ class PCComm {
     const byte  _CTRLHEADER[4]    = {150, 50, 50, 175};
     const int16_t _RX_PKT_LEN = 60;
     const byte  _WRITEHEADER[4]   = {170, 8, 69, 0};
-    const int16_t _TX_PKT_LEN = 170;
+    const int16_t _TX_PKT_LEN = 150;
+    const int16_t _TX_presQ_SLOT        = 8;
+    const int16_t _TX_presQDOT_SLOT     = 20;
+    const int16_t _TX_presXYZ_SLOT      = 32;
+    const int16_t _TX_presXYZdot_SLOT   = 44;
+    const int16_t _TX_goalQ_SLOT        = 56;
+    const int16_t _TX_goalQDOT_SLOT     = 68;
+    const int16_t _TX_1stBlank_SLOT     = 80;
+    const int16_t _TX_rawFTcts_SLOT     = 82;
+    const int16_t _TX_globalF_SLOT      = 94;
+    const int16_t _TX_globalT_SLOT      = 106;
+    const int16_t _TX_modelXYZ_SLOT     = 118;
+    const int16_t _TX_modelXYZdot_SLOT  = 130;
+    const int16_t _TX_2ndBlank_SLOT     = 142;
 
     void ConfigPacketRX(byte * RxPacket);
     void ModifierPacketRX(byte * RxPacket);
