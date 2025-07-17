@@ -66,6 +66,8 @@ p = simplify(output(1:3,4))
 % base frame. 
 Ti = [output(1:3,1:3)',[-n'*p,-s'*p,-a'*p]';0,0,0,1]
 
+R = Ti(1:3,1:3)*[1;1;1]
+
 %% Inverse Kinematics from C++ code
 A1A2 = A1 + A2;
 HofL2 = sqrt(A4^2 + L2^2);

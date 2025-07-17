@@ -99,13 +99,19 @@ classdef armSupportRobot < handle
                 obj.frameData(17) = double(typecast(uint8(obj.rawBytes(69:72)),'int32'));
                 obj.frameData(18) = double(typecast(uint8(obj.rawBytes(73:76)),'int32'));
                 obj.frameData(19) = double(typecast(uint8(obj.rawBytes(77:80)),'int32'));
+
                 % Raw Force and Torque Values (Cts)
-                obj.frameData(20) = double(typecast(uint8(obj.rawBytes(83:84)),'uint16'));
-                obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:86)),'uint16'));
-                obj.frameData(22) = double(typecast(uint8(obj.rawBytes(87:88)),'uint16'));
-                obj.frameData(23) = double(typecast(uint8(obj.rawBytes(89:90)),'uint16'));
-                obj.frameData(24) = double(typecast(uint8(obj.rawBytes(91:92)),'uint16'));
-                obj.frameData(25) = double(typecast(uint8(obj.rawBytes(93:94)),'uint16'));
+                % obj.frameData(20) = double(typecast(uint8(obj.rawBytes(83:84)),'uint16'));
+                % obj.frameData(21) = double(typecast(uint8(obj.rawBytes(85:86)),'uint16'));
+                % obj.frameData(22) = double(typecast(uint8(obj.rawBytes(87:88)),'uint16'));
+                % obj.frameData(23) = double(typecast(uint8(obj.rawBytes(89:90)),'uint16'));
+                % obj.frameData(24) = double(typecast(uint8(obj.rawBytes(91:92)),'uint16'));
+                % obj.frameData(25) = double(typecast(uint8(obj.rawBytes(93:94)),'uint16'));
+                % Raw Force (N) for testing
+                obj.frameData(20) = double(typecast(uint8(obj.rawBytes(83:86)),'int32'));
+                obj.frameData(21) = double(typecast(uint8(obj.rawBytes(87:90)),'int32'));
+                obj.frameData(22) = double(typecast(uint8(obj.rawBytes(91:94)),'int32'));
+                
                 % XYZ Global Forces
                 obj.frameData(26) = double(typecast(uint8(obj.rawBytes(95:98)),'int32'));
                 obj.frameData(27) = double(typecast(uint8(obj.rawBytes(99:102)),'int32'));
@@ -130,6 +136,7 @@ classdef armSupportRobot < handle
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./1000;
+                obj.frameData(20:22) = obj.frameData(20:22)./1000;
                 obj.frameData(26:37) = obj.frameData(26:37)./1000;
                 obj.frameData(39) = obj.frameData(39)*0.001;
             end

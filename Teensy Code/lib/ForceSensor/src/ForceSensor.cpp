@@ -47,20 +47,28 @@ uint16_t * ForceSensor::GetRawCtsFT(){
   return ftxyzRawCts_M;
 }
 
-float * ForceSensor::GetRawFT(){
-  return ftxyzRaw_M;
+float * ForceSensor::GetRawForces(){
+  return rawForcesXYZ_M;
 }
 
-float * ForceSensor::GetFilteredFT(){
-  return ftxyzFilt_M;
+float * ForceSensor::GetRawTorques(){
+  return rawTorquesXYZ_M;
+}
+
+float * ForceSensor::GetFilteredForces(){
+  return filtForcesXYZ_M;
+}
+
+float * ForceSensor::GetFilteredTorques(){
+  return filtTorquesXYZ_M;
 }
 
 float * ForceSensor::GetGlobalForces(){
-  return FxyzGlobal_M;
+  return globalForcesXYZ_M;
 }
 
 float * ForceSensor::GetGlobalTorques(){
-  return TxyzGlobal_M;
+  return globalTorquesXYZ_M;
 }
 
 float ForceSensor::GetFilterWeight(){
@@ -100,8 +108,9 @@ void ForceSensor::CalibrateSensor(){
     if (currentTime - previousTime >= loopDT){
       previousTime = currentTime;
       ReadForceSensor();
-      for (int i = 0; i < 6; i++){
-          newXYZcal[i] += ftxyzRaw_M[i] / samples4Cal;
+      for (int i = 0; i < 3; i++){
+          newXYZcal[i] += rawForcesXYZ_M[i] / samples4Cal;
+          newXYZcal[i+3] += rawTorquesXYZ_M[i] / samples4Cal;
       }
       samples += 1;
     }
@@ -115,12 +124,6 @@ void ForceSensor::CalibrateSensor(){
   / Force Sensor Reading -------------------------------------------------------------------/
   /----------------------------------------------------------------------------------------*/
   void ForceSensor::ReadForceSensor(){
-    // Move data from last frame
-    for (int i = 0; i < 6; i++){
-      ftxyzLastRawCts_M[i] = ftxyzRawCts_M[i];
-      ftxyzLastRaw_M[i] = ftxyzRaw_M[i];
-    }
-
     // Reads Analog Signals
     ftxyzRawCts_M[0] = analogRead(_FX_PIN);
     ftxyzRawCts_M[1] = analogRead(_FY_PIN);
@@ -130,12 +133,12 @@ void ForceSensor::CalibrateSensor(){
     ftxyzRawCts_M[5] = analogRead(_TZ_PIN);
 
     // Convert to Force/Torque Values
-    ftxyzRaw_M[0] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[0];
-    ftxyzRaw_M[1] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[1];
-    ftxyzRaw_M[2] = _AFZ_M  - _BFZ_M  * ftxyzRawCts_M[2];
-    ftxyzRaw_M[3] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[3];
-    ftxyzRaw_M[4] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[4];
-    ftxyzRaw_M[5] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
+    rawForcesXYZ_M[0] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[0];
+    rawForcesXYZ_M[1] = _AFXY_M - _BFXY_M * ftxyzRawCts_M[1];
+    rawForcesXYZ_M[2] = _AFZ_M  - _BFZ_M  * ftxyzRawCts_M[2];
+    rawTorquesXYZ_M[0] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[3];
+    rawTorquesXYZ_M[1] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[4];
+    rawTorquesXYZ_M[2] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
     // Filter Values
     FilterFT();
@@ -145,11 +148,13 @@ void ForceSensor::CalibrateSensor(){
   / Force Sensor Filter --------------------------------------------------------------------/
   /----------------------------------------------------------------------------------------*/
   void ForceSensor::FilterFT(){
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < 3; i++){
       // Move data from last frame
-      ftxyzLastFilt_M[i] = ftxyzFilt_M[i];
+      prevFiltForcesXYZ_M[i] = filtForcesXYZ_M[i];
+      prevFiltTorquesXYZ_M[i] = filtTorquesXYZ_M[i];
       // Filter current frame
-      ftxyzFilt_M[i] = FilterWeight_M * (ftxyzRaw_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * ftxyzLastFilt_M[i];
+      filtForcesXYZ_M[i] = FilterWeight_M * (rawForcesXYZ_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * prevFiltForcesXYZ_M[i];
+      filtTorquesXYZ_M[i] = FilterWeight_M * (rawTorquesXYZ_M[i] - _xyzCALIBRATION[i + 3]) + (1.0 - FilterWeight_M) * prevFiltTorquesXYZ_M[i];
     }
   }
 
@@ -160,7 +165,7 @@ void ForceSensor::CalculateGlobalForces(float *q) {
   // q[] = [q1, q2, q4] corresponding to the angles of the arm joints.
   // q[0] = q1, q[1] = q2, q[2] = q4
   ReadForceSensor();
-  FxyzGlobal_M[0] = ftxyzFilt_M[0] * ( sin(q[0] + q[2])) + ftxyzFilt_M[1] * (-cos(q[0] + q[2]));
-  FxyzGlobal_M[1] = ftxyzFilt_M[0] * (-cos(q[0] + q[2])) + ftxyzFilt_M[1] * (-sin(q[0] + q[2]));
-  FxyzGlobal_M[2] = -ftxyzFilt_M[2];
+  globalForcesXYZ_M[0] = filtForcesXYZ_M[0] * ( cos(q[0] + q[2])) + filtForcesXYZ_M[1] * (sin(q[0] + q[2]));
+  globalForcesXYZ_M[1] = filtForcesXYZ_M[0] * (cos(q[0] + q[2])) + filtForcesXYZ_M[1] * (-sin(q[0] + q[2]));
+  globalForcesXYZ_M[2] = -filtForcesXYZ_M[2];
 }

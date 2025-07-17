@@ -247,7 +247,12 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 
   // Model State Variables
   // Raw Forces and Torques (counts)
-  packetBuffer = uint16ArrayToBytes(Sensor.GetRawCtsFT());
+  // packetBuffer = uint16ArrayToBytes(Sensor.GetRawCtsFT());
+  // for (int16_t i = _TX_rawFTcts_SLOT; i < _TX_globalF_SLOT; i++){
+  //   RxPacket[i] = packetBuffer[i - _TX_rawFTcts_SLOT];
+  // }
+  // Raw Forces (Newtons) for testing
+  packetBuffer = floatArrayToBytes(Sensor.GetFilteredForces());
   for (int16_t i = _TX_rawFTcts_SLOT; i < _TX_globalF_SLOT; i++){
     RxPacket[i] = packetBuffer[i - _TX_rawFTcts_SLOT];
   }

@@ -74,7 +74,6 @@ class PCComm {
     void ModifierPacketRX(byte * RxPacket);
     void ControlPacketRX(byte * RxPacket);
     void SendFlagResets();
-    void ModeSelection(byte modeNumber);
 
     // Config Parameters
     bool _SEND_RAWF           = true;
