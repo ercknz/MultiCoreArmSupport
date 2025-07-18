@@ -5,6 +5,9 @@
 %
 % Script by erick nunez
 
+%% clean up
+clear; clc; close all;
+
 %% Constants
 % physical robot dimensions
 Link1 = 0.419;
@@ -55,7 +58,7 @@ T07 = @(q1,q2,A1,L1,q4,A2,A3,A4,L2) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45
 % end-effector. S is the sliding vector of the end-effector. A is the
 % approach vector of the end-effector.
 syms q1 q2 q4 L1 L2 A1 A2 A3 A4 real
-output = T07(q1,q2,A1,L1,q4,A2,A3,A4,L2);
+output = T07(q1,q2,A1,L1,q4,A2,A3,A4,L2)
 n = simplify(output(1:3,1))
 s = simplify(output(1:3,2))
 a = simplify(output(1:3,3))
@@ -66,7 +69,10 @@ p = simplify(output(1:3,4))
 % base frame. 
 Ti = [output(1:3,1:3)',[-n'*p,-s'*p,-a'*p]';0,0,0,1]
 
-R = Ti(1:3,1:3)*[1;1;1]
+output2 = output*matrixT(rotateX(pi),[0,0,0]')
+syms x y z real
+R = simplify(Ti(1:3,1:3))*[x,-y,-z]'
+R2 = simplify(output2(1:3,1:3))*[x,y,z]'
 
 %% Inverse Kinematics from C++ code
 A1A2 = A1 + A2;

@@ -18,6 +18,8 @@ SHDR_LIMIT = [0,270];
 ELVN_LIMIT = [-45,45];
 ELBW_LIMIT = [atand(offset/L2),180];
 
+modelIncrements = 1;
+
 %% Test Goals and Communication Setup
 testGoals = [0.750,  0.300,  0.250;
              0.750, -0.300,  0.250;
@@ -170,28 +172,68 @@ HbttnTestGoal = uicontrol('Style','pushbutton',...
     'String','<html>Send<br />Goal</html>','Callback',@sendGoal);
 
 %% COM Port Selection
-HportLabel = uicontrol('Style','text',...
-    'Units','normalized','Position',[0 0 0.08 0.05],...
+HcommPanel = uipanel(Hfigure,'Position',[0 0 0.1 0.05]);
+HportLabel = uicontrol(HcommPanel,'Style','text','Units','normalized','Position',[0 0 0.5 1],...
     'String','COM Port:','Fontsize',12,'HorizontalAlignment','left');
-HportDropdown = uicontrol('Style','popupmenu',...
-    'Units','normalized','Position',[0.05 0 0.08 0.05],...
-    'String',availablePorts,'Value',length(availablePorts),...
-    'Callback',@selectPort,'FontSize',10);
+HportDropdown = uicontrol(HcommPanel,'Style','popupmenu','Units','normalized','Position',[0.5 0 0.5 1],...
+    'String',availablePorts,'Value',length(availablePorts),'Callback',@selectPort,'FontSize',10);
 
 %% Status Display Elements
 % Time displays
-HtimeLabel = uicontrol('Style','text','Units','normalized','Position',[0.933 0.9 0.066 0.05],...
+HstatusPanel = uipanel(Hfigure,'Position',[.933 .65 .066, .3]);
+HtimeLabel = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0.8333 1 0.1665],...
     'String','elapsedT:','Fontsize',18);
-HtimeValue = uicontrol('Style','text','Units','normalized','Position',[0.933 0.85 0.066 0.05],...
+HtimeValue = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0.667 1 0.1665],...
     'String','0','Fontsize',20);
-HloopLabel = uicontrol('Style','text','Units','normalized','Position',[0.933 0.8 0.066 0.05],...
+HloopLabel = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0.5 1 0.1665],...
     'String','loopT:','Fontsize',20);
-HloopValue = uicontrol('Style','text','Units','normalized','Position',[0.933 0.75 0.066 0.05],...
+HloopValue = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0.333 1 0.1665],...
     'String','0','Fontsize',20);
-HdriveModeLabel = uicontrol('Style','text','Units','normalized','Position',[0.933 0.7 0.066 0.05],...
+HdriveModeLabel = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0.1665 1 0.1665],...
     'String','DriveMode:','Fontsize',16);
-HdriveModeValue = uicontrol('Style','text','Units','normalized','Position',[0.933 0.65 0.066 0.05],...
+HdriveModeValue = uicontrol(HstatusPanel,'Style','text','Units','normalized','Position',[0 0 1 0.1665],...
     'String','0','Fontsize',20);
+
+%% Model Parameters Display Elements
+HmodelMxyPanel = uipanel(Hfigure, 'Position',[0.2 0 0.2 0.05]);
+HMassXYlabel = uicontrol(HmodelMxyPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+    'String','Mxy:','Fontsize',20);
+HbttnDownMxy = uicontrol(HmodelMxyPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
+    'String',['-',num2str(modelIncrements),'kg'],'Callback',@DownMassXY);
+HMassXYvalue = uicontrol(HmodelMxyPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
+    'String','0','Fontsize',15);
+HbttnUpMxy = uicontrol(HmodelMxyPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
+    'String',['+',num2str(modelIncrements),'kg'],'Callback',@UpMassXY);
+
+HmodelMzPanel = uipanel(Hfigure, 'Position',[0.4 0 0.2 0.05]);
+HMassZlabel = uicontrol(HmodelMzPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+    'String','Mz:','Fontsize',20);
+HbttnDownMz = uicontrol(HmodelMzPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
+    'String',['-',num2str(modelIncrements),'kg'],'Callback',@DownMassZ);
+HMassZvalue = uicontrol(HmodelMzPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
+    'String','0','Fontsize',15);
+HbttnUpMz = uicontrol(HmodelMzPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
+    'String',['+',num2str(modelIncrements),'kg'],'Callback',@UpMassZ);
+
+HmodelBxyPanel = uipanel(Hfigure, 'Position',[0.6 0 0.2 0.05]);
+HDampXYlabel = uicontrol(HmodelBxyPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+    'String','Bxy:','Fontsize',20);
+HbttnDownBxy = uicontrol(HmodelBxyPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
+    'String',['-',num2str(modelIncrements),'Ns/m'],'Callback',@DownDampXY);
+HDampXYvalue = uicontrol(HmodelBxyPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
+    'String','0','Fontsize',15);
+HbttnUpBxy = uicontrol(HmodelBxyPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
+    'String',['+',num2str(modelIncrements),'Ns/m'],'Callback',@UpDampXY);
+
+HmodelBzPanel = uipanel(Hfigure, 'Position',[0.8 0 0.2 0.05]);
+HDampZlabel = uicontrol(HmodelBzPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+    'String','Bz:','Fontsize',20);
+HbttnDownBz = uicontrol(HmodelBzPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
+    'String',['-',num2str(modelIncrements),'Ns/m'],'Callback',@DownDampZ);
+HDampZvalue = uicontrol(HmodelBzPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
+    'String','0','Fontsize',15);
+HbttnUpBz = uicontrol(HmodelBzPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
+    'String',['+',num2str(modelIncrements),'Ns/m'],'Callback',@UpDampZ);
 
 %% Joint Position Displays
 % Present Q1, Q2, Q4
@@ -318,7 +360,7 @@ HFzCtsValue = uicontrol('Style','text','Units','normalized','Position',[0.832 0.
 initializeAnimatedLines();
 
 %% ========================================================================
-%  CALLBACK FUNCTIONS
+%  CONTROLLER CALLBACK FUNCTIONS
 %  ========================================================================
     function selectPort(~,~)
         selectedPortIdx = get(HportDropdown,'Value');
@@ -410,6 +452,74 @@ initializeAnimatedLines();
         set(HsQ1Value,'String',num2str(goalQ(1)));
         set(HsQ2Value,'String',num2str(goalQ(2)));
         set(HsQ4Value,'String',num2str(goalQ(3)));
+    end
+
+%% ========================================================================
+%  MODEL PARAMETER CALLBACK FUNCTIONS
+%  ========================================================================
+    
+    function DownMassXY(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HMassXYvalue,'String'));
+            botSerial.SendMassXY(currentVal - modelIncrements);
+        end
+    end
+    
+    function UpMassXY(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HMassXYvalue,'String'));
+            botSerial.SendMassXY(currentVal + modelIncrements);
+        end
+    end
+
+    function DownMassZ(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HMassZvalue,'String'));
+            botSerial.SendMassZ(currentVal - modelIncrements);
+        end
+    end
+    
+    function UpMassZ(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HMassZvalue,'String'));
+            botSerial.SendMassZ(currentVal + modelIncrements);
+        end
+    end
+
+    function DownDampXY(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HDampXYvalue,'String'));
+            botSerial.SendDampingXY(currentVal - modelIncrements);
+        end
+    end
+    
+    function UpDampXY(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HDampXYvalue,'String'));
+            botSerial.SendDampingXY(currentVal + modelIncrements);
+        end
+    end
+
+    function DownDampZ(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HDampZvalue,'String'));
+            botSerial.SendDampingZ(currentVal - modelIncrements);
+        end
+    end
+    
+    function UpDampZ(~,~)
+        testRunning = get(Hfigure,'UserData');
+        if testRunning && fullRobot
+            currentVal = str2double(get(HDampZvalue,'String'));
+            botSerial.SendDampingZ(currentVal + modelIncrements);
+        end
     end
 
 %% ========================================================================
@@ -515,6 +625,10 @@ initializeAnimatedLines();
                 addpoints(models{plotIdx}, 0, 0);
             end
         end
+        set(HMassXYvalue,'String', '-');
+        set(HMassZvalue,'String', '-');
+        set(HDampXYvalue,'String', '-');
+        set(HDampZvalue,'String', '-');
     end
 
 %% ========================================================================
@@ -563,8 +677,10 @@ initializeAnimatedLines();
             modelData.x = botSerial.frameData(32);
             modelData.y = botSerial.frameData(33);
             modelData.z = botSerial.frameData(34);
-            statusData.torqueVal = botSerial.frameData(38);
-            statusData.lTime = botSerial.frameData(39);
+            modelData.Mxy = botSerial.frameData(38);
+            modelData.Mz = botSerial.frameData(39);
+            modelData.Bxy = botSerial.frameData(40);
+            modelData.Bz = botSerial.frameData(41);
         else
             modelData.q1Cts = botSerial.frameData(20);
             modelData.q2Cts = botSerial.frameData(21);
@@ -572,11 +688,11 @@ initializeAnimatedLines();
             modelData.gQ1cts = botSerial.frameData(26);
             modelData.gQ2cts = botSerial.frameData(27);
             modelData.gQ4cts = botSerial.frameData(28);
-            statusData.torqueVal = botSerial.frameData(32);
-            statusData.lTime = botSerial.frameData(33);
         end
         
         statusData.elapsedTime = botSerial.frameData(1);
+        statusData.torqueVal = botSerial.frameData(end-1);
+        statusData.lTime = botSerial.frameData(end);
     end
 
     function [prevX, prevY, prevZ, prevQ1, prevQ2, prevQ4] = updatePreviousValues(robotData)
@@ -680,6 +796,10 @@ initializeAnimatedLines();
             set(HFxCtsValue,'String',num2str(modelData.forceXcts));
             set(HFyCtsValue,'String',num2str(modelData.forceYcts));
             set(HFzCtsValue,'String',num2str(modelData.forceZcts));
+            set(HMassXYvalue,'String',num2str(modelData.Mxy, '%.1f'));
+            set(HMassZvalue,'String',num2str(modelData.Mz, '%.1f'));
+            set(HDampXYvalue,'String',num2str(modelData.Bxy, '%.1f'));
+            set(HDampZvalue,'String',num2str(modelData.Bz, '%.1f'));
         else
             set(HgoalQ1ctsValue,'String',num2str(modelData.gQ1cts));
             set(HgoalQ2ctsValue,'String',num2str(modelData.gQ2cts));

@@ -166,6 +166,6 @@ void ForceSensor::CalculateGlobalForces(float *q) {
   // q[0] = q1, q[1] = q2, q[2] = q4
   ReadForceSensor();
   globalForcesXYZ_M[0] = filtForcesXYZ_M[0] * ( cos(q[0] + q[2])) + filtForcesXYZ_M[1] * (sin(q[0] + q[2]));
-  globalForcesXYZ_M[1] = filtForcesXYZ_M[0] * (cos(q[0] + q[2])) + filtForcesXYZ_M[1] * (-sin(q[0] + q[2]));
+  globalForcesXYZ_M[1] = filtForcesXYZ_M[0] * (sin(q[0] + q[2])) + filtForcesXYZ_M[1] * (-cos(q[0] + q[2]));
   globalForcesXYZ_M[2] = -filtForcesXYZ_M[2];
 }

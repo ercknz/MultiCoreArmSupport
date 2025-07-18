@@ -14,7 +14,7 @@ classdef armSupportRobot < handle
         dt = 0.008
         port
         rawBytes
-        frameData = nan(1,39)
+        frameData = nan(1,44)
         
         configHeader = uint8([150, 0, 69, 8])
         modHeader = uint8([150, 10, 10, 96])
@@ -23,7 +23,7 @@ classdef armSupportRobot < handle
         txPacketLen = 60
         
         rxHeader = uint8([170, 8, 69, 0])
-        rxPacketLen = 150
+        rxPacketLen = 170
     end
     
     properties (Access = private)
@@ -129,16 +129,23 @@ classdef armSupportRobot < handle
                 obj.frameData(36) = double(typecast(uint8(obj.rawBytes(135:138)),'int32'));
                 obj.frameData(37) = double(typecast(uint8(obj.rawBytes(139:142)),'int32'));
                 
+                % Model Mass XY and Z
+                obj.frameData(38) = double(typecast(uint8(obj.rawBytes(145:148)),'int32'));
+                obj.frameData(39) = double(typecast(uint8(obj.rawBytes(149:152)),'int32'));
+                % Model Damping XY and Z
+                obj.frameData(40) = double(typecast(uint8(obj.rawBytes(153:156)),'int32'));
+                obj.frameData(41) = double(typecast(uint8(obj.rawBytes(157:160)),'int32'));
+
                 % Torque Mode
-                obj.frameData(38) = double(obj.rawBytes(144));
+                obj.frameData(end-1) = double(obj.rawBytes(end-6));
                 % Loop Time
-                obj.frameData(39) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                obj.frameData(end) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./1000;
                 obj.frameData(20:22) = obj.frameData(20:22)./1000;
-                obj.frameData(26:37) = obj.frameData(26:37)./1000;
-                obj.frameData(39) = obj.frameData(39)*0.001;
+                obj.frameData(26:41) = obj.frameData(26:41)./1000;
+                obj.frameData(end) = obj.frameData(end)*0.001;
             end
         end
 
@@ -157,7 +164,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(1);
-            writePacket(6:9) = typecast(int32(MassXY*1000),'uint8');
+            writePacket(8:11) = typecast(int32(MassXY*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -170,7 +177,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(2);
-            writePacket(10:13) = typecast(int32(MassZ*1000),'uint8');
+            writePacket(12:15) = typecast(int32(MassZ*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -183,7 +190,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(4);
-            writePacket(14:17) = typecast(int32(DampingXY*1000),'uint8');
+            writePacket(16:19) = typecast(int32(DampingXY*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
@@ -196,7 +203,7 @@ classdef armSupportRobot < handle
             writePacket = uint8(zeros(1,obj.txPacketLen));
             writePacket(1:4) = obj.modHeader;
             writePacket(5) = uint8(8);
-            writePacket(18:21) = typecast(int32(DampingZ*1000),'uint8');
+            writePacket(20:23) = typecast(int32(DampingZ*1000),'uint8');
             checkSum = sum(writePacket);
             writePacket(end-1) = uint8(floor(checkSum/256));
             writePacket(end) = uint8(mod(checkSum,256));
