@@ -141,13 +141,14 @@ void ForceSensor::CalibrateSensor(){
     rawTorquesXYZ_M[2] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
     // Filter Values
-    FilterFT();
+    ExpoFilterFT();
+    // LowFilterFT();
   }
 
   /* ---------------------------------------------------------------------------------------/
   / Force Sensor Filter --------------------------------------------------------------------/
   /----------------------------------------------------------------------------------------*/
-  void ForceSensor::FilterFT(){
+  void ForceSensor::ExpoFilterFT(){
     for (int i = 0; i < 3; i++){
       // Move data from last frame
       prevFiltForcesXYZ_M[i] = filtForcesXYZ_M[i];
@@ -156,6 +157,37 @@ void ForceSensor::CalibrateSensor(){
       filtForcesXYZ_M[i] = FilterWeight_M * (rawForcesXYZ_M[i] - _xyzCALIBRATION[i]) + (1.0 - FilterWeight_M) * prevFiltForcesXYZ_M[i];
       filtTorquesXYZ_M[i] = FilterWeight_M * (rawTorquesXYZ_M[i] - _xyzCALIBRATION[i + 3]) + (1.0 - FilterWeight_M) * prevFiltTorquesXYZ_M[i];
     }
+  }
+
+  void ForceSensor::LowFilterFT(){
+    // 2nd Order Lowpass Butterworth filter with 15Hz cutoff frequency
+    // Shift Previous Values
+    Fx_in[2] = Fx_in[1];
+    Fx_in[1] = Fx_in[0];
+    Fx_in[0] = rawForcesXYZ_M[0];
+
+    Fy_in[2] = Fy_in[1];
+    Fy_in[1] = Fy_in[0];
+    Fy_in[0] = rawForcesXYZ_M[1];
+
+    Fz_in[2] = Fz_in[1];
+    Fz_in[1] = Fz_in[0];
+    Fz_in[0] = rawForcesXYZ_M[2];
+
+    // Shift Output Values
+    Fx_out[1] = Fx_out[0];
+    Fx_out[0] = filtForcesXYZ_M[0];
+
+    Fy_out[1] = Fy_out[0];
+    Fy_out[0] = filtForcesXYZ_M[1];
+
+    Fz_out[1] = Fz_out[0];
+    Fz_out[0] = filtForcesXYZ_M[2];
+
+    // Calculate New Output Values
+    filtForcesXYZ_M[0] = _LP_B[0] * Fx_in[0] + _LP_B[1] * Fx_in[1] + _LP_B[2] * Fx_in[2] - _LP_A[1] * Fx_out[0] - _LP_A[2] * Fx_out[1];
+    filtForcesXYZ_M[1] = _LP_B[0] * Fy_in[0] + _LP_B[1] * Fy_in[1] + _LP_B[2] * Fy_in[2] - _LP_A[1] * Fy_out[0] - _LP_A[2] * Fy_out[1];
+    filtForcesXYZ_M[2] = _LP_B[0] * Fz_in[0] + _LP_B[1] * Fz_in[1] + _LP_B[2] * Fz_in[2] - _LP_A[1] * Fz_out[0] - _LP_A[2] * Fz_out[1];
   }
 
   /* ---------------------------------------------------------------------------------------/

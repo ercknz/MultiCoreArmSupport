@@ -28,7 +28,8 @@ class ForceSensor {
     
   protected:
    
-    void  FilterFT();
+    void  ExpoFilterFT();
+    void  LowFilterFT();
 
     float       _xyzCALIBRATION[6] = {0.0f}; // [fx, fy, fz, tx, ty, tz]
     int16_t     _SAMPLECOUNTER;
@@ -55,6 +56,8 @@ class ForceSensor {
     const float _ATXYZ_M, _BTXYZ_M; //Const Coefficients
 
     float FilterWeight_M;
+    const float _LP_A[3] = {1.0000f, -1.3490f, 0.5140f};    // 15Hz Low Pass Filter A Coefficients
+    const float _LP_B[3] = {0.0413f,  0.0825f, 0.0413f};    // 15Hz Low Pass Filter B Coefficients
 
     // Force Torque Counts Array: [Fx, Fy, Fz, Tx, Ty, Tz]
     uint16_t ftxyzRawCts_M[6]     = {0};
@@ -66,6 +69,18 @@ class ForceSensor {
     float prevFiltTorquesXYZ_M[3] = {0.0f};
     float globalForcesXYZ_M[3]    = {0.0f};
     float globalTorquesXYZ_M[3]   = {0.0f};
+    float Fx_in[3] = {0.0f};
+    float Fy_in[3] = {0.0f};
+    float Fz_in[3] = {0.0f};
+    // float Tx_in[3] = {0.0f};
+    // float Ty_in[3] = {0.0f};
+    // float Tz_in[3] = {0.0f};
+    float Fx_out[2] = {0.0f};
+    float Fy_out[2] = {0.0f};
+    float Fz_out[2] = {0.0f};
+    // float Tx_out[2] = {0.0f};
+    // float Ty_out[2] = {0.0f};
+    // float Tz_out[2] = {0.0f};
 
 };
 
