@@ -66,7 +66,8 @@ void AdmittanceModel::SetPosition(float *newXYZ) {
   float clampedZ = newXYZ[2];
   if (clampedZ >  _Z_LIMIT) clampedZ =  _Z_LIMIT;
   if (clampedZ < -_Z_LIMIT) clampedZ = -_Z_LIMIT;
-  float outerRLimit = _A1A2 + _H_OF_L2 + sqrt(pow(ASR::L1_LINK, 2) - pow(clampedZ, 2));
+  float L1_XY = sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2] - ASR::A3_LINK, 2));
+  float outerRLimit = _A1A2 + _H_OF_L2 + L1_XY;
   xyzGoal_M[2] = clampedZ;
   float Rxy = sqrt(pow(newXYZ[0],2) + pow(newXYZ[1],2));
   float alpha   = atan2(newXYZ[1], newXYZ[0]);
@@ -85,6 +86,8 @@ void AdmittanceModel::SetPosition(float *newXYZ) {
   } 
   xyzGoal_M[0] = newXYZ[0];
   xyzGoal_M[1] = newXYZ[1];
+  if (xyzGoal_M[0] < _MODEL_X_LIMIT) xyzGoal_M[0] = _MODEL_X_LIMIT;
+  if (xyzGoal_M[1] > _MODEL_Y_LIMIT) xyzGoal_M[1] = _MODEL_Y_LIMIT;
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -127,20 +130,27 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
     xyzGoal_M[2] = -_Z_LIMIT;
     xyzDotGoal_M[2] = 0.0f;
   }
-  float outerRLimit = _A1A2 + _H_OF_L2 + sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2], 2));
+  float L1_XY = sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2] - ASR::A3_LINK, 2));
+  float outerRLimit = _A1A2 + _H_OF_L2 + L1_XY;
   float Rxy = sqrt(pow(xyzGoal_M[0],2) + pow(xyzGoal_M[1],2));
   float alpha   = atan2(xyzGoal_M[1], xyzGoal_M[0]);
   if (alpha < 0.0f) alpha += 2 * PI;
   if (Rxy < _INNER_R_LIMIT) {
-    Rxy           = _INNER_R_LIMIT;
     xyzGoal_M[0]  = _INNER_R_LIMIT * cos(alpha);
     xyzGoal_M[1]  = _INNER_R_LIMIT * sin(alpha);
   }
   if (Rxy > outerRLimit) {
-    Rxy           = outerRLimit;
     xyzGoal_M[0]  = outerRLimit * cos(alpha);
     xyzGoal_M[1]  = outerRLimit * sin(alpha);
   } 
+  if (xyzGoal_M[0] < _MODEL_X_LIMIT) {
+    xyzGoal_M[0] = _MODEL_X_LIMIT;
+    xyzDotGoal_M[0] = 0.0f;
+  }
+  if (xyzGoal_M[1] > _MODEL_Y_LIMIT) {
+    xyzGoal_M[1] = _MODEL_Y_LIMIT;
+    xyzDotGoal_M[1] = 0.0f;
+  }
 }
 
 /* ---------------------------------------------------------------------------------------/

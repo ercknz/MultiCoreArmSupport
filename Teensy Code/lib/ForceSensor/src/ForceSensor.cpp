@@ -141,8 +141,8 @@ void ForceSensor::CalibrateSensor(){
     rawTorquesXYZ_M[2] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
     // Filter Values
-    ExpoFilterFT();
-    // LowFilterFT();
+    // ExpoFilterFT();
+    LowFilterFT();
   }
 
   /* ---------------------------------------------------------------------------------------/

@@ -195,45 +195,29 @@ HdriveModeValue = uicontrol(HstatusPanel,'Style','text','Units','normalized','Po
     'String','0','Fontsize',20);
 
 %% Model Parameters Display Elements
-HmodelMxyPanel = uipanel(Hfigure, 'Position',[0.2 0 0.2 0.05]);
-HMassXYlabel = uicontrol(HmodelMxyPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+HmodelMxyPanel = uipanel(Hfigure, 'Position',[0.6 0 0.1 0.05]);
+HMassXYlabel = uicontrol(HmodelMxyPanel,'Style','text','Units','normalized','Position',[0 0 0.4 1],...
     'String','Mxy:','Fontsize',20);
-HbttnDownMxy = uicontrol(HmodelMxyPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
-    'String',['-',num2str(modelIncrements),'kg'],'Callback',@DownMassXY);
-HMassXYvalue = uicontrol(HmodelMxyPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
-    'String','0','Fontsize',15);
-HbttnUpMxy = uicontrol(HmodelMxyPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
-    'String',['+',num2str(modelIncrements),'kg'],'Callback',@UpMassXY);
+HMassXYvalue = uicontrol(HmodelMxyPanel,'Style','edit','Units','normalized','Position',[0.4 0 0.6 1],...
+    'String','0','Fontsize',15, 'Callback',@SendMassXY);
 
-HmodelMzPanel = uipanel(Hfigure, 'Position',[0.4 0 0.2 0.05]);
-HMassZlabel = uicontrol(HmodelMzPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+HmodelMzPanel = uipanel(Hfigure, 'Position',[0.7 0 0.1 0.05]);
+HMassZlabel = uicontrol(HmodelMzPanel,'Style','text','Units','normalized','Position',[0 0 0.4 1],...
     'String','Mz:','Fontsize',20);
-HbttnDownMz = uicontrol(HmodelMzPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
-    'String',['-',num2str(modelIncrements),'kg'],'Callback',@DownMassZ);
-HMassZvalue = uicontrol(HmodelMzPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
-    'String','0','Fontsize',15);
-HbttnUpMz = uicontrol(HmodelMzPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
-    'String',['+',num2str(modelIncrements),'kg'],'Callback',@UpMassZ);
+HMassZvalue = uicontrol(HmodelMzPanel,'Style','edit','Units','normalized','Position',[0.4 0 0.6 1],...
+    'String','0','Fontsize',15,'Callback',@SendMassZ);
 
-HmodelBxyPanel = uipanel(Hfigure, 'Position',[0.6 0 0.2 0.05]);
-HDampXYlabel = uicontrol(HmodelBxyPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+HmodelBxyPanel = uipanel(Hfigure, 'Position',[0.8 0 0.1 0.05]);
+HDampXYlabel = uicontrol(HmodelBxyPanel,'Style','text','Units','normalized','Position',[0 0 0.4 1],...
     'String','Bxy:','Fontsize',20);
-HbttnDownBxy = uicontrol(HmodelBxyPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
-    'String',['-',num2str(modelIncrements),'Ns/m'],'Callback',@DownDampXY);
-HDampXYvalue = uicontrol(HmodelBxyPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
-    'String','0','Fontsize',15);
-HbttnUpBxy = uicontrol(HmodelBxyPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
-    'String',['+',num2str(modelIncrements),'Ns/m'],'Callback',@UpDampXY);
+HDampXYvalue = uicontrol(HmodelBxyPanel,'Style','edit','Units','normalized','Position',[0.4 0 0.6 1],...
+    'String','0','Fontsize',15,'Callback',@SendDampingXY);
 
-HmodelBzPanel = uipanel(Hfigure, 'Position',[0.8 0 0.2 0.05]);
-HDampZlabel = uicontrol(HmodelBzPanel,'Style','text','Units','normalized','Position',[0 0 0.25 1],...
+HmodelBzPanel = uipanel(Hfigure, 'Position',[0.9 0 0.1 0.05]);
+HDampZlabel = uicontrol(HmodelBzPanel,'Style','text','Units','normalized','Position',[0 0 0.4 1],...
     'String','Bz:','Fontsize',20);
-HbttnDownBz = uicontrol(HmodelBzPanel,'Style','pushbutton','Units','normalized','Position',[0.25 0 0.25 1],...
-    'String',['-',num2str(modelIncrements),'Ns/m'],'Callback',@DownDampZ);
-HDampZvalue = uicontrol(HmodelBzPanel,'Style','text','Units','normalized','Position',[0.5 0 0.25 1],...
-    'String','0','Fontsize',15);
-HbttnUpBz = uicontrol(HmodelBzPanel,'Style','pushbutton','Units','normalized','Position',[0.75 0 0.25 1],...
-    'String',['+',num2str(modelIncrements),'Ns/m'],'Callback',@UpDampZ);
+HDampZvalue = uicontrol(HmodelBzPanel,'Style','edit','Units','normalized','Position',[0.4 0 0.6 1],...
+    'String','0','Fontsize',15,'Callback',@SendDampingZ);
 
 %% Joint Position Displays
 % Present Q1, Q2, Q4
@@ -424,101 +408,74 @@ initializeAnimatedLines();
     end
 
     function sendGoal(~,~)
-        test = randi(5);
-        while test == idx
-            test = randi(5);
+        testRunning = get(Hfigure,'UserData');
+        if testRunning
+            if fullRobot
+                currentX = str2double(get(HRxValue,'String'));
+                currentY = str2double(get(HRyValue,'String'));
+                currentZ = str2double(get(HRzValue,'String'));
+                botSerial.SendNewModelGoals(currentX, currentY, currentZ);
+            else
+                test = randi(5);
+                while test == idx
+                    test = randi(5);
+                end
+                idx = test;
+                botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
+            end
+
+            % Update text displays
+            set(HSxValue,'String',num2str(testGoals(idx,1)));
+            set(HSyValue,'String',num2str(testGoals(idx,2)));
+            set(HSzValue,'String',num2str(testGoals(idx,3)));
+
+            % Update goal end effector position
+            updateGoalEndEffector(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
+
+            % Calculate and update goal robot configuration
+            goalQ = iKine(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
+            updateGoalSettingDisplay(goalQ);
+
+            % Update goal joint text displays
+            set(HsQ1Value,'String',num2str(goalQ(1)));
+            set(HsQ2Value,'String',num2str(goalQ(2)));
+            set(HsQ4Value,'String',num2str(goalQ(3)));
         end
-        idx = test;
-        
-        if fullRobot
-            botSerial.SendNewModelGoals(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
-        else
-            botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
-        end
-        
-        % Update text displays
-        set(HSxValue,'String',num2str(testGoals(idx,1)));
-        set(HSyValue,'String',num2str(testGoals(idx,2)));
-        set(HSzValue,'String',num2str(testGoals(idx,3)));
-        
-        % Update goal end effector position
-        updateGoalEndEffector(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
-        
-        % Calculate and update goal robot configuration
-        goalQ = iKine(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3));
-        updateGoalSettingDisplay(goalQ);
-        
-        % Update goal joint text displays
-        set(HsQ1Value,'String',num2str(goalQ(1)));
-        set(HsQ2Value,'String',num2str(goalQ(2)));
-        set(HsQ4Value,'String',num2str(goalQ(3)));
     end
 
 %% ========================================================================
 %  MODEL PARAMETER CALLBACK FUNCTIONS
 %  ========================================================================
     
-    function DownMassXY(~,~)
+    function SendMassXY(~,~)
         testRunning = get(Hfigure,'UserData');
         if testRunning && fullRobot
             currentVal = str2double(get(HMassXYvalue,'String'));
-            botSerial.SendMassXY(currentVal - modelIncrements);
-        end
-    end
-    
-    function UpMassXY(~,~)
-        testRunning = get(Hfigure,'UserData');
-        if testRunning && fullRobot
-            currentVal = str2double(get(HMassXYvalue,'String'));
-            botSerial.SendMassXY(currentVal + modelIncrements);
+            botSerial.SendMassXY(currentVal);
         end
     end
 
-    function DownMassZ(~,~)
+    function SendMassZ(~,~)
         testRunning = get(Hfigure,'UserData');
         if testRunning && fullRobot
             currentVal = str2double(get(HMassZvalue,'String'));
-            botSerial.SendMassZ(currentVal - modelIncrements);
-        end
-    end
-    
-    function UpMassZ(~,~)
-        testRunning = get(Hfigure,'UserData');
-        if testRunning && fullRobot
-            currentVal = str2double(get(HMassZvalue,'String'));
-            botSerial.SendMassZ(currentVal + modelIncrements);
+            botSerial.SendMassZ(currentVal);
         end
     end
 
-    function DownDampXY(~,~)
+    function SendDampingXY(~,~)
         testRunning = get(Hfigure,'UserData');
         if testRunning && fullRobot
             currentVal = str2double(get(HDampXYvalue,'String'));
-            botSerial.SendDampingXY(currentVal - modelIncrements);
-        end
-    end
-    
-    function UpDampXY(~,~)
-        testRunning = get(Hfigure,'UserData');
-        if testRunning && fullRobot
-            currentVal = str2double(get(HDampXYvalue,'String'));
-            botSerial.SendDampingXY(currentVal + modelIncrements);
+            botSerial.SendDampingXY(currentVal);
         end
     end
 
-    function DownDampZ(~,~)
+    function SendDampingZ(~,~)
         testRunning = get(Hfigure,'UserData');
         if testRunning && fullRobot
             currentVal = str2double(get(HDampZvalue,'String'));
-            botSerial.SendDampingZ(currentVal - modelIncrements);
-        end
-    end
-    
-    function UpDampZ(~,~)
-        testRunning = get(Hfigure,'UserData');
-        if testRunning && fullRobot
-            currentVal = str2double(get(HDampZvalue,'String'));
-            botSerial.SendDampingZ(currentVal + modelIncrements);
+            botSerial.SendDampingZ(currentVal);
         end
     end
 

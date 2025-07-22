@@ -34,6 +34,8 @@ class AdmittanceModel {
     const float _H_OF_L2;      
     const float _A1A2;
     const float _INNER_R_LIMIT;
+    const float _MODEL_X_LIMIT = 0.0f;
+    const float _MODEL_Y_LIMIT = 0.5f;
 
     float mass_M[3];        // [x, y, z]
     float damping_M[3];     // [x, y, z]
