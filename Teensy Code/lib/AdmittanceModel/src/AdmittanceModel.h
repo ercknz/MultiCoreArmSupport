@@ -30,12 +30,14 @@ class AdmittanceModel {
     const float _GRAVITY;
     const float _DELTA_T;
     const float _ELEVATION_CENTER;
-    const float _Z_LIMIT;
+    const float _MODEL_Z_LIMIT;
     const float _H_OF_L2;      
     const float _A1A2;
     const float _INNER_R_LIMIT;
     const float _MODEL_X_LIMIT = 0.0f;
     const float _MODEL_Y_LIMIT = 0.5f;
+    const float _VEL_XYZ_LIMIT = 1.0f;
+    const float _MAX_STEP;
 
     float mass_M[3];        // [x, y, z]
     float damping_M[3];     // [x, y, z]
