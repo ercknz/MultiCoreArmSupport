@@ -130,7 +130,7 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
     xyzGoal_M[2] = -_Z_LIMIT;
     xyzDotGoal_M[2] = 0.0f;
   }
-  float L1_XY = sqrt(pow(ASR::L1_LINK, 2) - pow(xyzGoal_M[2] - ASR::A3_LINK, 2));
+  float L1_XY = sqrt(pow(ASR::L1_LINK, 2) - pow((xyzGoal_M[2] - ASR::A3_LINK), 2));
   float outerRLimit = _A1A2 + _H_OF_L2 + L1_XY;
   float Rxy = sqrt(pow(xyzGoal_M[0],2) + pow(xyzGoal_M[1],2));
   float alpha   = atan2(xyzGoal_M[1], xyzGoal_M[0]);

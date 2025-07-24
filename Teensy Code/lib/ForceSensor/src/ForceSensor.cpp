@@ -141,8 +141,8 @@ void ForceSensor::CalibrateSensor(){
     rawTorquesXYZ_M[2] = _ATXYZ_M - _BTXYZ_M * ftxyzRawCts_M[5];
 
     // Filter Values
-    // ExpoFilterFT();
-    LowFilterFT();
+    ExpoFilterFT();
+    // LowFilterFT();
   }
 
   /* ---------------------------------------------------------------------------------------/
@@ -164,15 +164,15 @@ void ForceSensor::CalibrateSensor(){
     // Shift Previous Values
     Fx_in[2] = Fx_in[1];
     Fx_in[1] = Fx_in[0];
-    Fx_in[0] = rawForcesXYZ_M[0];
+    Fx_in[0] = rawForcesXYZ_M[0] - _xyzCALIBRATION[0];
 
     Fy_in[2] = Fy_in[1];
     Fy_in[1] = Fy_in[0];
-    Fy_in[0] = rawForcesXYZ_M[1];
+    Fy_in[0] = rawForcesXYZ_M[1] - _xyzCALIBRATION[1];
 
     Fz_in[2] = Fz_in[1];
     Fz_in[1] = Fz_in[0];
-    Fz_in[0] = rawForcesXYZ_M[2];
+    Fz_in[0] = rawForcesXYZ_M[2] - _xyzCALIBRATION[2];
 
     // Shift Output Values
     Fx_out[1] = Fx_out[0];

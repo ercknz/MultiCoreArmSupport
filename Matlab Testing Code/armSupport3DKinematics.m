@@ -18,14 +18,16 @@ SHDR_LIMIT = [0,270];
 ELVN_LIMIT = [-45,45];
 ELBW_LIMIT = [atand(offset/L2),180];
 
-modelIncrements = 1;
-
 %% Test Goals and Communication Setup
 testGoals = [0.750,  0.300,  0.250;
              0.750, -0.300,  0.250;
              0.550,  0.000,  0.000;
+             0.650,  0.000,  0.000;
              0.650,  0.300, -0.200;
-             0.650, -0.300, -0.200];
+             0.650, -0.300, -0.200;
+             0.750,  0.000,  0.000;
+             0.850,  0.000,  0.000;
+             0.950,  0.000,  0.000;];
 idx = 1;
 velocityXYZ = 0.5;
 
@@ -416,9 +418,9 @@ initializeAnimatedLines();
                 currentZ = str2double(get(HRzValue,'String'));
                 botSerial.SendNewModelGoals(currentX, currentY, currentZ);
             else
-                test = randi(5);
+                test = randi(9);
                 while test == idx
-                    test = randi(5);
+                    test = randi(9);
                 end
                 idx = test;
                 botSerial.SendGoal(testGoals(idx,1), testGoals(idx,2), testGoals(idx,3), velocityXYZ, velocityXYZ, velocityXYZ);
