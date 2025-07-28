@@ -11,7 +11,7 @@
 
 class RobotControl {
   public:
-          RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float Offset);
+          RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float A4);
           
     void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
@@ -40,11 +40,12 @@ class RobotControl {
   protected:
     void  fKine();
     void  iKine(float *goalXYZ, float *goalXYZDot);
+    void  iKineOptimized(float *goalXYZ, float *goalXYZDot);
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
     const float  _A1A2,      _L1,        _L2,         _A3;
-    const double _OFFSET,    _PHI,       _H_OF_L2;
+    const double _A4,    _PHI,       _H_OF_L2;
     const double _Q1_MIN,    _Q1_MAX;
     const double _Q2_LIMIT;
     const double _Q4_MIN,    _Q4_MAX;

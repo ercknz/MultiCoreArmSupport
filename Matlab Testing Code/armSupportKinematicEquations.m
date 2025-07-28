@@ -38,19 +38,19 @@ matrixTi = @(alpha,a,theta,d)   [cos(theta),            -sin(theta),            
 % matrix is made up of rotations about X times the rotate about Z and the
 % position vector of the translate from the last frame.
 T01 = @(q1) matrixT(rotateZ(q1),[0,0,0]');
-T12 = @(q2,A1) matrixT(rotateX(sym(pi/2))*rotateZ(q2),[A1,0,0]');
+T12 = @(q2,A1) matrixT(rotateX(sym(pi)/2)*rotateZ(q2),[A1,0,0]');
 T23 = @(q2,L1) matrixT(rotateZ(-q2),[L1,0,0]');
-T34 = @(q4,A2) matrixT(rotateX(sym(-pi/2))*rotateZ(q4),[A2,0,0]');
+T34 = @(q4,A2) matrixT(rotateX(-sym(pi)/2)*rotateZ(q4),[A2,0,0]');
 T45 = @(A3) matrixT(rotateZ(0),[0,0,A3]');
 T56 = @(A4) matrixT(rotateZ(0),[0,-A4,0]');
 T67 = @(L2) matrixT(rotateZ(0),[L2,0,0]');
 
 T02 = @(q1,q2,A1) T01(q1)*T12(q2,A1);
 T03 = @(q1,q2,A1,L1) T01(q1)*T12(q2,A1)*T23(q2,L1);
-T04 = @(q1,q2,A1,L1,q4,A2) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2);
-T05 = @(q1,q2,A1,L1,q4,A2,A3) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3);
-T06 = @(q1,q2,A1,L1,q4,A2,A3,A4) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3)*T56(A4);
-T07 = @(q1,q2,A1,L1,q4,A2,A3,A4,L2) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3)*T56(A4)*T67(L2);
+T04 = @(q1,q2,q4,A1,A2,L1) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2);
+T05 = @(q1,q2,q4,A1,A2,A3,L1) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3);
+T06 = @(q1,q2,q4,A1,A2,A3,A4,L1) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3)*T56(A4);
+T07 = @(q1,q2,q4,A1,A2,A3,A4,L1,L2) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45(A3)*T56(A4)*T67(L2);
 
 %% Forward equations
 % Transformation matrix from base frame to end-effector. Matrix can be
@@ -58,7 +58,7 @@ T07 = @(q1,q2,A1,L1,q4,A2,A3,A4,L2) T01(q1)*T12(q2,A1)*T23(q2,L1)*T34(q4,A2)*T45
 % end-effector. S is the sliding vector of the end-effector. A is the
 % approach vector of the end-effector.
 syms q1 q2 q4 L1 L2 A1 A2 A3 A4 real
-output = T07(q1,q2,A1,L1,q4,A2,A3,A4,L2)
+output = T07(q1,q2,q4,A1,A2,A3,A4,L1,L2)
 n = simplify(output(1:3,1))
 s = simplify(output(1:3,2))
 a = simplify(output(1:3,3))
@@ -69,7 +69,7 @@ p = simplify(output(1:3,4))
 % base frame. 
 Ti = [output(1:3,1:3)',[-n'*p,-s'*p,-a'*p]';0,0,0,1]
 
-output2 = output*matrixT(rotateX(pi),[0,0,0]')
+output2 = output*matrixT(rotateX(sym(pi)),[0,0,0]')
 syms x y z real
 R = simplify(Ti(1:3,1:3))*[x,-y,-z]'
 R2 = simplify(output2(1:3,1:3))*[x,y,z]'

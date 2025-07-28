@@ -21,14 +21,14 @@
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Constructor ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl::RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float Offset)
+RobotControl::RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float A4)
   :_A1A2{A1 + A2},
   _L1{L1},
   _L2{L2},
   _A3{A3},
-  _OFFSET{Offset},
-  _PHI{atan(Offset / L2)},
-  _H_OF_L2{sqrt(pow(Offset, 2) + pow(L2, 2))},
+  _A4{A4},
+  _PHI{atan(A4 / L2)},
+  _H_OF_L2{sqrt(pow(A4, 2) + pow(L2, 2))},
   _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
   _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
   _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO))},
@@ -130,12 +130,24 @@ void RobotControl::ReadRobot(dynamixel::GroupSyncRead &syncReadPacket){
 
 void RobotControl::WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
   iKine(xyz, xyzDot);
+  // iKineOptimized(xyz, xyzDot);
   int returnInt = WriteToMotors(addParamResult, syncWritePacket);
 }
 
 /* -----------------------------------------------------------------------------/
 / Arm Support Inverse Kinematics Member function -------------------------------/
 /------------------------------------------------------------------------------*/
+void RobotControl::iKineOptimized(float *goalXYZ, float *goalXYZDot) {
+  const int MAX_ITERATIONS = 50;
+  const float lambda = 0.01f;
+  const float threshold = 0.001f;
+  
+  for (int i = 0; i < MAX_ITERATIONS; i++){
+
+  }
+
+}
+
 void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   /*  NOTE:
               xyz_M[3] = {x, y, z}
@@ -159,8 +171,8 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   if ((abs(xyz_M[0]) < 0.001) && (abs(xyz_M[1]) < 0.001)) {
     q_M[0] = qPres_M[0];
     q_M[2] = _Q4_MAX;
-    xyz_M[0] = _A1A2 * cos(q_M[0]) + _L1 * cos(q_M[0]) * cos(q_M[1]) + _OFFSET * sin(q_M[0] + q_M[2]) + _L2 * cos(q_M[0] + q_M[2]);
-    xyz_M[1] = _A1A2 * sin(q_M[0]) + _L1 * sin(q_M[0]) * cos(q_M[1]) - _OFFSET * cos(q_M[0] + q_M[2]) + _L2 * sin(q_M[0] + q_M[2]);
+    xyz_M[0] = _A1A2 * cos(q_M[0]) + _L1 * cos(q_M[0]) * cos(q_M[1]) + _A4 * sin(q_M[0] + q_M[2]) + _L2 * cos(q_M[0] + q_M[2]);
+    xyz_M[1] = _A1A2 * sin(q_M[0]) + _L1 * sin(q_M[0]) * cos(q_M[1]) - _A4 * cos(q_M[0] + q_M[2]) + _L2 * sin(q_M[0] + q_M[2]);
   }
 
   /* R and Alpha */
@@ -220,17 +232,17 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
 /------------------------------------------------------------------------------*/
 void  RobotControl::fKine() {
   /* Calculates the Taskspace Position */
-  xyzPres_M[0] = _A1A2 * cos(qPres_M[0]) + _L1 * cos(qPres_M[0]) * cos(qPres_M[1]) + _OFFSET * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
-  xyzPres_M[1] = _A1A2 * sin(qPres_M[0]) + _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) - _OFFSET * cos(qPres_M[0] + qPres_M[2]) + _L2 * sin(qPres_M[0] + qPres_M[2]);
+  xyzPres_M[0] = _A1A2 * cos(qPres_M[0]) + _L1 * cos(qPres_M[0]) * cos(qPres_M[1]) + _A4 * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
+  xyzPres_M[1] = _A1A2 * sin(qPres_M[0]) + _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) - _A4 * cos(qPres_M[0] + qPres_M[2]) + _L2 * sin(qPres_M[0] + qPres_M[2]);
   xyzPres_M[2] =   _L1 * sin(qPres_M[1]) + _A3;
 
   /* Calculates Jacobian Matrix */
-  J_M[0][0] = - _A1A2   * sin(qPres_M[0]) - _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) + _OFFSET * cos(qPres_M[0] + qPres_M[2]) - _L2 * sin(qPres_M[0] + qPres_M[2]);
+  J_M[0][0] = - _A1A2   * sin(qPres_M[0]) - _L1 * sin(qPres_M[0]) * cos(qPres_M[1]) + _A4 * cos(qPres_M[0] + qPres_M[2]) - _L2 * sin(qPres_M[0] + qPres_M[2]);
   J_M[0][1] = - _L1     * cos(qPres_M[0]) * sin(qPres_M[1]);
-  J_M[0][2] =   _OFFSET * cos(qPres_M[0] + qPres_M[2]) - _L2 * sin(qPres_M[0] + qPres_M[2]);
-  J_M[1][0] =   _A1A2   * cos(qPres_M[0]) + _L1 * cos(qPres_M[0]) * cos(qPres_M[1]) + _OFFSET * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
+  J_M[0][2] =   _A4 * cos(qPres_M[0] + qPres_M[2]) - _L2 * sin(qPres_M[0] + qPres_M[2]);
+  J_M[1][0] =   _A1A2   * cos(qPres_M[0]) + _L1 * cos(qPres_M[0]) * cos(qPres_M[1]) + _A4 * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
   J_M[1][1] = - _L1     * sin(qPres_M[0]) * sin(qPres_M[1]);
-  J_M[1][2] =   _OFFSET * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
+  J_M[1][2] =   _A4 * sin(qPres_M[0] + qPres_M[2]) + _L2 * cos(qPres_M[0] + qPres_M[2]);
   J_M[2][1] =   _L1     * cos(qPres_M[1]);  // J31 = J33 = 0.0
 
   /* Calcaultes Taskspace Velociies */

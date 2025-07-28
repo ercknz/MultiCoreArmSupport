@@ -85,7 +85,7 @@ const float L1_LINK     = 0.419;      // length of 4bar linkage
 const float A2_LINK     = 0.082;      // 4bar linkage to elbow
 const float L2_LINK     = 0.520;      // elbow to sensor
 const float A3_LINK     = 0.072;      // Elbow Vertical Offset
-const float LINK_OFFSET = 0.035;      // elbow to sensor offset
+const float LINK_OFFSET = 0.035;      // elbow to sensor offset AKA A4
 
 // Spring Dynamics
 const int    SPRING_KS      = 8231;     // N/m
