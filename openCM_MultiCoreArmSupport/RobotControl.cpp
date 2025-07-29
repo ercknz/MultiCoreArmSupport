@@ -27,18 +27,19 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
   _L2{L2},
   _A3{A3},
   _A4{A4},
-  _PHI{atan(A4 / L2)},
-  _H_OF_L2{sqrt(pow(A4, 2) + pow(L2, 2))},
-  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
-  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0)},
-  _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO))},
-  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET},
-  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET},
+  _PI{OCM::_PI},
+  _PHI{atanf(A4 / L2)},
+  _H_OF_L2{sqrtf(powf(A4, 2) + powf(L2, 2))},
+  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0)},
+  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0)},
+  _Q2_LIMIT{fabs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO))},
+  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET},
+  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET},
   _INNER_R{A1 + L1 + A2 - L2},
-  _Z_LIMIT{abs(L1 * sin((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO)))},
-  _SPRING_Li{sqrt(pow(OCM::SPRING_SIDE_A,2) + pow(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
-  _BETAi{asin((OCM::SPRING_SIDE_A/_SPRING_Li) * - OCM::COS_SIN_45)},
-  _SPRING_Fi{OCM::SPRING_KS * (OCM::SPRING_XI - OCM::SPRING_X0) * sin(_BETAi + OCM::DEG_TO_RAD_45)},
+  _Z_LIMIT{fabs(L1 * sinf((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO)))},
+  _SPRING_Li{sqrtf(powf(OCM::SPRING_SIDE_A,2) + powf(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
+  _BETAi{asinf((OCM::SPRING_SIDE_A/_SPRING_Li) * - OCM::COS_SIN_45)},
+  _SPRING_Fi{OCM::SPRING_KS * (OCM::SPRING_XI - OCM::SPRING_X0) * sinf(_BETAi + OCM::DEG_TO_RAD_45)},
   _MaxVelocityXYZ{OCM::MAX_VELOCITY_XYZ}
 {
   // Initalize RobotControl Class
@@ -118,6 +119,13 @@ void RobotControl::InitializeGoals(){
   }
 }
 
+void RobotControl::UpdateGoals(float *xyz, float *xyzDot) {
+  for (int i = 0; i < 3; i++) {
+    xyz_M[i] = xyz[i];
+    xyzDot_M[i] = xyzDot[i];
+  }
+}
+
 /* ---------------------------------------------------------------------------------------/
 / ROBOT LEVEL FUNCTIONS ------------------------------------------------------------------/
 /-----------------------------------------------------------------------------------------/
@@ -129,89 +137,84 @@ void RobotControl::ReadRobot(dynamixel::GroupSyncRead &syncReadPacket){
   fKine();
 }
 
-void RobotControl::WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
-  iKine(xyz, xyzDot);
-  // iKineOptimized(xyz, xyzDot);
+void RobotControl::WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
+  iKineGeometric();
+  // iKineOptimized();
   int returnInt = WriteToMotors(addParamResult, syncWritePacket);
 }
 
 /* -----------------------------------------------------------------------------/
 / Arm Support Inverse Kinematics Member function -------------------------------/
 /------------------------------------------------------------------------------*/
-void RobotControl::iKineOptimized(float *goalXYZ, float *goalXYZDot) {
-  const int MAX_ITERATIONS = 50;
+void RobotControl::iKineOptimized() {
   const float alpha = 0.01f;
   const float threshold = 0.001f;
   
-  for (int i = 0; i < MAX_ITERATIONS; i++){
-    /* Calculates Cos and Sin of angles */
-    float c0 = cos(qPres_M[0]); float s0 = sin(qPres_M[0]);
-    float c1 = cos(qPres_M[1]); float s1 = sin(qPres_M[1]);
-    float c02 = cos(qPres_M[0] + qPres_M[2]); float s02 = sin(qPres_M[0] + qPres_M[2]);
+  /* Calculates Cos and Sin of angles */
+  float c0 = cos(qPres_M[0]); float s0 = sin(qPres_M[0]);
+  float c1 = cos(qPres_M[1]); float s1 = sin(qPres_M[1]);
+  float c02 = cos(qPres_M[0] + qPres_M[2]); float s02 = sin(qPres_M[0] + qPres_M[2]);
 
-    /* Calculates the Taskspace Position */
-    float xyz[3];
-    xyz[0] = _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
-    xyz[1] = _A1A2*s0 + _L1*s0*c1 - _A4*c02 + _L2*s02;
-    xyz[2] =   _L1*s1 + _A3;
+  /* Calculates the Taskspace Position */
+  // float xyz[3];
+  // xyz[0] = _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
+  // xyz[1] = _A1A2*s0 + _L1*s0*c1 - _A4*c02 + _L2*s02;
+  // xyz[2] =   _L1*s1 + _A3;
 
-    /* Calculate error */
-    float error[3];
+  /* Calculate error */
+  float error[3];
+  for (int i = 0; i < 3; i++) {
+    error[i] = xyzPres_M[i] - xyz_M[i];
+  }
+  float errorNorm = sqrt(error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
+  if (errorNorm < threshold){
     for (int i = 0; i < 3; i++) {
-      error[i] = goalXYZ[i] - xyz[i];
+      q_M[i] = qPres_M[i];
     }
-    float errorNorm = sqrt(error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
-    if (errorNorm < threshold) break;
-
-    /* Limit step size */
-    float maxStep = _MaxVelocityXYZ * OCM::LOOP_DT/1000.0f;
-    if (errorNorm > maxStep) {
-      float scale = maxStep / errorNorm;
-      for (int i = 0; i < 3; i++) {
-        error[i] *= scale;
-      }
-    }
-
-    /* Calculates Jacobian Matrix */
-    J_M[0][0] = - _A1A2*s0 - _L1*s0*c1 + _A4*c02 - _L2*s02;
-    J_M[0][1] = - _L1*c0*s1;
-    J_M[0][2] =   _A4*c02 - _L2*s02;
-    J_M[1][0] =   _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
-    J_M[1][1] = - _L1*s0*s1;
-    J_M[1][2] =   _A4*s02 + _L2*c02;
-    J_M[2][1] =   _L1*c1;  // J31 = J33 = 0.0 = J[2][0] = J[2][2]
-
-    /* dQ[3] Calculation using Jacobian Transpose*/
-    float dQ[3];
-    for (int i = 0; i < 3; i++) {
-      dQ[i] = alpha * (J_M[0][i] * error[0] + J_M[1][i] * error[1] + J_M[2][i] * error[2]);
-    }
-
-    /* Update joint angles */
-    for (int i = 0; i < 3; i++) {
-      qPres_M[i] += dQ[i];
-    }
-
-    /* Check Joint Limits */
-    q1
-    if (q_M[2] < _Q4_MIN) q_M[2] = _Q4_MIN;
-    if (q_M[2] > _Q4_MAX) q_M[2] = _Q4_MAX;
-    if (q_M[0] < _Q1_MIN) q_M[0] = _Q1_MIN;
-    if (q_M[0] > _Q1_MAX) q_M[0] = _Q1_MAX;
+    return;
   }
 
-}
+  /* Limit step size */
+  float maxStep = _MaxVelocityXYZ * OCM::LOOP_DT/1000.0f;
+  if (errorNorm > maxStep) {
+    float scale = maxStep / errorNorm;
+    for (int i = 0; i < 3; i++) {
+      error[i] *= scale;
+    }
+  }
 
-void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
+  /* Calculates Jacobian Matrix */
+  J_M[0][0] = - _A1A2*s0 - _L1*s0*c1 + _A4*c02 - _L2*s02;
+  J_M[0][1] = - _L1*c0*s1;
+  J_M[0][2] =   _A4*c02 - _L2*s02;
+  J_M[1][0] =   _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
+  J_M[1][1] = - _L1*s0*s1;
+  J_M[1][2] =   _A4*s02 + _L2*c02;
+  J_M[2][1] =   _L1*c1;  // J31 = J33 = 0.0 = J[2][0] = J[2][2]
+
+  /* dQ[3] Calculation using Jacobian Transpose*/
+  float dQ[3];
+  for (int i = 0; i < 3; i++) {
+    dQ[i] = alpha * (J_M[0][i] * error[0] + J_M[1][i] * error[1] + J_M[2][i] * error[2]);
+  }
+
+  /* Update joint angles */
+  for (int i = 0; i < 3; i++) {
+    q_M[i] = qPres_M[i] + dQ[i];
+  }
+
+  /* Check Joint Limits */
+  // q_M[0] = constrain(q_M[0], _Q1_MIN, _Q1_MAX);
+  // q_M[1] = constrain(q_M[1], -_Q2_LIMIT, _Q2_LIMIT);
+  // q_M[2] = constrain(q_M[2], _Q4_MIN, _Q4_MAX);
+  }
+
+void RobotControl::iKineGeometric() {
   /*  NOTE:
               xyz_M[3] = {x, y, z}
               q_M[3] = {q1, q2, q4} = {shoulder, elevation, elbow} 
   */
   float L1_XY, OUTER_R, R, alpha, presR, presAlpha, beta, gamma, detJ;
-  for (int i=0; i<3; i++){
-    xyz_M[i]    = goalXYZ[i];
-    xyzDot_M[i] = goalXYZDot[i];
-  }
 
   /* Check Z limits */
   if (xyz_M[2] >  _Z_LIMIT) xyz_M[2] =  _Z_LIMIT;
@@ -232,10 +235,10 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   /* R and Alpha */
   R       = sqrt(pow(xyz_M[0], 2) + pow(xyz_M[1], 2));
   alpha   = atan2(xyz_M[1], xyz_M[0]);
-  if (alpha < 0.0f) alpha += 2 * PI;
+  if (alpha < 0.0f) alpha += 2 * _PI;
   presR       = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
   presAlpha   = atan2(xyzPres_M[1], xyzPres_M[0]);
-  if (presAlpha < 0.0f) presAlpha += 2 * PI;
+  if (presAlpha < 0.0f) presAlpha += 2 * _PI;
 
   /* Checks walls */
   OUTER_R = _A1A2 + _H_OF_L2 + L1_XY;
@@ -253,16 +256,16 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
   /* Finds and checks Elbow Angle */
   if ((abs(R-presR) < 0.01) && (alpha < presAlpha)){
     q_M[2] = qPres_M[2];
-    gamma = PI - q_M[2];
+    gamma = _PI - q_M[2];
   } else {
     gamma = acos((pow((_A1A2 + L1_XY), 2) + pow(_H_OF_L2, 2) - pow(xyz_M[0], 2) - pow(xyz_M[1], 2)) / (2 * _H_OF_L2 * (_A1A2 + L1_XY)));
-    q_M[2] = PI - gamma + _PHI;
+    q_M[2] = _PI - gamma + _PHI;
   }
 
   /* Finds and checks shoulder angle */
   beta = asin((_H_OF_L2 * sin(gamma)) / R);
   q_M[0] = alpha - beta;  // + OCM::SHOULDER_OFFSET;
-  if (q_M[0] < 0.0f) q_M[0] += 2 * PI;
+  if (q_M[0] < 0.0f) q_M[0] += 2 * _PI;
 
   /* Check for nans */
   if (q_M[0] != q_M[0]) q_M[0] = qPres_M[0];
@@ -286,9 +289,9 @@ void RobotControl::iKine(float *goalXYZ, float *goalXYZDot) {
 /------------------------------------------------------------------------------*/
 void  RobotControl::fKine() {
   /* Calculates Cos and Sin of angles */
-  float c0 = cos(qPres_M[0]); float s0 = sin(qPres_M[0]);
-  float c1 = cos(qPres_M[1]); float s1 = sin(qPres_M[1]);
-  float c02 = cos(qPres_M[0] + qPres_M[2]); float s02 = sin(qPres_M[0] + qPres_M[2]);
+  float c0 = cos(qPres_M[0]);                   float s0 = sin(qPres_M[0]);
+  float c1 = cos(qPres_M[1]);                   float s1 = sin(qPres_M[1]);
+  float c02 = cos(qPres_M[0] + qPres_M[2]);     float s02 = sin(qPres_M[0] + qPres_M[2]);
 
   /* Calculates the Taskspace Position */
   xyzPres_M[0] = _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
@@ -432,12 +435,12 @@ int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite
   uint8_t elbowParam[8], shoulderParam[8], elevateParam[8];
 
   /* Convert to Motor Counts */
-  qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
+  qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0 / _PI) / OCM::DEGREES_PER_COUNT;
   qCts_M[1]    = OCM::ELEVATION_CENTER - (q_M[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
-  qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0 / PI) / OCM::DEGREES_PER_COUNT;
-  qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
-  qDotCts_M[1] = abs(qDot_M[1] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
-  qDotCts_M[2] = abs(qDot_M[2] * (60.0 / (2.0 * PI)) / OCM::RPM_PER_COUNT);
+  qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0 / _PI) / OCM::DEGREES_PER_COUNT;
+  qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT);
+  qDotCts_M[1] = abs(qDot_M[1] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
+  qDotCts_M[2] = abs(qDot_M[2] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT);
 
   /* Check versus hard limits */
   if (qCts_M[0] < OCM::SHOULDER_MIN_POS) qCts_M[0] = OCM::SHOULDER_MIN_POS;

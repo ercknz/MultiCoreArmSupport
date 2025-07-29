@@ -16,7 +16,8 @@ class RobotControl {
     void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
     void  ReadRobot(dynamixel::GroupSyncRead &syncReadPacket);
-    void   WriteToRobot(float *xyz, float *xyzDot, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+    void  WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+    void  UpdateGoals(float *xyz, float *xyzDot);
     uint8_t   GetCurrentTorqueMode();
     float *   GetPresQ();
     float *   GetPresQDot();
@@ -39,9 +40,9 @@ class RobotControl {
     
   protected:
     void  fKine();
-    void  iKine(float *goalXYZ, float *goalXYZDot);
-    void  iKineOptimized(float *goalXYZ, float *goalXYZDot);
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
+    void  iKineGeometric();
+    void  iKineOptimized();
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
     const float  _A1A2, _A3, _A4, _L1, _L2;
@@ -52,6 +53,7 @@ class RobotControl {
     const float _Q4_MIN,    _Q4_MAX;
     const float _INNER_R,   _Z_LIMIT;
     const float _SPRING_Li, _BETAi, _SPRING_Fi;
+    const float _PI;
 
     float J_M[3][3] = {{0.0f}};     // Jacobian Matrix
 

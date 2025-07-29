@@ -96,6 +96,7 @@ extern const float  SPRING_SIDE_A;    // in m
 extern const float  SPRING_SIDE_B;   // in m
 extern const float  COS_SIN_45;   // Cos Sin of 45 degrees
 extern const float  DEG_TO_RAD_45;   // 45 Degrees to radians
+extern const float _PI;
 extern float SPRING_FORCE_SCALING_FACTOR;
 }
 

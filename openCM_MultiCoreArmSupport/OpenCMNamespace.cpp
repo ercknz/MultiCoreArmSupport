@@ -86,7 +86,7 @@ const float A2_LINK     = 0.082;      // 4bar linkage to elbow
 const float L2_LINK     = 0.520;      // elbow to sensor
 const float A3_LINK     = 0.072;      // Elbow Vertical Offset
 const float LINK_OFFSET = 0.035;      // elbow to sensor offset AKA A4
-const float MAX_VELOCITY_XYZ = 1.0;         // Max velocity in m/s
+const float MAX_VELOCITY_XYZ = 1.0;   // Max velocity in m/s
 
 // Spring Dynamics
 const int    SPRING_KS      = 8231;     // N/m
@@ -96,5 +96,6 @@ const float  SPRING_SIDE_A  = 0.066;    // in m
 const float  SPRING_SIDE_B  = 0.0365;   // in m
 const float  COS_SIN_45     = 0.7071;   // Cos Sin of 45 degrees
 const float  DEG_TO_RAD_45  = 0.7853;   // 45 Degrees to radians
+const float  _PI            = 3.14159;
 float SPRING_FORCE_SCALING_FACTOR = 0.5;
 }
