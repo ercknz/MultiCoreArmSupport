@@ -44,13 +44,14 @@ class RobotControl {
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
-    const float  _A1A2,      _L1,        _L2,         _A3;
-    const double _A4,    _PHI,       _H_OF_L2;
-    const double _Q1_MIN,    _Q1_MAX;
-    const double _Q2_LIMIT;
-    const double _Q4_MIN,    _Q4_MAX;
-    const double _INNER_R,   _Z_LIMIT;
-    const double _SPRING_Li, _BETAi, _SPRING_Fi;
+    const float  _A1A2, _A3, _A4, _L1, _L2;
+    const float _MaxVelocityXYZ;
+    const float _PHI, _H_OF_L2;
+    const float  _Q1_MIN,    _Q1_MAX;
+    const float _Q2_LIMIT;
+    const float _Q4_MIN,    _Q4_MAX;
+    const float _INNER_R,   _Z_LIMIT;
+    const float _SPRING_Li, _BETAi, _SPRING_Fi;
 
     float J_M[3][3] = {{0.0f}};     // Jacobian Matrix
 
