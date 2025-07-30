@@ -41,7 +41,7 @@ SerialPackets   c2cComm  = SerialPackets(&Serial2, OCM::SERIAL_BAUDRATE);
 / Setup function -------------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(OCM::SERIAL_BAUDRATE);
   delay(100);
   /* Set up pins */
   pinMode(OCM::COMM_LED_PIN, OUTPUT);
@@ -130,11 +130,11 @@ void loop() {
         c2cComm.NewGoalApplied();
       }
 
-      /* Read Robot */
-      ArmRobot.ReadRobot(syncReadPacket);
-
       /* Write Robot */
       ArmRobot.WriteToRobot(addParamResult, syncWritePacket);
+
+      /* Read Robot */
+      ArmRobot.ReadRobot(syncReadPacket);
 
       /* Outgoing Data */
       loopTime = millis() - startLoop;

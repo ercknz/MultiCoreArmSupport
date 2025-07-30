@@ -29,15 +29,15 @@ RobotControl::RobotControl(const float A1, const float L1, const float A2, const
   _A4{A4},
   _PI{OCM::_PI},
   _PHI{atanf(A4 / L2)},
-  _H_OF_L2{sqrtf(powf(A4, 2) + powf(L2, 2))},
-  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0)},
-  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0)},
-  _Q2_LIMIT{fabs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO))},
-  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET},
-  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET},
+  _H_OF_L2{sqrtf(pow(A4, 2) + pow(L2, 2))},
+  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0f)},
+  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0f)},
+  _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) * (1/OCM::ELEVATION_RATIO))},
+  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) + OCM::SHOULDER_OFFSET},
+  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) + OCM::SHOULDER_OFFSET},
   _INNER_R{A1 + L1 + A2 - L2},
-  _Z_LIMIT{fabs(L1 * sinf((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO)))},
-  _SPRING_Li{sqrtf(powf(OCM::SPRING_SIDE_A,2) + powf(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
+  _Z_LIMIT{abs(L1 * sinf((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) * (1/OCM::ELEVATION_RATIO)))},
+  _SPRING_Li{sqrtf(pow(OCM::SPRING_SIDE_A,2) + pow(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
   _BETAi{asinf((OCM::SPRING_SIDE_A/_SPRING_Li) * - OCM::COS_SIN_45)},
   _SPRING_Fi{OCM::SPRING_KS * (OCM::SPRING_XI - OCM::SPRING_X0) * sinf(_BETAi + OCM::DEG_TO_RAD_45)},
   _MaxVelocityXYZ{OCM::MAX_VELOCITY_XYZ}
@@ -124,6 +124,38 @@ void RobotControl::UpdateGoals(float *xyz, float *xyzDot) {
     xyz_M[i] = xyz[i];
     xyzDot_M[i] = xyzDot[i];
   }
+
+  /* Check TaskSpace Limits */
+  if (xyz_M[2] >  _Z_LIMIT) {
+    xyz_M[2] =  _Z_LIMIT;
+    xyzDot_M[2] = 0.0f;
+  }
+  if (xyz_M[2] < -_Z_LIMIT) {
+    xyz_M[2] = -_Z_LIMIT;
+    xyzDot_M[2] = 0.0f;
+  }
+
+  float L1_XY = sqrt(pow(_L1, 2) - pow((xyz_M[2] - _A3), 2));
+  float outerRLimit = _A1A2 + _H_OF_L2 + L1_XY;
+  float Rxy = sqrt(pow(xyz_M[0],2) + pow(xyz_M[1],2));
+  float alpha   = atan2(xyz_M[1], xyz_M[0]);
+  if (alpha < 0.0f) alpha += 2 * _PI;
+  if (Rxy < _INNER_R) {
+    xyz_M[0]  = _INNER_R * cos(alpha);
+    xyz_M[1]  = _INNER_R * sin(alpha);
+  }
+  if (Rxy > outerRLimit) {
+    xyz_M[0]  = outerRLimit * cos(alpha);
+    xyz_M[1]  = outerRLimit * sin(alpha);
+  } 
+  if (xyz_M[0] < _TASK_X_LIMIT) {
+    xyz_M[0] = _TASK_X_LIMIT;
+    xyzDot_M[0] = 0.0f;
+  }
+  if (xyz_M[1] > _TASK_Y_LIMIT) {
+    xyz_M[1] = _TASK_Y_LIMIT;
+    xyzDot_M[1] = 0.0f;
+  }
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -151,9 +183,9 @@ void RobotControl::iKineOptimized() {
   const float threshold = 0.001f;
   
   /* Calculates Cos and Sin of angles */
-  float c0 = cos(qPres_M[0]); float s0 = sin(qPres_M[0]);
-  float c1 = cos(qPres_M[1]); float s1 = sin(qPres_M[1]);
-  float c02 = cos(qPres_M[0] + qPres_M[2]); float s02 = sin(qPres_M[0] + qPres_M[2]);
+  float c0 = cos(qPres_M[0]);                 float s0 = sin(qPres_M[0]);
+  float c1 = cos(qPres_M[1]);                 float s1 = sin(qPres_M[1]);
+  float c02 = cos(qPres_M[0] + qPres_M[2]);   float s02 = sin(qPres_M[0] + qPres_M[2]);
 
   /* Calculates the Taskspace Position */
   // float xyz[3];
@@ -190,12 +222,12 @@ void RobotControl::iKineOptimized() {
   J_M[1][0] =   _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
   J_M[1][1] = - _L1*s0*s1;
   J_M[1][2] =   _A4*s02 + _L2*c02;
-  J_M[2][1] =   _L1*c1;  // J31 = J33 = 0.0 = J[2][0] = J[2][2]
+  J_M[2][1] =   _L1*c1;  // J31 = J33 = 0.0
 
   /* dQ[3] Calculation using Jacobian Transpose*/
   float dQ[3];
   for (int i = 0; i < 3; i++) {
-    dQ[i] = alpha * (J_M[0][i] * error[0] + J_M[1][i] * error[1] + J_M[2][i] * error[2]);
+    dQ[i] = alpha * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
   }
 
   /* Update joint angles */
@@ -415,12 +447,12 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
   iPresCts_M[2]    = syncReadPacket.getData(OCM::ID_ELBOW,     OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
 
   /* Convert from Motor Counts */
-  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (PI / 180.0) + OCM::SHOULDER_OFFSET;
-  qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0) * (1/OCM::ELEVATION_RATIO);
-  qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0);
-  qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0);
-  qDotPres_M[1]   = qDotPresCts_M[1] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0) * (1/OCM::ELEVATION_RATIO);
-  qDotPres_M[2]   = qDotPresCts_M[2] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0);
+  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET;
+  qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO);
+  qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0);
+  qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0);
+  qDotPres_M[1]   = qDotPresCts_M[1] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0) * (1/OCM::ELEVATION_RATIO);
+  qDotPres_M[2]   = qDotPresCts_M[2] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0);
   iPres_M[0]      = iPresCts_M[0] * OCM::CURRENT_PER_COUNT; 
   iPres_M[1]      = iPresCts_M[1] * OCM::CURRENT_PER_COUNT;
   iPres_M[2]      = iPresCts_M[2] * OCM::CURRENT_PER_COUNT;

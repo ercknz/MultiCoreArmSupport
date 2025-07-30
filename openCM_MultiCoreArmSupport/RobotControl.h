@@ -55,6 +55,9 @@ class RobotControl {
     const float _SPRING_Li, _BETAi, _SPRING_Fi;
     const float _PI;
 
+    const float _TASK_X_LIMIT = 0.0f; // Meters
+    const float _TASK_Y_LIMIT = 0.5f; // Meters
+
     float J_M[3][3] = {{0.0f}};     // Jacobian Matrix
 
     int32_t qPresCts_M[3],  qDotPresCts_M[3];

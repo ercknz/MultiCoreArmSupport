@@ -67,8 +67,8 @@ const float CURRENT_PER_COUNT = 2.69;     // mA
 // Dynamixel Motor Limits
 const int ELBOW_MIN_POS     = 1200;
 const int ELBOW_MAX_POS     = 3130;
-const int SHOULDER_MIN_POS  = 776;
-const int SHOULDER_MAX_POS  = 3677;
+const int SHOULDER_MIN_POS  = 420; // 776; 
+const int SHOULDER_MAX_POS  = 2800; //3677;
 const int ELEVATION_MIN_POS = 720;
 const int ELEVATION_MAX_POS = 3040;
 const int ELEVATION_CENTER  = (ELEVATION_MAX_POS + ELEVATION_MIN_POS) / 2;
