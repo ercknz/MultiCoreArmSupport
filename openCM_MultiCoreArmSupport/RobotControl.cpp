@@ -21,25 +21,24 @@
 /* ---------------------------------------------------------------------------------------/
 / Arm Support Constructor ----------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl::RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float A4)
+RobotControl::RobotControl(const float L1, const float L2, const float A1, const float A2, const float A3, const float A4)
   :_A1A2{A1 + A2},
   _L1{L1},
   _L2{L2},
   _A3{A3},
   _A4{A4},
-  _PI{OCM::_PI},
-  _PHI{atanf(A4 / L2)},
-  _H_OF_L2{sqrtf(pow(A4, 2) + pow(L2, 2))},
-  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0f)},
-  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (_PI / 180.0f)},
-  _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) * (1/OCM::ELEVATION_RATIO))},
-  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) + OCM::SHOULDER_OFFSET},
-  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) + OCM::SHOULDER_OFFSET},
+  _PHI{atan(A4 / L2)},
+  _H_OF_L2{sqrt(pow(A4, 2) + pow(L2, 2))},
+  _Q1_MIN{OCM::SHOULDER_MIN_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0f)},
+  _Q1_MAX{OCM::SHOULDER_MAX_POS * OCM::DEGREES_PER_COUNT * (PI / 180.0f)},
+  _Q2_LIMIT{abs((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) * (1/OCM::ELEVATION_RATIO))},
+  _Q4_MIN{(OCM::ELBOW_MIN_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) + OCM::SHOULDER_OFFSET},
+  _Q4_MAX{(OCM::ELBOW_MAX_POS - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) + OCM::SHOULDER_OFFSET},
   _INNER_R{A1 + L1 + A2 - L2},
-  _Z_LIMIT{abs(L1 * sinf((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0f) * (1/OCM::ELEVATION_RATIO)))},
-  _SPRING_Li{sqrtf(pow(OCM::SPRING_SIDE_A,2) + pow(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
-  _BETAi{asinf((OCM::SPRING_SIDE_A/_SPRING_Li) * - OCM::COS_SIN_45)},
-  _SPRING_Fi{OCM::SPRING_KS * (OCM::SPRING_XI - OCM::SPRING_X0) * sinf(_BETAi + OCM::DEG_TO_RAD_45)},
+  _Z_LIMIT{abs(L1 * sin((OCM::ELEVATION_MAX_POS - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) * (1/OCM::ELEVATION_RATIO)))},
+  _SPRING_Li{sqrt(pow(OCM::SPRING_SIDE_A,2) + pow(OCM::SPRING_SIDE_B,2) + 2 * OCM::SPRING_SIDE_A * OCM::SPRING_SIDE_B * OCM::COS_SIN_45)},
+  _BETAi{asin((OCM::SPRING_SIDE_A/_SPRING_Li) * - OCM::COS_SIN_45)},
+  _SPRING_Fi{OCM::SPRING_KS * (OCM::SPRING_XI - OCM::SPRING_X0) * sin(_BETAi + OCM::DEG_TO_RAD_45)},
   _MaxVelocityXYZ{OCM::MAX_VELOCITY_XYZ}
 {
   // Initalize RobotControl Class
@@ -123,6 +122,7 @@ void RobotControl::UpdateGoals(float *xyz, float *xyzDot) {
   for (int i = 0; i < 3; i++) {
     xyz_M[i] = xyz[i];
     xyzDot_M[i] = xyzDot[i];
+    
   }
 
   /* Check TaskSpace Limits */
@@ -139,7 +139,7 @@ void RobotControl::UpdateGoals(float *xyz, float *xyzDot) {
   float outerRLimit = _A1A2 + _H_OF_L2 + L1_XY;
   float Rxy = sqrt(pow(xyz_M[0],2) + pow(xyz_M[1],2));
   float alpha   = atan2(xyz_M[1], xyz_M[0]);
-  if (alpha < 0.0f) alpha += 2 * _PI;
+  if (alpha < 0.0f) alpha += 2 * PI;
   if (Rxy < _INNER_R) {
     xyz_M[0]  = _INNER_R * cos(alpha);
     xyz_M[1]  = _INNER_R * sin(alpha);
@@ -170,8 +170,8 @@ void RobotControl::ReadRobot(dynamixel::GroupSyncRead &syncReadPacket){
 }
 
 void RobotControl::WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
-  iKineGeometric();
-  // iKineOptimized();
+  // iKineGeometric();
+  iKineOptimized();
   int returnInt = WriteToMotors(addParamResult, syncWritePacket);
 }
 
@@ -267,10 +267,10 @@ void RobotControl::iKineGeometric() {
   /* R and Alpha */
   R       = sqrt(pow(xyz_M[0], 2) + pow(xyz_M[1], 2));
   alpha   = atan2(xyz_M[1], xyz_M[0]);
-  if (alpha < 0.0f) alpha += 2 * _PI;
+  if (alpha < 0.0f) alpha += 2 * PI;
   presR       = sqrt(pow(xyzPres_M[0], 2) + pow(xyzPres_M[1], 2));
   presAlpha   = atan2(xyzPres_M[1], xyzPres_M[0]);
-  if (presAlpha < 0.0f) presAlpha += 2 * _PI;
+  if (presAlpha < 0.0f) presAlpha += 2 * PI;
 
   /* Checks walls */
   OUTER_R = _A1A2 + _H_OF_L2 + L1_XY;
@@ -288,16 +288,16 @@ void RobotControl::iKineGeometric() {
   /* Finds and checks Elbow Angle */
   if ((abs(R-presR) < 0.01) && (alpha < presAlpha)){
     q_M[2] = qPres_M[2];
-    gamma = _PI - q_M[2];
+    gamma = PI - q_M[2];
   } else {
     gamma = acos((pow((_A1A2 + L1_XY), 2) + pow(_H_OF_L2, 2) - pow(xyz_M[0], 2) - pow(xyz_M[1], 2)) / (2 * _H_OF_L2 * (_A1A2 + L1_XY)));
-    q_M[2] = _PI - gamma + _PHI;
+    q_M[2] = PI - gamma + _PHI;
   }
 
   /* Finds and checks shoulder angle */
   beta = asin((_H_OF_L2 * sin(gamma)) / R);
   q_M[0] = alpha - beta;  // + OCM::SHOULDER_OFFSET;
-  if (q_M[0] < 0.0f) q_M[0] += 2 * _PI;
+  if (q_M[0] < 0.0f) q_M[0] += 2 * PI;
 
   /* Check for nans */
   if (q_M[0] != q_M[0]) q_M[0] = qPres_M[0];
@@ -447,12 +447,12 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
   iPresCts_M[2]    = syncReadPacket.getData(OCM::ID_ELBOW,     OCM::ADDRESS_PRESENT_CURRENT,  OCM::LEN_PRESENT_CURRENT); 
 
   /* Convert from Motor Counts */
-  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) + OCM::SHOULDER_OFFSET;
-  qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (_PI / 180.0) * (1/OCM::ELEVATION_RATIO);
-  qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (_PI / 180.0);
-  qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0);
-  qDotPres_M[1]   = qDotPresCts_M[1] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0) * (1/OCM::ELEVATION_RATIO);
-  qDotPres_M[2]   = qDotPresCts_M[2] * OCM::RPM_PER_COUNT * (2.0 * _PI / 60.0);
+  qPres_M[0]      =  (qPresCts_M[0]) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) + OCM::SHOULDER_OFFSET;
+  qPres_M[1]      = -(qPresCts_M[1] - OCM::ELEVATION_CENTER) * OCM::DEGREES_PER_COUNT * (PI / 180.0f) * (1/OCM::ELEVATION_RATIO);
+  qPres_M[2]      =  (qPresCts_M[2] - OCM::ELBOW_MIN_POS) * OCM::DEGREES_PER_COUNT * (PI / 180.0f);
+  qDotPres_M[0]   = qDotPresCts_M[0] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0f);
+  qDotPres_M[1]   = qDotPresCts_M[1] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0f) * (1/OCM::ELEVATION_RATIO);
+  qDotPres_M[2]   = qDotPresCts_M[2] * OCM::RPM_PER_COUNT * (2.0 * PI / 60.0f);
   iPres_M[0]      = iPresCts_M[0] * OCM::CURRENT_PER_COUNT; 
   iPres_M[1]      = iPresCts_M[1] * OCM::CURRENT_PER_COUNT;
   iPres_M[2]      = iPresCts_M[2] * OCM::CURRENT_PER_COUNT;
@@ -467,12 +467,12 @@ int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite
   uint8_t elbowParam[8], shoulderParam[8], elevateParam[8];
 
   /* Convert to Motor Counts */
-  qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0 / _PI) / OCM::DEGREES_PER_COUNT;
-  qCts_M[1]    = OCM::ELEVATION_CENTER - (q_M[1] * OCM::ELEVATION_RATIO * (180.0 / PI) / OCM::DEGREES_PER_COUNT);
-  qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0 / _PI) / OCM::DEGREES_PER_COUNT;
-  qDotCts_M[0] = abs(qDot_M[0] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT);
-  qDotCts_M[1] = abs(qDot_M[1] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
-  qDotCts_M[2] = abs(qDot_M[2] * (60.0 / (2.0 * _PI)) / OCM::RPM_PER_COUNT);
+  qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0f / PI) / OCM::DEGREES_PER_COUNT;
+  qCts_M[1]    = OCM::ELEVATION_CENTER - (q_M[1] * OCM::ELEVATION_RATIO * (180.0f / PI) / OCM::DEGREES_PER_COUNT);
+  qCts_M[2]    = OCM::ELBOW_MIN_POS + q_M[2] * (180.0f / PI) / OCM::DEGREES_PER_COUNT;
+  qDotCts_M[0] = abs(qDot_M[0] * (60.0f / (2.0f * PI)) / OCM::RPM_PER_COUNT);
+  qDotCts_M[1] = abs(qDot_M[1] * (60.0f / (2.0f * PI)) / OCM::RPM_PER_COUNT) * OCM::ELEVATION_RATIO;
+  qDotCts_M[2] = abs(qDot_M[2] * (60.0f / (2.0f * PI)) / OCM::RPM_PER_COUNT);
 
   /* Check versus hard limits */
   if (qCts_M[0] < OCM::SHOULDER_MIN_POS) qCts_M[0] = OCM::SHOULDER_MIN_POS;

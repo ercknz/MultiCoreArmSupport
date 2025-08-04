@@ -11,7 +11,7 @@
 
 class RobotControl {
   public:
-          RobotControl(const float A1, const float L1, const float A2, const float L2, const float A3, const float A4);
+          RobotControl(const float L1, const float L2, const float A1, const float A2, const float A3, const float A4);
           
     void  EnableTorque(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler, uint8_t state);
     void  MotorConfig(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler  *packetHandler);
@@ -46,14 +46,13 @@ class RobotControl {
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
     const float  _A1A2, _A3, _A4, _L1, _L2;
-    const float _MaxVelocityXYZ;
-    const float _PHI, _H_OF_L2;
-    const float  _Q1_MIN,    _Q1_MAX;
-    const float _Q2_LIMIT;
-    const float _Q4_MIN,    _Q4_MAX;
-    const float _INNER_R,   _Z_LIMIT;
-    const float _SPRING_Li, _BETAi, _SPRING_Fi;
-    const float _PI;
+    const double _MaxVelocityXYZ;
+    const double _PHI, _H_OF_L2;
+    const double  _Q1_MIN,    _Q1_MAX;
+    const double _Q2_LIMIT;
+    const double _Q4_MIN,    _Q4_MAX;
+    const double _INNER_R,   _Z_LIMIT;
+    const double _SPRING_Li, _BETAi, _SPRING_Fi;
 
     const float _TASK_X_LIMIT = 0.0f; // Meters
     const float _TASK_Y_LIMIT = 0.5f; // Meters

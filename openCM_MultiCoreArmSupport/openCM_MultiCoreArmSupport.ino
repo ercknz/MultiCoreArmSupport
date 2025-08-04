@@ -34,7 +34,7 @@ dynamixel::PacketHandler *packetHandler;
 /* ---------------------------------------------------------------------------------------/
 / Robot Control Objects ------------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-RobotControl    ArmRobot = RobotControl(OCM::A1_LINK, OCM::L1_LINK, OCM::A2_LINK, OCM::L2_LINK, OCM::A3_LINK, OCM::LINK_OFFSET);
+RobotControl    ArmRobot = RobotControl(OCM::L1_LINK, OCM::L2_LINK, OCM::A1_LINK, OCM::A2_LINK, OCM::A3_LINK, OCM::LINK_OFFSET);
 SerialPackets   c2cComm  = SerialPackets(&Serial2, OCM::SERIAL_BAUDRATE);
 
 /* ---------------------------------------------------------------------------------------/
