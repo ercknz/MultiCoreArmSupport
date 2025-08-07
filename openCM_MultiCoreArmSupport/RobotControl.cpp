@@ -115,6 +115,7 @@ float RobotControl::GetSpringForce(){
 void RobotControl::InitializeGoals(){
   for (int i = 0; i < 3; i++){
     q_M[i] = qPres_M[i];
+    qInt_M[i] = qPres_M[i];
   }
 }
 
@@ -171,15 +172,17 @@ void RobotControl::ReadRobot(dynamixel::GroupSyncRead &syncReadPacket){
 
 void RobotControl::WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
   // iKineGeometric();
-  iKineOptimized();
+  iKineNumeric();
   int returnInt = WriteToMotors(addParamResult, syncWritePacket);
+  // int returnInt = WriteToMotors(iKineNumeric(), addParamResult, syncWritePacket);
 }
 
 /* -----------------------------------------------------------------------------/
 / Arm Support Inverse Kinematics Member function -------------------------------/
 /------------------------------------------------------------------------------*/
-void RobotControl::iKineOptimized() {
-  const float alpha = 0.01f;
+// float * RobotControl::iKineNumeric() {
+void RobotControl::iKineNumeric() {
+  const float alpha = 1.0f;
   const float threshold = 0.001f;
   
   /* Calculates Cos and Sin of angles */
@@ -187,19 +190,13 @@ void RobotControl::iKineOptimized() {
   float c1 = cos(qPres_M[1]);                 float s1 = sin(qPres_M[1]);
   float c02 = cos(qPres_M[0] + qPres_M[2]);   float s02 = sin(qPres_M[0] + qPres_M[2]);
 
-  /* Calculates the Taskspace Position */
-  // float xyz[3];
-  // xyz[0] = _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
-  // xyz[1] = _A1A2*s0 + _L1*s0*c1 - _A4*c02 + _L2*s02;
-  // xyz[2] =   _L1*s1 + _A3;
-
   /* Calculate error */
   float error[3];
   for (int i = 0; i < 3; i++) {
     error[i] = xyzPres_M[i] - xyz_M[i];
   }
-  float errorNorm = sqrt(error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
-  if (errorNorm < threshold){
+  float errorSum = 0.5 * (error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
+  if (errorSum < threshold){
     for (int i = 0; i < 3; i++) {
       q_M[i] = qPres_M[i];
     }
@@ -207,13 +204,12 @@ void RobotControl::iKineOptimized() {
   }
 
   /* Limit step size */
-  float maxStep = _MaxVelocityXYZ * OCM::LOOP_DT/1000.0f;
-  if (errorNorm > maxStep) {
-    float scale = maxStep / errorNorm;
-    for (int i = 0; i < 3; i++) {
-      error[i] *= scale;
-    }
-  }
+//  float maxStep = _MaxVelocityXYZ * OCM::LOOP_DT/1000.0f;
+//  if (errorSum > maxStep) {
+//    for (int i = 0; i < 3; i++) {
+//      error[i] *= maxStep;
+//    }
+//  }
 
   /* Calculates Jacobian Matrix */
   J_M[0][0] = - _A1A2*s0 - _L1*s0*c1 + _A4*c02 - _L2*s02;
@@ -227,7 +223,7 @@ void RobotControl::iKineOptimized() {
   /* dQ[3] Calculation using Jacobian Transpose*/
   float dQ[3];
   for (int i = 0; i < 3; i++) {
-    dQ[i] = alpha * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
+    dQ[i] = - alpha * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
   }
 
   /* Update joint angles */
@@ -236,9 +232,9 @@ void RobotControl::iKineOptimized() {
   }
 
   /* Check Joint Limits */
-  // q_M[0] = constrain(q_M[0], _Q1_MIN, _Q1_MAX);
-  // q_M[1] = constrain(q_M[1], -_Q2_LIMIT, _Q2_LIMIT);
-  // q_M[2] = constrain(q_M[2], _Q4_MIN, _Q4_MAX);
+  q_M[0] = constrain(q_M[0], _Q1_MIN, _Q1_MAX);
+  q_M[1] = constrain(q_M[1], -_Q2_LIMIT, _Q2_LIMIT);
+  q_M[2] = constrain(q_M[2], _Q4_MIN, _Q4_MAX);
   }
 
 void RobotControl::iKineGeometric() {
@@ -462,9 +458,9 @@ void  RobotControl::ReadMotors(dynamixel::GroupSyncRead  &syncReadPacket) {
 / Arm Support DXL Write Member Function ----------------------------------------/
 /------------------------------------------------------------------------------*/
 int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket) {
-  //int32_t velocity = OCM::VEL_MAX_LIMIT;
   int dxlCommResult;
-  uint8_t elbowParam[8], shoulderParam[8], elevateParam[8];
+  uint8_t elbowParam[4], shoulderParam[4], elevateParam[4];
+  // uint8_t elbowParam[8], shoulderParam[8], elevateParam[8];
 
   /* Convert to Motor Counts */
   qCts_M[0]    = (q_M[0] - OCM::SHOULDER_OFFSET) * (180.0f / PI) / OCM::DEGREES_PER_COUNT;
@@ -483,34 +479,46 @@ int  RobotControl::WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite
   if (qCts_M[2] > OCM::ELBOW_MAX_POS) qCts_M[2] = OCM::ELBOW_MAX_POS;
 
   /* Shoulder Parameters (Goal Position and Velocity) */
-  shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[0]));
-  shoulderParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[0]));
-  shoulderParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[0]));
-  shoulderParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[0]));
-  shoulderParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[0]));
-  shoulderParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[0]));
-  shoulderParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[0]));
-  shoulderParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[0]));
+  // shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[0]));
+  // shoulderParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[0]));
+  // shoulderParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[0]));
+  // shoulderParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[0]));
+  // shoulderParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[0]));
+  // shoulderParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[0]));
+  // shoulderParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[0]));
+  // shoulderParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[0]));
+  shoulderParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[0]));
+  shoulderParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[0]));
+  shoulderParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[0]));
+  shoulderParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[0]));
 
   /* Elevation Parameters (Goal Position and Velocity) */
-  elevateParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[1]));
-  elevateParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[1]));
-  elevateParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[1]));
-  elevateParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[1]));
-  elevateParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[1]));
-  elevateParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[1]));
-  elevateParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[1]));
-  elevateParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[1]));
+  // elevateParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[1]));
+  // elevateParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[1]));
+  // elevateParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[1]));
+  // elevateParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[1]));
+  // elevateParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[1]));
+  // elevateParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[1]));
+  // elevateParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[1]));
+  // elevateParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[1]));
+  elevateParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[1]));
+  elevateParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[1]));
+  elevateParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[1]));
+  elevateParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[1]));
 
   /* Elbow Parameters (Goal Position and Velocity) */
-  elbowParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[2]));
-  elbowParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[2]));
-  elbowParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[2]));
-  elbowParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[2]));
-  elbowParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[2]));
-  elbowParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[2]));
-  elbowParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[2]));
-  elbowParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[2]));
+  // elbowParam[0] = DXL_LOBYTE(DXL_LOWORD(qDotCts_M[2]));
+  // elbowParam[1] = DXL_HIBYTE(DXL_LOWORD(qDotCts_M[2]));
+  // elbowParam[2] = DXL_LOBYTE(DXL_HIWORD(qDotCts_M[2]));
+  // elbowParam[3] = DXL_HIBYTE(DXL_HIWORD(qDotCts_M[2]));
+  // elbowParam[4] = DXL_LOBYTE(DXL_LOWORD(qCts_M[2]));
+  // elbowParam[5] = DXL_HIBYTE(DXL_LOWORD(qCts_M[2]));
+  // elbowParam[6] = DXL_LOBYTE(DXL_HIWORD(qCts_M[2]));
+  // elbowParam[7] = DXL_HIBYTE(DXL_HIWORD(qCts_M[2]));
+  elbowParam[0] = DXL_LOBYTE(DXL_LOWORD(qCts_M[2]));
+  elbowParam[1] = DXL_HIBYTE(DXL_LOWORD(qCts_M[2]));
+  elbowParam[2] = DXL_LOBYTE(DXL_HIWORD(qCts_M[2]));
+  elbowParam[3] = DXL_HIBYTE(DXL_HIWORD(qCts_M[2]));
 
   /* Writes Packets */
   addParamResult = syncWritePacket.addParam(OCM::ID_SHOULDER,  shoulderParam);

@@ -49,6 +49,7 @@ class SerialPackets {
     const int16_t _TX_goalQcts_SLOT     = 104;
     const int16_t _TX_goalQDOTcts_SLOT  = 116;
     const int16_t _TX_presCURRENT_SLOT  = 128;
+    const int16_t _TX_goalXYZ_SLOT      = 128;
     const int16_t _TX_BLANK_SLOT        = 140;
 
     bool testingMode_M = true;

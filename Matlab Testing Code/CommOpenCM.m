@@ -14,7 +14,7 @@ classdef CommOpenCM < handle
         dt = 0.008
         port
         rawBytes
-        frameData = nan(1,33)
+        frameData = nan(1,36)
         
         txHeader = uint8([150, 10, 1, 101])
         txPacketLen = 60
@@ -114,14 +114,20 @@ classdef CommOpenCM < handle
                 obj.frameData(30) = double(typecast(uint8(obj.rawBytes(121:124)),'int32'));
                 obj.frameData(31) = double(typecast(uint8(obj.rawBytes(125:128)),'int32'));
                 
+                % Goal XYZ (m)
+                obj.frameData(32) = double(typecast(uint8(obj.rawBytes(129:132)),'int32'));
+                obj.frameData(33) = double(typecast(uint8(obj.rawBytes(133:136)),'int32'));
+                obj.frameData(34) = double(typecast(uint8(obj.rawBytes(137:140)),'int32'));
+
                 % Torque Mode
-                obj.frameData(32) = double(obj.rawBytes(144));
+                obj.frameData(35) = double(obj.rawBytes(end-6));
                 % Loop Time
-                obj.frameData(33) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
+                obj.frameData(36) = typecast(uint8(obj.rawBytes(end-5:end-2)),'uint32');
                 % Corrections
                 obj.frameData(1) = obj.frameData(1)*0.001;
                 obj.frameData(2:19) = obj.frameData(2:19)./1000;
-                obj.frameData(33) = obj.frameData(33)*0.001;
+                obj.frameData(32:34) = obj.frameData(32:34)./1000;
+                obj.frameData(36) = obj.frameData(33)*0.001;
             end
         end
         

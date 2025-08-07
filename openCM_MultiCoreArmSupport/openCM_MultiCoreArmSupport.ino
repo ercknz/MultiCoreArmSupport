@@ -82,7 +82,8 @@ void loop() {
   int  goalReturn;
   bool addParamResult = false;
   dynamixel::GroupSyncRead  syncReadPacket(portHandler, packetHandler, OCM::ADDRESS_PRESENT_VELOCITY, OCM::LEN_PRESENT_VELOCITY + OCM::LEN_PRESENT_POSITION);
-  dynamixel::GroupSyncWrite syncWritePacket(portHandler, packetHandler, OCM::ADDRESS_PROFILE_VELOCITY, OCM::LEN_GOAL_POSITION + OCM::LEN_PROFILE_VELOCITY);
+  // dynamixel::GroupSyncWrite syncWritePacket(portHandler, packetHandler, OCM::ADDRESS_PROFILE_VELOCITY, OCM::LEN_GOAL_POSITION + OCM::LEN_PROFILE_VELOCITY);
+  dynamixel::GroupSyncWrite syncWritePacket(portHandler, packetHandler, OCM::ADDRESS_GOAL_POSITION, OCM::LEN_GOAL_POSITION);
   addParamResult = syncReadPacket.addParam(OCM::ID_SHOULDER);
   addParamResult = syncReadPacket.addParam(OCM::ID_ELBOW);
   addParamResult = syncReadPacket.addParam(OCM::ID_ELEVATION);

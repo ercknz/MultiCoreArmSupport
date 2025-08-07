@@ -523,10 +523,8 @@ initializeAnimatedLines();
                 % Update goal display
                 updateGoalDisplay(goalData);
                 
-                % Update model (for Teensy mode)
-                if fullRobot
-                    updateModelPosition(modelData.x, modelData.y, modelData.z);
-                end
+                % Update model (for Teensy mode) or goal (for OpenCM mode)
+                updateModelPosition(modelData.x, modelData.y, modelData.z);
                 
                 % Update text displays
                 updateAllTextDisplays(robotData, goalData, modelData, statusData);
@@ -647,6 +645,9 @@ initializeAnimatedLines();
             modelData.gQ1cts = botSerial.frameData(26);
             modelData.gQ2cts = botSerial.frameData(27);
             modelData.gQ4cts = botSerial.frameData(28);
+            modelData.x = botSerial.frameData(32);
+            modelData.y = botSerial.frameData(33);
+            modelData.z = botSerial.frameData(34);
         end
         
         statusData.elapsedTime = botSerial.frameData(1);
@@ -745,10 +746,10 @@ initializeAnimatedLines();
         set(HdriveModeValue,'String',num2str(statusData.torqueVal));
         
         % Mode-specific displays
+        set(HMxValue,'String',num2str(modelData.x, '%.3f'));
+        set(HMyValue,'String',num2str(modelData.y, '%.3f'));
+        set(HMzValue,'String',num2str(modelData.z, '%.3f'));
         if fullRobot
-            set(HMxValue,'String',num2str(modelData.x, '%.3f'));
-            set(HMyValue,'String',num2str(modelData.y, '%.3f'));
-            set(HMzValue,'String',num2str(modelData.z, '%.3f'));
             set(HFxValue,'String',num2str(modelData.forceX, '%.3f'));
             set(HFyValue,'String',num2str(modelData.forceY, '%.3f'));
             set(HFzValue,'String',num2str(modelData.forceZ, '%.3f'));

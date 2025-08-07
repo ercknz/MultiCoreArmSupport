@@ -41,8 +41,10 @@ class RobotControl {
   protected:
     void  fKine();
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
-    void  iKineGeometric();
-    void  iKineOptimized();
+    void    iKineGeometric();
+    // float * iKineNumeric();
+    void   iKineNumeric();
+    // int   WriteToMotors(float *goalQ, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
     const float  _A1A2, _A3, _A4, _L1, _L2;
@@ -64,6 +66,7 @@ class RobotControl {
     float   xyzPres_M[3],   xyzDotPres_M[3];
     int32_t qCts_M[3],      qDotCts_M[3];     // Goal Q and Qdot in counts
     float   q_M[3],         qDot_M[3];        // Goal Q and Qdot in radians
+    float   qInt_M[3];      // Intermediate Goal Q
     float   xyz_M[3],       xyzDot_M[3];      // Goal XYZ coordinates in meters
     float   springF_M;
     float   scalingFactor_M;
