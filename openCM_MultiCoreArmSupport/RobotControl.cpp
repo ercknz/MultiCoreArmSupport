@@ -123,7 +123,6 @@ void RobotControl::UpdateGoals(float *xyz, float *xyzDot) {
   for (int i = 0; i < 3; i++) {
     xyz_M[i] = xyz[i];
     xyzDot_M[i] = xyzDot[i];
-    
   }
 
   /* Check TaskSpace Limits */
@@ -202,14 +201,6 @@ void RobotControl::iKineNumeric() {
     }
     return;
   }
-
-  /* Limit step size */
-//  float maxStep = _MaxVelocityXYZ * OCM::LOOP_DT/1000.0f;
-//  if (errorSum > maxStep) {
-//    for (int i = 0; i < 3; i++) {
-//      error[i] *= maxStep;
-//    }
-//  }
 
   /* Calculates Jacobian Matrix */
   J_M[0][0] = - _A1A2*s0 - _L1*s0*c1 + _A4*c02 - _L2*s02;

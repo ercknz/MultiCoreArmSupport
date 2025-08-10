@@ -99,7 +99,9 @@ void loop() {
 
   /* Initialize Robot*/
   previousTime = millis();
+  delay(100);
   ArmRobot.ReadRobot(syncReadPacket);
+  delay(100);
   ArmRobot.InitializeGoals();
   c2cComm.WritePackets(totalTime, ArmRobot, loopTime);
 
