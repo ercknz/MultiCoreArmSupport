@@ -32,10 +32,12 @@ const float SENSOR_FILTER_WEIGHT = 0.05;
 const float LOOP_DT        = 5;        // Milliseconds
 const float MODEL_DT       = 0.005;    // Secs
 const float GRAVITY        = 9.80665;  // m/sec^2
+const float VEL_XYZ_LIMIT = 1.0f;      // m/sec
 float initMassXY    = 10.0f;     // kg
 float initDampingXY = 15.0f;     // N*(sec/m)
 float initMassZ     = 10.0f;     // kg
 float initDampingZ  = 15.0f;     // N*(sec/m)
+
 
 // Kinematic Constants for Task Space Limits
 const float A1_LINK     = 0.073;      // Shoulder to 4bar linkage

@@ -1,47 +1,52 @@
 /* This class is the admittance control model.
    It takes a XYZ force input and output XYZ position and velocity based on initial conditions.
+   This uses a Numerical Backward Euler integration method to determine the new postions. 
 
    Class arrays use the following:
    xyz[3]     = {x, y, z};
    xyzDot[3]  = {xDot, yDot, zDot};
 
    X Direction *****************************************************************
-   2nd order eqn:       M*x" = Fx - B*x'
-   general solution:    xg(t) = Cx1*exp(-(B/M)*t) + Cx2
-   particular solution: xp(t) = (Fx/B)*t
-   coefficents:         Cx1 = ((Fx/B) - xPresentVelocity)*(M/B)
-                        Cx2 = xPresentPosition - Cx1
-   solutions:           x(t) = Cx1*exp(-(B/M)*t) + (Fx/B)*t + Cx2
-                        x'(t) = -(B/M)*Cx1*exp(-(B/M)*t) + (Fx/B)
+   2nd order eqn:       M*x" + B*x' = Fx
+   Approximations:      x" = (x - 2*x_1 + x_2) / dt^2
+                        x' = (x - x_1) / dt
+   Plug-in:             (M/dt^2 + B/dt)*x - (2*M/dt^2 + B/dt)*x_1  + (M/dt^2)*x_2 = Fx
+   Coefficents:         a0 = M/dt^2 + B/dt
+                        a1 = 2*M/dt^2 + B/dt
+                        a2 = M/dt^2
+   Solution:            x = (a1/a0)*x_1 - (a2/a0)*x_2 + (1/a0)*Fx
+
    Y Direction *****************************************************************
-   2nd order eqn:       M*y" = Fy - B*y'
-   general solution:    yg(t) = Cy1*exp(-(B/M)*t) + Cy2
-   particular solution: yp(t) = (Fy/B)*t
-   coefficents:         Cy1 = ((Fy/B) - yPresentVelocity)*(M/B)
-                        Cy2 = yPresentPosition - Cy1
-   solutions:           y(t) = Cy1*exp(-(B/M)*t) + (Fy/B)*t + Cy2
-                        y'(t) = -(B/M)*Cy1*exp(-(B/M)*t) + (Fy/B)
+   2nd order eqn:       M*y" + B*y' = Fy
+   Approximations:      y" = (y - 2*y_1 + y_2) / dt^2
+                        y' = (y - y_1) / dt
+   Plug-in:             (M/dt^2 + B/dt)*y - (2*M/dt^2 + B/dt)*y_1  + (M/dt^2)*y_2 = Fy
+   Coefficents:         a0 = M/dt^2 + B/dt
+                        a1 = 2*M/dt^2 + B/dt
+                        a2 = M/dt^2
+   Solution:            y = (a1/a0)*y_1 - (a2/a0)*y_2 + (1/a0)*Fy
    Z Direction *****************************************************************
-   2nd order eqn:       M*z" = Fz - B*z' - Mg
-   general solution:    zg(t) = Cz1*exp(-(B/M)*t) + Cz2
-   particular solution: zp(t) = (1/B)*(Fz-g*M)*t
-   coefficents:         Cz1 = ((1/B)*(Fz-g*M) - zPresentVelocity)*(M/B)
-                        Cz2 = zPresentPosition - Cz1
-   solutions:           z(t) = Cz1*exp(-(B/M)*t) + (1/B)*(Fz-g*M)*t + Cz2
-                        z'(t) = -(B/M)*Cz1*exp(-(B/M)*t) + (1/B)*(Fz-g*M)
+   2nd order eqn:       M*z" + B*z' = Fz
+   Approximations:      z" = (z - 2*z_1 + z_2) / dt^2
+                        z' = (z - z_1) / dt
+   Plug-in:             (M/dt^2 + B/dt)*z - (2*M/dt^2 + B/dt)*z_1  + (M/dt^2)*z_2 = Fz
+   Coefficents:         a0 = M/dt^2 + B/dt
+                        a1 = 2*M/dt^2 + B/dt
+                        a2 = M/dt^2
+   Solution:            z = (a1/a0)*z_1 - (a2/a0)*z_2 + (1/a0)*Fz
 
    Created 10/27/2020
    by erick nunez
 */
 
 #include <Arduino.h>
-#include "AdmittanceModel.h"
+#include "AdmittanceNumerical.h"
 #include "ArmSupportNamespace.h"
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Constructor -----------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz)
+AdmittanceNumerical::AdmittanceNumerical(float Mxy, float Mz, float Bxy, float Bz)
   : _GRAVITY{ASR::GRAVITY},
     _DELTA_T{ASR::MODEL_DT},
     _ELEVATION_CENTER{(ASR::ELEVATION_MAX_POS + ASR::ELEVATION_MIN_POS) / 2},
@@ -58,12 +63,13 @@ AdmittanceModel::AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz)
   damping_M[0] = Bxy;
   damping_M[1] = Bxy;
   damping_M[2] = Bz;
+  CalculateParameters();
 }
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Initalizer ------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void AdmittanceModel::SetPosition(float *newXYZ) {
+void AdmittanceNumerical::SetPosition(float *newXYZ) {
   /* Check TaskSpace Limits */
   float clampedZ = newXYZ[2];
   if (clampedZ >  _MODEL_Z_LIMIT) clampedZ =  _MODEL_Z_LIMIT;
@@ -90,44 +96,37 @@ void AdmittanceModel::SetPosition(float *newXYZ) {
   xyzGoal_M[1] = newXYZ[1];
   if (xyzGoal_M[0] < _MODEL_X_LIMIT) xyzGoal_M[0] = _MODEL_X_LIMIT;
   if (xyzGoal_M[1] > _MODEL_Y_LIMIT) xyzGoal_M[1] = _MODEL_Y_LIMIT;
+  for (int i = 0; i < 3; i++) {
+    xyz_1_M[i]      = xyzGoal_M[i];
+    xyz_2_M[i]      = xyzGoal_M[i];
+    xyzDot_1_M[i]   = 0.0f;
+    xyzDotGoal_M[i] = 0.0f;
+    totalForces_M[i]= 0.0f;
+  }
 }
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Updater ---------------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
+void AdmittanceNumerical::UpdateModel(float *forceXYZ, float *externalFxyz) {
   for (int i = 0; i < 3; i++) {
-    // xyzInit_M[i] = 0.0f;
-    xyzInit_M[i]    = xyzGoal_M[i];
-    xyzDotInit_M[i] = xyzDotGoal_M[i];
+    xyz_2_M[i]    = xyz_1_M[i];
+    xyz_1_M[i]    = xyzGoal_M[i];
+    xyzDot_1_M[i] = xyzDotGoal_M[i];
   }
 
-  /* Coefficents and Solution for X-Direction */
-  totalForces_M[0] = forceXYZ[0] + externalFxyz[0];
-  float Cx1 = ((totalForces_M[0] / damping_M[0]) - xyzDotInit_M[0]) * (mass_M[0] / damping_M[0]);
-  float Cx2 = xyzInit_M[0] - Cx1;
-  xyzGoal_M[0]    = Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTA_T) + (totalForces_M[0] / damping_M[0]) * _DELTA_T + Cx2;
-  xyzDotGoal_M[0] = (totalForces_M[0] / damping_M[0]) - (damping_M[0] / mass_M[0]) * Cx1 * exp(-(damping_M[0] / mass_M[0]) * _DELTA_T);
-
-  /* Coefficents and Solution for Y-Direction */
-  totalForces_M[1] = forceXYZ[1] + externalFxyz[1];
-  float Cy1 = ((totalForces_M[1] / damping_M[1]) - xyzDotInit_M[1]) * (mass_M[1] / damping_M[1]);
-  float Cy2 = xyzInit_M[1] - Cy1;
-  xyzGoal_M[1]    = Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T) + (totalForces_M[1] / damping_M[1]) * _DELTA_T + Cy2;
-  xyzDotGoal_M[1] = (totalForces_M[1] / damping_M[1]) - (damping_M[1] / mass_M[1]) * Cy1 * exp(-(damping_M[1] / mass_M[1]) * _DELTA_T);
-
-  /* Coefficents and Solution for Z-Direction */
-  totalForces_M[2] = forceXYZ[2] + externalFxyz[2]; // Testing without gravity
-  float Cz1 = ((totalForces_M[2]  / damping_M[2]) - xyzDotInit_M[2]) * (mass_M[2] / damping_M[2]);
-  float Cz2 = xyzInit_M[2] - Cz1;
-  xyzGoal_M[2]    = Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T) + (totalForces_M[2] / damping_M[2]) * _DELTA_T + Cz2;
-  xyzDotGoal_M[2] = (totalForces_M[2] / damping_M[2]) - (damping_M[2] / mass_M[2]) * Cz1 * exp(-(damping_M[2] / mass_M[2]) * _DELTA_T);
-
+  /* Solution for XYZ-Directions */
+  for (int i = 0; i < 3; i++){
+    totalForces_M[i] = forceXYZ[i] + externalFxyz[i];
+    xyzGoal_M[i]    = (a1_M[i]/a0_M[i])*xyz_1_M[i] - (a2_M[i]/a0_M[i])*xyz_2_M[i] + (1/a0_M[i])*totalForces_M[i];
+    xyzDotGoal_M[i] = (xyzGoal_M[i] - xyz_1_M[i]) / _DELTA_T;
+  }
+  
   // Clamp the XYZ Goal Position and Velocity
   for (int i = 0; i < 3; i++) {
     xyzDotGoal_M[i] = constrain(xyzDotGoal_M[i], -_VEL_LIMIT, _VEL_LIMIT);
-    if(fabs(xyzGoal_M[i] - xyzInit_M[i]) > _MAX_STEP) {
-      xyzGoal_M[i] = xyzInit_M[i] + copysign(_MAX_STEP, xyzGoal_M[i] - xyzInit_M[i]);
+    if(fabs(xyzGoal_M[i] - xyz_1_M[i]) > _MAX_STEP) {
+      xyzGoal_M[i] = xyz_1_M[i] + copysign(_MAX_STEP, xyzGoal_M[i] - xyz_1_M[i]);
     }
   }
 
@@ -166,30 +165,30 @@ void AdmittanceModel::UpdateModel(float *forceXYZ, float *externalFxyz) {
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Get Functions ---------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-float* AdmittanceModel::GetGoalPos() {
+float* AdmittanceNumerical::GetGoalPos() {
   return xyzGoal_M;
 }
 
-float* AdmittanceModel::GetGoalVel() {
+float* AdmittanceNumerical::GetGoalVel() {
   return xyzDotGoal_M;
 }
 
-float*  AdmittanceModel::GetMass(){
+float*  AdmittanceNumerical::GetMass(){
   return mass_M;
 }
 
-float*  AdmittanceModel::GetDamping(){
+float*  AdmittanceNumerical::GetDamping(){
   return damping_M;
 }
 
-float* AdmittanceModel::GetTotalForces(){
+float* AdmittanceNumerical::GetTotalForces(){
   return totalForces_M;
 }
 
 /* ---------------------------------------------------------------------------------------/
 / Admittance Model Setter Functions ------------------------------------------------------/
 /----------------------------------------------------------------------------------------*/
-void AdmittanceModel::SetMassXY(float newMxy){
+void AdmittanceNumerical::SetMassXY(float newMxy){
   if (newMxy > 0.1){
     mass_M[0] = newMxy;
     mass_M[1] = newMxy;
@@ -197,17 +196,19 @@ void AdmittanceModel::SetMassXY(float newMxy){
     mass_M[0] = 0.1;
     mass_M[1] = 0.1;
   }
+  CalculateParameters();
 }
 
-void AdmittanceModel::SetMassZ(float newMz){
+void AdmittanceNumerical::SetMassZ(float newMz){
   if (newMz > 0.1){
     mass_M[2] = newMz;
   } else {
     mass_M[2] = 0.1;
   }
+  CalculateParameters();
 }
 
-void AdmittanceModel::SetDampingXY(float newBxy){
+void AdmittanceNumerical::SetDampingXY(float newBxy){
   if (newBxy > 0.1){
     damping_M[0] = newBxy;
     damping_M[1] = newBxy;
@@ -215,12 +216,22 @@ void AdmittanceModel::SetDampingXY(float newBxy){
     damping_M[0] = 0.1;
     damping_M[1] = 0.1;
   }
+  CalculateParameters();
 }
 
-void AdmittanceModel::SetDampingZ(float newBz){
+void AdmittanceNumerical::SetDampingZ(float newBz){
   if (newBz > 0.1){
     damping_M[2] = newBz;
   } else {
     damping_M[2] = 0.1;
+  }
+  CalculateParameters();
+}
+
+void AdmittanceNumerical::CalculateParameters(){
+  for (int i = 0; i < 3; i++) {
+    a0_M[i] = mass_M[i] / (_DELTA_T * _DELTA_T) + damping_M[i] / _DELTA_T;
+    a1_M[i] = 2 * mass_M[i] / (_DELTA_T * _DELTA_T) + damping_M[i] / _DELTA_T;
+    a2_M[i] = mass_M[i] / (_DELTA_T * _DELTA_T);
   }
 }

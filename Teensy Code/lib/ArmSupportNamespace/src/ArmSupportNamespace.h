@@ -32,6 +32,7 @@ extern const float SENSOR_FILTER_WEIGHT;
 extern const float LOOP_DT;  // Milliseconds
 extern const float MODEL_DT; // Secs
 extern const float GRAVITY;  // m/sec^2
+extern float VEL_XYZ_LIMIT;  // m/sec
 extern float initMassXY;     // kg
 extern float initDampingXY;  // N*(sec/m)
 extern float initMassZ;      // kg

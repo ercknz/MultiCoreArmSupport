@@ -1,18 +1,19 @@
 /* This class is the admittance control model.
-   It takes a XYZ force input and output XYZ position and velocity based on initial conditions.
+   It takes a XYZ force input and output XYZ position and velocity based on initial conditions and model parameters.
+   The model is using a numerical Euler integration method to update the position and velocity.
 
-   Created 10/27/2020
+   Created 8/16/2025
    by erick nunez
 */
 
-#ifndef ADMITTANCE_MODEL_H
-#define ADMITTANCE_MODEL_H
+#ifndef ADMITTANCE_NUMERICAL_H
+#define ADMITTANCE_NUMERICAL_H
 
 #include <Arduino.h>
 
-class AdmittanceModel {
+class AdmittanceNumerical {
   public:
-           AdmittanceModel(float Mxy, float Mz, float Bxy, float Bz);
+           AdmittanceNumerical(float Mxy, float Mz, float Bxy, float Bz);
     void   SetPosition(float *newXYZ);
     void   UpdateModel(float *forceXYZ, float *externalFxyz);
     float* GetGoalPos();
@@ -26,6 +27,8 @@ class AdmittanceModel {
     void   SetDampingZ(float newBz);
 
   protected:
+    void   CalculateParameters();
+
     // Model constants
     const float _GRAVITY;
     const float _DELTA_T;
@@ -41,11 +44,15 @@ class AdmittanceModel {
 
     float mass_M[3];        // [x, y, z]
     float damping_M[3];     // [x, y, z]
+    float a0_M[3]           = {0.0f};
+    float a1_M[3]           = {0.0f};
+    float a2_M[3]           = {0.0f};
     float xyzGoal_M[3]      = {0.0f};
     float xyzDotGoal_M[3]   = {0.0f};
-    float xyzInit_M[3]      = {0.0f};
-    float xyzDotInit_M[3]   = {0.0f};
+    float xyz_1_M[3]        = {0.0f};
+    float xyz_2_M[3]        = {0.0f};
+    float xyzDot_1_M[3]     = {0.0f};
     float totalForces_M[3]  = {0.0f};
 };
 
-#endif // ADMITTANCE_MODEL_H
+#endif // ADMITTANCE_NUMERICAL_H
