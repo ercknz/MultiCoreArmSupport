@@ -87,6 +87,7 @@ extern const float L2_LINK;      // elbow to sensor
 extern const float A3_LINK;      // Elbow Vertical Offset
 extern const float LINK_OFFSET;  // elbow to sensor offset AKA A4
 extern const float MAX_VELOCITY_XYZ;      // Max velocity in m/s
+extern const float GD_ALPHA;     // Alpha for blended GD IK
 
 // Spring Dynamics
 extern const int    SPRING_KS;     // N/m

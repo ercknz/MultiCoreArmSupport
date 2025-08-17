@@ -86,7 +86,8 @@ const float A2_LINK     = 0.082;      // 4bar linkage to elbow
 const float L2_LINK     = 0.520;      // elbow to sensor
 const float A3_LINK     = 0.072;      // Elbow Vertical Offset
 const float LINK_OFFSET = 0.035;      // elbow to sensor offset AKA A4
-const float MAX_VELOCITY_XYZ = 2.0;   // Max velocity in m/s
+const float MAX_VELOCITY_XYZ = 1.5;   // Max velocity in m/s
+const float GD_ALPHA = 0.5f;
 
 // Spring Dynamics
 const int    SPRING_KS      = 8231;     // N/m

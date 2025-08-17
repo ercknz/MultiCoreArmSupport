@@ -43,6 +43,7 @@ RobotControl::RobotControl(const float L1, const float L2, const float A1, const
 {
   // Initalize RobotControl Class
   scalingFactor_M = OCM::SPRING_FORCE_SCALING_FACTOR;
+  alpha_M = OCM::GD_ALPHA;
 }
 
 /* ---------------------------------------------------------------------------------------/
@@ -179,9 +180,8 @@ void RobotControl::WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite 
 /* -----------------------------------------------------------------------------/
 / Arm Support Inverse Kinematics Member function -------------------------------/
 /------------------------------------------------------------------------------*/
-// float * RobotControl::iKineNumeric() {
 void RobotControl::iKineNumeric() {
-  const float alpha = 1.0f;
+  const float eta = 1.0f;
   const float threshold = 0.001f;
   
   /* Calculates Cos and Sin of angles */
@@ -214,7 +214,7 @@ void RobotControl::iKineNumeric() {
   /* dQ[3] Calculation using Jacobian Transpose*/
   float dQ[3];
   for (int i = 0; i < 3; i++) {
-    dQ[i] = - alpha * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
+    dQ[i] = - eta * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
   }
 
   /* Update joint angles */
@@ -226,7 +226,55 @@ void RobotControl::iKineNumeric() {
   q_M[0] = constrain(q_M[0], _Q1_MIN, _Q1_MAX);
   q_M[1] = constrain(q_M[1], -_Q2_LIMIT, _Q2_LIMIT);
   q_M[2] = constrain(q_M[2], _Q4_MIN, _Q4_MAX);
+}
+
+void RobotControl::IKineBlendedGD(){
+  const float eta = 1.0f;
+  const float threshold = 0.001f;
+  
+  /* Calculates Cos and Sin of angles */
+  float c0 = cos(qPres_M[0]);                 float s0 = sin(qPres_M[0]);
+  float c1 = cos(qPres_M[1]);                 float s1 = sin(qPres_M[1]);
+  float c02 = cos(qPres_M[0] + qPres_M[2]);   float s02 = sin(qPres_M[0] + qPres_M[2]);
+
+  /* Calculate error */
+  float error[3];
+  for (int i = 0; i < 3; i++) {
+    error[i] = xyzPres_M[i] - xyz_M[i];
   }
+  float errorSum = 0.5 * (error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
+  if (errorSum < threshold){
+    for (int i = 0; i < 3; i++) {
+      q_M[i] = qPres_M[i];
+    }
+    return;
+  }
+
+  /* Calculates Jacobian Matrix */
+  J_M[0][0] = - _A1A2*s0 - _L1*s0*c1 + _A4*c02 - _L2*s02;
+  J_M[0][1] = - _L1*c0*s1;
+  J_M[0][2] =   _A4*c02 - _L2*s02;
+  J_M[1][0] =   _A1A2*c0 + _L1*c0*c1 + _A4*s02 + _L2*c02;
+  J_M[1][1] = - _L1*s0*s1;
+  J_M[1][2] =   _A4*s02 + _L2*c02;
+  J_M[2][1] =   _L1*c1;  // J31 = J33 = 0.0
+
+  /* dQ[3] Calculation using Jacobian Transpose*/
+  float dQ[3];
+  for (int i = 0; i < 3; i++) {
+    dQ[i] = - eta * (J_M[0][i]*error[0] + J_M[1][i]*error[1] + J_M[2][i]*error[2]);
+  }
+
+  /* Update joint angles */
+  for (int i = 0; i < 3; i++) {
+    q_M[i] = qPres_M[i] + dQ[i];
+  }
+
+  /* Check Joint Limits */
+  q_M[0] = constrain(q_M[0], _Q1_MIN, _Q1_MAX);
+  q_M[1] = constrain(q_M[1], -_Q2_LIMIT, _Q2_LIMIT);
+  q_M[2] = constrain(q_M[2], _Q4_MIN, _Q4_MAX);
+}
 
 void RobotControl::iKineGeometric() {
   /*  NOTE:

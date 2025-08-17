@@ -41,10 +41,9 @@ class RobotControl {
   protected:
     void  fKine();
     void  ReadMotors(dynamixel::GroupSyncRead &syncReadPacket);
-    void    iKineGeometric();
-    // float * iKineNumeric();
-    void   iKineNumeric();
-    // int   WriteToMotors(float *goalQ, bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
+    void  iKineGeometric();
+    void  IKineBlendedGD();
+    void  iKineNumeric();
     int   WriteToMotors(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket);
 
     const float  _A1A2, _A3, _A4, _L1, _L2;
@@ -55,6 +54,8 @@ class RobotControl {
     const double _Q4_MIN,    _Q4_MAX;
     const double _INNER_R,   _Z_LIMIT;
     const double _SPRING_Li, _BETAi, _SPRING_Fi;
+
+    float alpha_M;
 
     const float _TASK_X_LIMIT = 0.0f; // Meters
     const float _TASK_Y_LIMIT = 0.5f; // Meters
