@@ -117,6 +117,8 @@ void RobotControl::InitializeGoals(){
   for (int i = 0; i < 3; i++){
     q_M[i] = qPres_M[i];
     qInt_M[i] = qPres_M[i];
+    xyz_M[i] = xyzPres_M[i];
+    xyzPrev_M[i] = xyzPres_M[i];
   }
 }
 
@@ -238,9 +240,10 @@ void RobotControl::IKineBlendedGD(){
   float c02 = cos(qPres_M[0] + qPres_M[2]);   float s02 = sin(qPres_M[0] + qPres_M[2]);
 
   /* Calculate error */
-  float error[3];
+  float error[3], xyzEst[3];
   for (int i = 0; i < 3; i++) {
-    error[i] = xyzPres_M[i] - xyz_M[i];
+    xyzEst[i] = alpha_M * xyzPrev_M[i] + (1 - alpha_M) * xyzPres_M[i];
+    error[i] = xyzEst[i] - xyz_M[i];
   }
   float errorSum = 0.5 * (error[0]*error[0] + error[1]*error[1] + error[2]*error[2]);
   if (errorSum < threshold){

@@ -65,6 +65,7 @@ class RobotControl {
     int32_t qPresCts_M[3],  qDotPresCts_M[3];
     float   qPres_M[3],     qDotPres_M[3];
     float   xyzPres_M[3],   xyzDotPres_M[3];
+    float   xyzPrev_M[3];
     int32_t qCts_M[3],      qDotCts_M[3];     // Goal Q and Qdot in counts
     float   q_M[3],         qDot_M[3];        // Goal Q and Qdot in radians
     float   qInt_M[3];      // Intermediate Goal Q
