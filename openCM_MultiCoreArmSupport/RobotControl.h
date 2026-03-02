@@ -37,6 +37,8 @@ class RobotControl {
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
     void      InitializeGoals();
+    void      SetAlpha(float newAlpha);
+    float     GetCurrentAlpha();
     
   protected:
     void  fKine();
@@ -55,7 +57,7 @@ class RobotControl {
     const double _INNER_R,   _Z_LIMIT;
     const double _SPRING_Li, _BETAi, _SPRING_Fi;
 
-    float alpha_M;
+    float alpha_M;    // Blending Parameter for IKineBlendedGD
 
     const float _TASK_X_LIMIT = 0.0f; // Meters
     const float _TASK_Y_LIMIT = 0.5f; // Meters

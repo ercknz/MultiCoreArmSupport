@@ -144,6 +144,10 @@ uint8_t RobotComm::GetTorqueState(){
   return torqueState_M;
 }
 
+uint8_t RobotComm::GetAlphaIK(){
+  return alphaIK_M;
+}
+
 bool RobotComm::IsConnected(){
   return connected2Robot_M;
 }
@@ -184,7 +188,8 @@ void RobotComm::ReadRobot(){
                           goalQ1dot(cts):  116,117,118,119,...
                           goalQ2dot(cts):  120,121,122,123,...
                           goalQ4dot(cts):  124,125,126,127,...
-                                        :  128-142,...
+                                       _:  128-141,...
+                                alphaVal:  142,...
                         currentDriveMode:  143,...
                                 loopTime:  144,145,146,147,...
                                 CheckSum:  148,149]
@@ -270,6 +275,9 @@ void RobotComm::ReadRobot(){
   qDotGoalCts_M[0] = bytesToInt32(dataPacket[116], dataPacket[117], dataPacket[118], dataPacket[119]);
   qDotGoalCts_M[1] = bytesToInt32(dataPacket[120], dataPacket[121], dataPacket[122], dataPacket[123]);
   qDotGoalCts_M[2] = bytesToInt32(dataPacket[124], dataPacket[125], dataPacket[126], dataPacket[127]);
+
+  /* Alpha IK Value*/
+  alphaIK_M = dataPacket[142];
 
   /* Torque State */
   torqueState_M = dataPacket[143];
@@ -384,20 +392,20 @@ void RobotComm::ReadRobotMultipleTimes(){
 void RobotComm::RequestDataOnly(){
   //RobotComm::Send only Request for Data packet to robot.
   float blankData[3] = {0.0f, 0.0f, 0.0f};
-  uint8_t blankTorque = 0;
-  WriteToRobot(4, blankData, blankData, blankTorque);
+  uint8_t blankValue = 0;
+  WriteToRobot(4, blankData, blankData, blankValue, blankValue);
 }
 
-void RobotComm::ChangeTorqueOnly(uint8_t newTorqueValue){
-  //RobotComm::Only sends a torque mode change to robot. 
+void RobotComm::ChangeParameterOnly(uint8_t newTorqueValue, uint8_t newAlphaIKValue){
+  //RobotComm::Only sends parameters to robot. 
   float blankData[3] = {0.0f, 0.0f, 0.0f};
-  WriteToRobot(1, blankData, blankData, newTorqueValue);
+  WriteToRobot(1, blankData, blankData, newTorqueValue, newAlphaIKValue);
 }
 
 void RobotComm::SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal){
   //RobotComm::Only sends new goal position and velocity to robot.
-  uint8_t blankTorque = 0;
-  WriteToRobot(2, newXYZGoal, newXYZdotGoal, blankTorque);
+  uint8_t blankValue = 0;
+  WriteToRobot(2, newXYZGoal, newXYZdotGoal, blankValue, blankValue);
 }
 
 void RobotComm::SendZeroes(){
@@ -406,12 +414,12 @@ void RobotComm::SendZeroes(){
   robotPort_M->write(dataPacket,_TX_PKT_LEN); 
 }
 
-void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode){
+void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode, uint8_t alphaIKValue){
   /* Outgoing Packet Structure:       Header: [ 0, 1, 2, 3,...
                                            _:   4,...
     Packet Type                  Packet Type:   5,...
     --------------                         _:   6,...
-    No.| T | G | R                      Mode:   7,...
+    No.| P | G | R                      Mode:   7,...
     --------------                     goalX:   8, 9,10,11,...
     0 || 0 | 0 | 0                     goalY:  12,13,14,15,...
     1 || 1 | 0 | 0                     goalZ:  16,17,18,19,...
@@ -421,7 +429,8 @@ void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZ
     5 || 1 | 0 | 1              goalCurrent1:  32,33,34,35,...
     6 || 0 | 1 | 1              goalCurrent2:  36,37,38,39,...
     7 || 1 | 1 | 1              goalCurrent3:  40,41,42,43,...
-                                           _:  44,45,46,47,48,49,50,51,52,53,54,55,56,57,...
+                                           _:  44,45,46,47,48,49,50,51,52,53,54,55,56,...
+                                alphaIKValue:  57,...
                                     CheckSum:  58,59]
   */ 
   for (int16_t i = 0; i < 3; i++){
@@ -440,6 +449,7 @@ void RobotComm::WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZ
   /* Filling in Parameters*/
   dataPacket[_TX_PKT_TYPE_SLOT] = packetType;
   dataPacket[_TX_TORQUE_CHANGE_SLOT] = torqueMode;
+  dataPacket[_TX_ALPHA_IK_SLOT] = alphaIKValue;
 
   // Motor's PresQ, PresQdot, and Torques
   byte *goalXYZ_bytes = floatArrayToBytes(xyzGoal_M);

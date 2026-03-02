@@ -113,6 +113,17 @@ float RobotControl::GetSpringForce(){
   return springF_M;
 } 
 
+void RobotControl::SetAlpha(float newAlpha){
+  if (newAlpha == alpha_M) return;
+  if (newAlpha < 0.0f) newAlpha = 0.0f;
+  if (newAlpha > 1.0f) newAlpha = 1.0f;
+  alpha_M = newAlpha;
+}
+
+float RobotControl::GetCurrentAlpha(){
+  return alpha_M;
+}
+
 void RobotControl::InitializeGoals(){
   for (int i = 0; i < 3; i++){
     q_M[i] = qPres_M[i];
@@ -419,6 +430,7 @@ void  RobotControl::EnableTorque(dynamixel::PortHandler *portHandler, dynamixel:
    *  [20]: Fully Passive (Shoulder, Elbow, and Elevation TORQUE DISABLED)
    */
   using namespace OCM;
+  if (state == currentTorqueMode_M) return;
   currentTorqueMode_M = state;
   int dxlCommResult;
   if ((state == 5)||(state == 10)){

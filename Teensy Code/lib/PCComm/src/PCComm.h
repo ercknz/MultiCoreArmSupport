@@ -44,6 +44,7 @@ class PCComm {
     float * GetNewGoalXYZdot();
     bool SetTorqueMode();
     uint8_t GetNewMode();
+    uint8_t GetNewAlphaIK();
     bool DataRequested();
 
   protected:
@@ -116,6 +117,8 @@ class PCComm {
     // Ctrl Parameters
     bool newTorqueMode_M      = false;
     uint8_t torqueMode_M;
+    bool newAlphaIK_M        = false;
+    uint8_t alphaIK_M;
     bool    newGoalQ_M        = false;
     bool    newGoalQdot_M     = false;
     bool    newGoalCurrent_M  = false;

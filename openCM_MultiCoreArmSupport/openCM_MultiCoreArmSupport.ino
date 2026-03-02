@@ -121,10 +121,11 @@ void loop() {
         c2cComm.ReadPackets();
       }
 
-      /* Torque Change */
-      if(c2cComm.TorqueChanged()) {
+      /* Parameter Changes */
+      if(c2cComm.ParameterChanged()) {
         ArmRobot.EnableTorque(portHandler, packetHandler, c2cComm.ChangeModeTo());
-        c2cComm.TorqueChangeApplied();
+        ArmRobot.SetAlpha(c2cComm.GetNewIKAlpha());
+        c2cComm.ParameterChangeApplied();
       }
 
       /* Check if new goal is available */

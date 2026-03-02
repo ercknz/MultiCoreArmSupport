@@ -145,6 +145,11 @@ uint8_t PCComm::GetNewMode(){
   return torqueMode_M;
 }
 
+uint8_t PCComm::GetNewAlphaIK(){
+  newAlphaIK_M = false;
+  return alphaIK_M;
+}
+
 bool PCComm::DataRequested() {
   return dataRequested_M;
 }
@@ -198,7 +203,8 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
                                  MassZ(kg):  148,149,150,151,...
                            DampingXY(Ns/m):  152,153,154,155,...
                             DampingZ(Ns/m):  156,157,158,159,...
-                                          :  160,161,162,...
+                                          :  160,161,...
+                                   alphaIK:  162,...
                           currentDriveMode:  163,...
                                   loopTime:  164,165,166,167,...
                                   CheckSum:  168,169]
@@ -316,7 +322,6 @@ void PCComm::WritePackets(unsigned long &totalTime, ForceSensor &Sensor, Admitta
 
   // write data packet
   pcPort_M->write(RxPacket,_TX_PKT_LEN);
-
 }
 
 /* ------------------------------------------------------------------------------------------------------/
@@ -447,8 +452,10 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
                                           New External Fz: 31,32,33,34,...
                                        New Scaling Factor: 35,...
     Modifier Byte 2               New Force Sensor Filter: 36,...
-    [1]: Scaling Factor                                  : 37-47,...                                                  
-    [2]: Force Filter Value                      CheckSum: 58,59] 
+    [1]: Scaling Factor                     alphaIK Value: 37,...
+    [2]: Force Filter Value                             _: 38-47,...                                                  
+    [4]: AlphaIK Value                           CheckSum: 58,59] 
+    
   */
   byte mask = 1;
   byte bitArrayLarge[7];
@@ -488,6 +495,10 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
   if (bitArraySmall[1] == 1) {
     _NEW_FILTER = true;
     newFilter_M = (float)(0.01 * RxPacket[36]);
+  }
+  if (bitArraySmall[2] == 1) {
+    newAlphaIK_M = true;
+    alphaIK_M = RxPacket[37];
   }
 }
 

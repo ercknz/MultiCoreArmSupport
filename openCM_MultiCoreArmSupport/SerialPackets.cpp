@@ -74,17 +74,21 @@ void SerialPackets::NewGoalApplied(){
   return;
 }
 
-bool SerialPackets::TorqueChanged(){
-  return torqueChange_M;
-}
-
-uint8_t SerialPackets::ChangeModeTo(){
+uint8_t SerialPackets::GetNewTorqueMode(){
   return torqueMode_M;
 }
 
-void SerialPackets::TorqueChangeApplied(){
-  torqueChange_M = false;
+float SerialPackets::GetNewIKAlpha(){
+  return newAlphaVal_M; 
+}
+
+void SerialPackets::ParameterChangeApplied(){
+  parameterChange_M = false;
   return;
+}
+
+bool SerialPackets::ParameterChanged(){
+  return parameterChange_M;
 }
 
 bool SerialPackets::DataRequested(){
@@ -134,7 +138,8 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
                         goalX(m):  128,129,130,131,...
                         goalY(m):  132,133,134,135,...
                         goalZ(m):  136,137,138,139,...
-                               _:  140,141,142,...
+                               _:  140,141,...
+                        alphaVal:  142,...
                 currentDriveMode:  143,...
                         loopTime:  144,145,146,147,...
                         CheckSum:  148,149]
@@ -212,6 +217,8 @@ void SerialPackets::WritePackets(unsigned long &totalTime, RobotControl &Robot, 
     dataPacket[i] = packetBuffer[i - _TX_goalXYZ_SLOT];
   }
 
+  // Alpha Value for Blended IKine
+  dataPacket[_TX_BLANK_SLOT] = round(Robot.GetCurrentAlpha() * 100.0);
   // Robot Current Torque Mode
   dataPacket[_TX_PKT_LEN - 7] = Robot.GetCurrentTorqueMode();
 
@@ -248,7 +255,7 @@ void SerialPackets::ReadPackets() {
                                    _:   4,...
     Packet Type          Packet Type:   5,...
     --------------                 _:   6,...
-    No.| T | G | R              Mode:   7,...
+    No.| P | G | R              Mode:   7,...
     --------------             goalX:   8, 9,10,11,...
     0 || 0 | 0 | 0             goalY:  12,13,14,15,...
     1 || 1 | 0 | 0             goalZ:  16,17,18,19,...
@@ -258,7 +265,8 @@ void SerialPackets::ReadPackets() {
     5 || 1 | 0 | 1      goalCurrent1:  32,33,34,35,...
     6 || 0 | 1 | 1      goalCurrent2:  36,37,38,39,...
     7 || 1 | 1 | 1      goalCurrent3:  40,41,42,43,...
-                                   _:  44,45,46,47,48,49,50,51,52,53,54,55,56,57,...
+                                   _:  44,45,46,47,48,49,50,51,52,53,54,55,56,...
+                            alphaVal:  57,...
                             CheckSum:  58,59]
   */     
   byte dataPacket[_RX_PKT_LEN];
@@ -284,7 +292,6 @@ void SerialPackets::ReadPackets() {
     }
   }
   
-  
   /* Read Instructions */
   if (Serial && testingMode_M){
     for (int16_t i = 0; i < _RX_PKT_LEN; i++) {
@@ -295,7 +302,6 @@ void SerialPackets::ReadPackets() {
       dataPacket[i] = c2cPort_M->read();
     }
   }
-  
 
   /* Verify Packet */
   CHECKSUM = bytesToCounts(dataPacket[_RX_PKT_LEN - 2], dataPacket[_RX_PKT_LEN - 1]);
@@ -324,10 +330,11 @@ void SerialPackets::ReadPackets() {
       bitArray[i] = (packetType & (mask << i)) != 0;
   }
 
-  /* Torque Change Packet (1,3,5,7) *****/
+  /* Parameter Change Packet (1,3,5,7) *****/
   if (bitArray[0] == 1){
-    torqueChange_M = true;
+    parameterChange_M = true;
     torqueMode_M = dataPacket[7];
+    newAlphaVal_M = (float)dataPacket[57] / 100.0f;
   }
   /* New XYZ Goal Packet (2,3,6,7) *****/
   if (bitArray[1] == 1){

@@ -16,13 +16,14 @@ class SerialPackets {
 
     bool DataAvailable();
     bool NewGoalAvailable();
+    void NewGoalApplied();
     float * GetNewXYZGoal();
     float * GetNewXYZdotGoal();
     float * GetNewCurrentGoal();
-    void NewGoalApplied();
-    bool TorqueChanged();
-    uint8_t ChangeModeTo();
-    void TorqueChangeApplied();
+    uint8_t GetNewTorqueMode();
+    float   GetNewIKAlpha();
+    bool ParameterChanged();
+    void ParameterChangeApplied();
     bool DataRequested();
     void InitalizingComm();
     bool InTestingMode();
@@ -54,10 +55,12 @@ class SerialPackets {
 
     bool testingMode_M = true;
 
-    bool newGoal_M        = false;
-    bool torqueChange_M   = false;
-    bool dataRequested_M  = false;
+    bool newGoal_M            = false;
+    bool parameterChange_M    = false;
+    bool dataRequested_M      = false;
+
     uint8_t torqueMode_M;
+    float newAlphaVal_M;
 
     float goalXYZ_M[3] = {0.0f};
     float goalXYZdot_M[3] = {0.0f};

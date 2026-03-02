@@ -111,7 +111,7 @@ void loop() {
         robot.SetScalingFactor(pc.GetNewScalingFactor());
       }
       if (pc.SetTorqueMode()){
-        robot.ChangeTorqueOnly(pc.GetNewMode());
+        robot.ChangeParameterOnly(pc.GetNewMode(), pc.GetNewAlphaIK());
       }
       if (pc.ModifyFilter()){
         ati.SetFilterWeight(pc.GetNewFilter());

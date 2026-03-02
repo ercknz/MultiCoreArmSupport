@@ -15,9 +15,9 @@ class RobotComm {
           RobotComm(HardwareSerial *ptrSer, const int baudrate);
     void  ReadRobot();
     void  ReadRobotMultipleTimes();
-    void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode);
+    void  WriteToRobot(uint8_t packetType, float *goalXYZ, float * goalXYZdot, uint8_t torqueMode, uint8_t alphaIKValue);
     void  RequestDataOnly();
-    void  ChangeTorqueOnly(uint8_t newTorqueValue);
+    void  ChangeParameterOnly(uint8_t newTorqueValue, uint8_t newAlphaIKValue);
     void  SendNewGoalOnly(float *newXYZGoal, float * newXYZdotGoal);
     void  SendZeroes();
     int   BytesAvailable();
@@ -36,6 +36,7 @@ class RobotComm {
     float     GetSpringForce();
     void      SetScalingFactor(float newScalingFactor);
     uint8_t   GetTorqueState();
+    uint8_t   GetAlphaIK();
     int       Connect2Robot(uint8_t LEDpin);
     bool      IsConnected();
 
@@ -56,6 +57,7 @@ class RobotComm {
     const int16_t _TX_GOAL_XYZ_SLOT = 8;
     const int16_t _TX_GOAL_XYZDOT_SLOT = 20;
     const int16_t _TX_GOAL_CURRENT_SLOT = 32;
+    const int16_t _TX_ALPHA_IK_SLOT = 57;
     const int16_t _TX_BLANK_SLOT = 44;    
 
     // Receiving Data
@@ -72,6 +74,7 @@ class RobotComm {
     float springF_M;
     float scalingFactor_M;
     uint8_t torqueState_M;
+    uint8_t alphaIK_M;
 
     bool connected2Robot_M = false;
     
