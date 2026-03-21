@@ -459,11 +459,11 @@ void PCComm::ModifierPacketRX(byte * RxPacket) {
   */
   byte mask = 1;
   byte bitArrayLarge[7];
-  byte bitArraySmall[2];
+  byte bitArraySmall[3];
   for (int16_t i = 0; i < 7; i++) {
     bitArrayLarge[i] = (RxPacket[4] & (mask << i)) != 0;
   }
-  for (int16_t i = 0; i < 2; i++){
+  for (int16_t i = 0; i < 3; i++){
     bitArraySmall[i] = (RxPacket[5] & (mask << i)) != 0;
   }
   if (bitArrayLarge[0] == 1) {

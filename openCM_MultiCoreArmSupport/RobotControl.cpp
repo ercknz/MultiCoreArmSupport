@@ -185,9 +185,9 @@ void RobotControl::ReadRobot(dynamixel::GroupSyncRead &syncReadPacket){
 
 void RobotControl::WriteToRobot(bool &addParamResult, dynamixel::GroupSyncWrite &syncWritePacket){
   // iKineGeometric();
-  iKineNumeric();
+  // iKineNumeric();
+  IKineBlendedGD();
   int returnInt = WriteToMotors(addParamResult, syncWritePacket);
-  // int returnInt = WriteToMotors(iKineNumeric(), addParamResult, syncWritePacket);
 }
 
 /* -----------------------------------------------------------------------------/

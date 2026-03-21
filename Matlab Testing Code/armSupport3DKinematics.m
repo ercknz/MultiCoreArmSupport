@@ -88,13 +88,14 @@ Q1 = @(alpha,beta) alpha - beta;
 %% Figure Setup
 Hfigure = figure(100);
 set(Hfigure,'Units','normalized','Position',[0.05 0.05 0.90 0.85]);
+set(Hfigure, 'Name', 'Arm Support 3D Kinematics', 'NumberTitle', 'off');
 set(Hfigure,'UserData',false);
 set(Hfigure, 'Renderer', 'opengl');  % Hardware acceleration
 set(Hfigure, 'DoubleBuffer', 'on');  % Reduce flicker
 
 %% Plot Configuration
 % Plot order: XY, XZ, YZ, XYZ
-plotPositions = [0.05 0.575 0.3 0.4; 0.4 0.575 0.3 0.4; 0.05 0.125 0.3 0.4; 0.4 0.125 0.3 0.4];
+plotPositions = [0.02 0.55 0.29 0.42; 0.33 0.55 0.29 0.42; 0.02 0.08 0.29 0.42; 0.33 0.08 0.29 0.42];
 plotViews = {[], [], [], [45,45]};  % 3D view is last
 axisLabels = {{'X','Y'}, {'X','Z'}, {'Y','Z'}, {'X','Y','Z'}};
 axisLimits = {[-1.2 1.2 -1.2 1.2], [-1.2 1.2 -1.2 1.2], [-1.2 1.2 -1.2 1.2 -1.2 1.2], [-1.2 1.2 -1.2 1.2 -1.2 1.2]};
@@ -105,13 +106,13 @@ goalColors = {[0 0 0 0.25], [0 0 0 0.25], [1 0 1 0.25], [0 0 0 0.25], [0 0 0 0.2
 goalSetColors = {[1 0 0 0.25], [1 0 0 0.25], [0 1 0 0.25], [1 0 0 0.25], [1 0 0 0.25], [1 0 0 0.25], [0 1 0 0.25]};
 
 %% Create AnimatedLine Objects
-plotHandles = cell(1,4);
-robotLinks = cell(4,7);      % 4 plots x 7 links
-goalLinks = cell(4,7);       % Goal robot links
-goalSetLinks = cell(4,7);    % Goal setting robot links
-endEffectors = cell(4,1);    % End effector markers
-goalEndEffectors = cell(4,1); % Goal end effectors
-models = cell(4,1);          % Model markers
+plotHandles      = cell(1,4);
+robotLinks       = cell(4,7);    % 4 plots x 7 links
+goalLinks        = cell(4,7);    % Goal robot links
+goalSetLinks     = cell(4,7);    % Goal setting robot links
+endEffectors     = cell(4,1);    % End effector markers
+goalEndEffectors = cell(4,1);    % Goal end effectors
+models           = cell(4,1);    % Model markers
 
 % Create all plots and animatedlines using loops
 for plotIdx = 1:4
@@ -120,15 +121,15 @@ for plotIdx = 1:4
     
     % Create robot links
     for linkIdx = 1:7
-        robotLinks{plotIdx,linkIdx} = animatedline('LineWidth',2,'Color',robotColors{linkIdx});
-        goalLinks{plotIdx,linkIdx} = animatedline('LineWidth',2,'Color',goalColors{linkIdx});
+        robotLinks{plotIdx,linkIdx}   = animatedline('LineWidth',2,'Color',robotColors{linkIdx});
+        goalLinks{plotIdx,linkIdx}    = animatedline('LineWidth',2,'Color',goalColors{linkIdx});
         goalSetLinks{plotIdx,linkIdx} = animatedline('LineWidth',2,'Color',goalSetColors{linkIdx});
     end
     
     % Create end effectors and models
-    endEffectors{plotIdx} = animatedline('Marker','*','MarkerSize',12,'Color','g','LineStyle','none');
+    endEffectors{plotIdx}     = animatedline('Marker','*','MarkerSize',12,'Color','g','LineStyle','none');
     goalEndEffectors{plotIdx} = animatedline('Marker','*','MarkerSize',12,'Color',[0.6350 0.0780 0.1840 0.2],'LineStyle','none');
-    models{plotIdx} = animatedline('Marker','o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2,'LineStyle','none');
+    models{plotIdx}           = animatedline('Marker','o','MarkerSize',12,'Color',[0.47 0.25 0.80 0.5],'LineWidth',2,'LineStyle','none');
     
     % Set plot properties
     set(plotHandles{plotIdx},'Position',plotPositions(plotIdx,:));
@@ -153,32 +154,42 @@ legend([robotLinks{4,3}, endEffectors{4}, goalLinks{4,3}, goalEndEffectors{4}, g
 %  USER INTERFACE CONTROLS
 %  ========================================================================
 
-%% Control Buttons
-HbttnOpenCMStart = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.70 0.95 0.05 0.05],...
+%% Robot Control Panel (Top of right column)
+HcontrolPanel = uipanel(Hfigure, 'Title', 'Robot Controls', ...
+    'Units', 'normalized', 'Position', [0.65, 0.880, 0.34, 0.108], ...
+    'FontSize', 11, 'FontWeight', 'bold');
+% Row 1: OpenCM and Teensy Start/Stop
+HbttnOpenCMStart = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.02, 0.54, 0.225, 0.40],...
     'String','<html>Start<br />OpenCM</html>','Callback',@startOpenCM);
-HbttnOpenCMStop = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.75 0.95 0.05 0.05],...
+HbttnOpenCMStop = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.26, 0.54, 0.225, 0.40],...
     'String','<html>Stop<br />OpenCM</html>','Callback',@stopOpenCM);
-HbttnTeensyStart = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.80 0.95 0.05 0.05],...
+HbttnTeensyStart = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.50, 0.54, 0.225, 0.40],...
     'String','<html>Start<br />Teensy</html>','Callback',@startTeensy);
-HbttnTeensyStop = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.85 0.95 0.05 0.05],...
+HbttnTeensyStop = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.74, 0.54, 0.225, 0.40],...
     'String','<html>Stop<br />Teensy</html>','Callback',@stopTeensy);
-HbttnTorque = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.90 0.95 0.05, 0.05],...
+% Row 2: Torque Enable/Disable and Send Goal
+HbttnTorque = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.02, 0.07, 0.225, 0.40],...
     'String','Torque','Callback',@changeTorque);
-HbttnTestGoal = uicontrol('Style','pushbutton',...
-    'Units','normalized','Position',[0.95 0.95 0.05, 0.05],...
+HbttnTestGoal = uicontrol(HcontrolPanel,'Style','pushbutton',...
+    'Units','normalized','Position',[0.26, 0.07, 0.225, 0.40],...
     'String','<html>Send<br />Goal</html>','Callback',@sendGoal);
 
 %% COM Port Selection
-HcommPanel = uipanel(Hfigure,'Position',[0 0 0.1 0.05]);
-HportLabel = uicontrol(HcommPanel,'Style','text','Units','normalized','Position',[0 0 0.5 1],...
-    'String','COM Port:','Fontsize',12,'HorizontalAlignment','left');
-HportDropdown = uicontrol(HcommPanel,'Style','popupmenu','Units','normalized','Position',[0.5 0 0.5 1],...
-    'String',availablePorts,'Value',length(availablePorts),'Callback',@selectPort,'FontSize',10);
+HcommPanel = uipanel(Hfigure, 'Title', 'COM Port', ...
+    'Units', 'normalized', 'Position', [0.65, 0.806, 0.34, 0.066], ...
+    'FontSize', 11, 'FontWeight', 'bold');
+HportLabel = uicontrol(HcommPanel,'Style','text',...
+    'Units','normalized','Position',[0.03, 0.15, 0.30, 0.70],...
+    'String','COM Port:','Fontsize',10,'HorizontalAlignment','left');
+HportDropdown = uicontrol(HcommPanel,'Style','popupmenu',...
+    'Units','normalized','Position',[0.35, 0.15, 0.62, 0.70],...
+    'String',availablePorts,'Value',length(availablePorts),...
+    'Callback',@selectPort,'FontSize',10);
 
 %% Status Display Elements
 % Time displays
